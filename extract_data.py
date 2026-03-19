@@ -11,9 +11,9 @@ import os
 OUTPUT = 'products.json'
 
 FILES = {
-    'LOL':      'data/Lista_de_precios_LOL.xlsx',
-    'INTCOMEX': 'data/Lista_de_precios_INTCOMEX.xlsx',
-    'INGRAM':   'data/Lista_de_precios_INGRAM.xlsx',
+    'LOL':      'data/Lista de precios Marzo 2026-LOL.xlsx',
+    'INTCOMEX': 'data/Lista de precios Marzo 2026-INTCOMEX.xlsx',
+    'INGRAM':   'data/Lista de precios Marzo 2026-INGRAM.xlsx',
 }
 
 all_products = []

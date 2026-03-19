@@ -416,12 +416,10 @@
         <label>Periodo</label>
         <select id="termFilter" class="search-input">
           <option value="">Todos</option>
-          <option value="P1M">Mensual (P1M)</option>
-          <option value="P1Y">Anual (P1Y)</option>
-          <option value="P3Y">Trianual (P3Y)</option>
-          <option value="Anual">Anual</option>
-          <option value="Mensual">Mensual</option>
-          <option value="OneTime">One Time</option>
+          <option value="mensual">Mensual</option>
+          <option value="anual">Anual</option>
+          <option value="trianual">Trianual</option>
+          <option value="onetime">One Time / Perpetuo</option>
         </select>
       </div>
       <button class="search-btn" onclick="runSearch()">Buscar</button>
@@ -463,6 +461,7 @@
     <div class="profit-input-group">
       <label style="font-size:12px;color:var(--muted)">TRM</label>
       <input type="number" id="trmInput" class="profit-input" style="width:100px" value="4200" oninput="renderTables()">
+      <span id="trmStatus" style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace"></span>
     </div>
   </div>
 
@@ -529,15 +528,29 @@ function runSearch() {
 
   setTimeout(() => {
     const words = q.split(/\s+/).filter(Boolean);
-    const filtered = PRODUCTS.filter(p => {
-      const name = p.name.toLowerCase();
-      const matches = words.every(w => name.includes(w));
-      if (!matches) return false;
-      if (type && p.type !== type) return false;
-      if (seg && !p.segment.toLowerCase().includes(seg.toLowerCase())) return false;
-      if (term && !p.term.includes(term) && !p.billing.includes(term)) return false;
-      return true;
-    });
+
+  // Unified term groups
+  const termGroups = {
+    mensual:  ['p1m','mensual','monthly'],
+    anual:    ['p1y','anual','annual'],
+    trianual: ['p3y','trianual','triennial'],
+    onetime:  ['onetime','one time','perpetuo','nan',''],
+  };
+
+  const filtered = PRODUCTS.filter(p => {
+    const name = p.name.toLowerCase();
+    const matches = words.every(w => name.includes(w));
+    if (!matches) return false;
+    if (type && p.type !== type) return false;
+    if (seg && !p.segment.toLowerCase().includes(seg.toLowerCase())) return false;
+    if (term) {
+      const group = termGroups[term] || [term.toLowerCase()];
+      const pt = (p.term || '').toLowerCase();
+      const pb = (p.billing || '').toLowerCase();
+      if (!group.some(g => pt.includes(g) || pb.includes(g))) return false;
+    }
+    return true;
+  });
 
     currentResults = { LOL: [], INTCOMEX: [], INGRAM: [] };
     for (const p of filtered) {
@@ -700,6 +713,38 @@ function formatBilling(b) {
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+// Auto-fetch TRM from datos.gov.co
+async function fetchTRM() {
+  const status = document.getElementById('trmStatus');
+  status.textContent = '⟳ cargando...';
+  try {
+    const now = new Date(Date.now() - 5 * 60 * 60 * 1000);
+    const hoy = now.toISOString().substring(0, 10);
+    const url = `https://www.datos.gov.co/resource/32sa-8pi3.json`
+      + `?$select=valor,vigenciadesde`
+      + `&$where=vigenciadesde <= '${hoy}' and vigenciahasta >= '${hoy}'`;
+    const r = await fetch(url);
+    if (r.ok) {
+      const d = await r.json();
+      if (d && d[0] && d[0].valor) {
+        const trm = parseFloat(d[0].valor);
+        if (trm > 100) {
+          document.getElementById('trmInput').value = Math.round(trm);
+          const fecha = (d[0].vigenciadesde || '').substring(0,10);
+          status.textContent = `✓ oficial ${fecha}`;
+          status.style.color = 'var(--green)';
+          renderTables();
+          return;
+        }
+      }
+    }
+  } catch(e) {}
+  status.textContent = '⚠ manual';
+  status.style.color = 'var(--muted)';
+}
+
+fetchTRM();
 </script>
 </body>
 </html>
