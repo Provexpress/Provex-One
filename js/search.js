@@ -131,7 +131,9 @@ async function loadProducts() {
 
     const data = await response.json();
     state.products = Array.isArray(data)
-      ? data.filter((product) => normalizeText(product.segment) !== "charity")
+      ? data
+          .filter((product) => normalizeText(product.segment) !== "charity")
+          .map(enrichProduct)
       : [];
 
     elements.totalCount.textContent = `${state.products.length.toLocaleString("es-CO")} productos - 3 mayoristas`;
@@ -241,15 +243,15 @@ function matchesSelectionOrQuery(product, criteria) {
   const productName = String(product.name || "").trim();
 
   if (criteria.selectedNames.size > 0) {
-    return criteria.selectedNames.has(productName);
+    return criteria.selectedNames.has(product.canonicalName);
   }
 
   if (!criteria.words.length) {
     return false;
   }
 
-  const normalizedName = normalizeText(productName);
-  return criteria.words.every((word) => normalizedName.includes(word));
+  const searchableName = product.searchText || normalizeText(productName);
+  return criteria.words.every((word) => searchableName.includes(word));
 }
 
 function matchesSecondaryFilters(product, criteria) {
@@ -285,7 +287,7 @@ function updateSearchSuggestions() {
   const criteria = getSearchCriteria(query);
 
   for (const product of state.products) {
-    const productName = String(product.name || "").trim();
+    const productName = product.canonicalName || String(product.name || "").trim();
 
     if (!productName || selectedNames.has(productName) || seenNames.has(productName)) {
       continue;
@@ -295,7 +297,7 @@ function updateSearchSuggestions() {
       continue;
     }
 
-    if (!normalizeText(productName).includes(query)) {
+    if (!(product.searchText || normalizeText(productName)).includes(query)) {
       continue;
     }
 
@@ -453,14 +455,16 @@ function groupResultsByDistributor(products) {
 }
 
 function compareProducts(left, right, selectedOrder) {
-  const leftOrder = selectedOrder.has(left.name) ? selectedOrder.get(left.name) : Number.MAX_SAFE_INTEGER;
-  const rightOrder = selectedOrder.has(right.name) ? selectedOrder.get(right.name) : Number.MAX_SAFE_INTEGER;
+  const leftName = left.canonicalName || left.name;
+  const rightName = right.canonicalName || right.name;
+  const leftOrder = selectedOrder.has(leftName) ? selectedOrder.get(leftName) : Number.MAX_SAFE_INTEGER;
+  const rightOrder = selectedOrder.has(rightName) ? selectedOrder.get(rightName) : Number.MAX_SAFE_INTEGER;
 
   if (leftOrder !== rightOrder) {
     return leftOrder - rightOrder;
   }
 
-  const nameCompare = String(left.name || "").localeCompare(String(right.name || ""), "es", {
+  const nameCompare = String(leftName || "").localeCompare(String(rightName || ""), "es", {
     sensitivity: "base",
   });
 
@@ -616,6 +620,33 @@ function createEmptyResults() {
 
 function normalizeText(value) {
   return String(value || "").trim().toLowerCase();
+}
+
+function enrichProduct(product) {
+  const canonicalName = getCanonicalProductName(product.name);
+  const comparisonKey = `${canonicalName}__${getStrictPeriodKey(product) || "sin_periodo"}`;
+  return {
+    ...product,
+    canonicalName,
+    comparisonKey,
+    searchText: normalizeText(`${canonicalName} ${product.name || ""}`),
+  };
+}
+
+function getCanonicalProductName(value) {
+  let normalized = String(value || "")
+    .replace(/\u00A0/g, " ")
+    .replace(/â€“|–/g, "-")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  normalized = normalized.replace(/\s+\((?:NCE|CSP)[^)]+\)$/i, "");
+  normalized = normalized.replace(/\s+NCE\s+[A-Z]{3}\s+(?:ANN|MTH|TRI)$/i, "");
+  normalized = normalized.replace(/\s*-\s*(?:1|3)\s*year(?:\s+subscription)?$/i, "");
+  normalized = normalized.replace(/\s+(?:1|3)\s*year(?:\s+subscription)?$/i, "");
+  normalized = normalized.replace(/\s*-\s*$/, "");
+
+  return normalized.replace(/\s+/g, " ").trim();
 }
 
 function escapeHtml(value) {

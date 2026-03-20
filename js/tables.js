@@ -231,14 +231,16 @@ function buildDistributorCard({ dist, products, bestByName, profitPct, qty, curr
       const saleTotal = saleUnit * qty;
       const costTotal = unitPrice * qty;
       const profit = saleTotal - costTotal;
-      const isBestPrice = unitPrice === bestByName[product.name];
+      const productDisplayName = getComparableName(product);
+      const comparisonKey = getComparisonKey(product);
+      const isBestPrice = unitPrice === bestByName[comparisonKey];
       const { tagClass, label } = getTypeMeta(product.type);
 
       html += `
         <tr class="${isBestPrice ? "best-price" : ""}">
           <td class="td-name">
             <div class="prod-name">
-              ${escHtml(String(product.name || "").substring(0, 70))}
+              ${escHtml(String(productDisplayName || "").substring(0, 70))}
               ${isBestPrice ? '<span class="best-badge">Mejor</span>' : ""}
             </div>
             <div class="prod-seg">
@@ -278,14 +280,23 @@ function getBestByName(currentResults, visibleDists) {
 
   visibleDists.forEach((dist) => {
     currentResults[dist].forEach((product) => {
+      const productName = getComparisonKey(product);
       const unitPrice = Number(product.price) || 0;
-      if (!bestByName[product.name] || unitPrice < bestByName[product.name]) {
-        bestByName[product.name] = unitPrice;
+      if (!bestByName[productName] || unitPrice < bestByName[productName]) {
+        bestByName[productName] = unitPrice;
       }
     });
   });
 
   return bestByName;
+}
+
+function getComparableName(product) {
+  return String(product.canonicalName || product.name || "").trim();
+}
+
+function getComparisonKey(product) {
+  return String(product.comparisonKey || getComparableName(product)).trim();
 }
 
 function getTypeMeta(type) {
