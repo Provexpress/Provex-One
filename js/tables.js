@@ -69,6 +69,7 @@ export function renderTables({
   qty,
   currency,
   trm,
+  selectionCount = 0,
 }) {
   const visibleDists = DIST_ORDER.filter((dist) => activeDists.has(dist));
   const visibleTotal = getVisibleTotal(currentResults, visibleDists);
@@ -98,10 +99,15 @@ export function renderTables({
     visibleTotal,
   });
 
+  const resultsLabel =
+    selectionCount > 0
+      ? `Comparando ${selectionCount} producto${selectionCount === 1 ? "" : "s"} seleccionados`
+      : "Mostrando resultados por mayorista";
+
   html += `
     <div class="results-header">
       <div class="results-count">
-        Mostrando resultados por mayorista - <span>${displayedTotal.toLocaleString("es-CO")}</span> productos
+        ${resultsLabel} - <span>${displayedTotal.toLocaleString("es-CO")}</span> registros
       </div>
     </div>
     <div class="tables-grid">

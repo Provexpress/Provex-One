@@ -77,10 +77,12 @@
         Buscar licencias
       </p>
       <div class="flex flex-wrap gap-2 items-end">
-        <div class="flex flex-col gap-1 flex-[2] min-w-[200px]">
+        <div id="searchComposer" class="flex flex-col gap-1 flex-[2] min-w-[200px] relative">
           <label for="searchInput" class="text-[11px] font-medium text-muted">Nombre del producto</label>
           <input type="text" id="searchInput" class="search-input"
-                 placeholder="Ej: Microsoft 365, Office, Teams...">
+                 placeholder="Escribe y selecciona varios productos para comparar"
+                 autocomplete="off">
+          <div id="searchSuggestions" class="search-suggestions" hidden></div>
         </div>
         <div class="flex flex-col gap-1 flex-1 min-w-[130px]">
           <label for="typeFilter" class="text-[11px] font-medium text-muted">Tipo</label>
@@ -97,17 +99,19 @@
             <option value="">Todos</option>
             <option value="Commercial">Commercial</option>
             <option value="Education">Education</option>
-            <option value="Charity">Charity</option>
           </select>
         </div>
         <div class="flex flex-col gap-1 flex-1 min-w-[130px]">
           <label for="termFilter" class="text-[11px] font-medium text-muted">Periodo</label>
           <select id="termFilter" class="search-input">
             <option value="">Todos</option>
-            <option value="mensual">Mensual</option>
-            <option value="anual">Anual</option>
-            <option value="trianual">Trianual</option>
-            <option value="onetime">One Time / Perpetuo</option>
+            <option value="mensual_mensual">Mensual / Mensual</option>
+            <option value="anual_anual">Anual / Anual</option>
+            <option value="anual_mensual">Anual / Mensual</option>
+            <option value="trianual_anual">Trianual / Anual</option>
+            <option value="trianual_trianual">Trianual / Trianual</option>
+            <option value="trianual_mensual">Trianual / Mensual</option>
+            <option value="onetime_onetime">One Time / OneTime</option>
           </select>
         </div>
         <button type="button" id="searchButton"
@@ -117,6 +121,16 @@
                        transition-all duration-150">
           Buscar
         </button>
+      </div>
+
+      <div id="selectedProductsSection" class="selected-products mt-3" hidden>
+        <div class="selected-products-head">
+          <span class="selected-products-label">Productos seleccionados para comparar</span>
+          <button type="button" id="clearSelectedProducts" class="selected-products-clear">
+            Limpiar
+          </button>
+        </div>
+        <div id="selectedProductsList" class="selected-products-list"></div>
       </div>
 
       <!-- Chips -->
@@ -184,8 +198,8 @@
     <section id="resultsArea" aria-live="polite">
       <div class="empty-state">
         <div class="icon">&#128269;</div>
-        <h3>Busca una licencia</h3>
-        <p>Escribe el nombre del producto y presiona Buscar</p>
+        <h3>Busca o selecciona productos</h3>
+        <p>Agrega varios productos para compararlos en la misma busqueda</p>
       </div>
     </section>
 

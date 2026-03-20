@@ -7,12 +7,7 @@ import {
 } from "./tables.js";
 import { fetchTRM } from "./trm.js";
 
-const TERM_GROUPS = {
-  mensual: ["p1m", "mensual", "monthly"],
-  anual: ["p1y", "anual", "annual"],
-  trianual: ["p3y", "trianual", "triennial"],
-  onetime: ["onetime", "one time", "perpetuo", "nan", ""],
-};
+const SUGGESTION_LIMIT = 8;
 
 const state = {
   products: [],
@@ -22,12 +17,19 @@ const state = {
   activeMobileDist: DIST_ORDER[0],
   isLoadingProducts: true,
   loadError: false,
+  selectedProducts: [],
+  searchSuggestions: [],
 };
 
 const elements = {
   totalCount: document.getElementById("totalCount"),
+  searchComposer: document.getElementById("searchComposer"),
   searchInput: document.getElementById("searchInput"),
   searchButton: document.getElementById("searchButton"),
+  searchSuggestions: document.getElementById("searchSuggestions"),
+  selectedProductsSection: document.getElementById("selectedProductsSection"),
+  selectedProductsList: document.getElementById("selectedProductsList"),
+  clearSelectedProducts: document.getElementById("clearSelectedProducts"),
   typeFilter: document.getElementById("typeFilter"),
   segFilter: document.getElementById("segFilter"),
   termFilter: document.getElementById("termFilter"),
@@ -47,6 +49,7 @@ function initialize() {
   bindEvents();
   syncFilterChips();
   syncMobileTabs();
+  renderSelectedProducts();
   loadProducts();
 
   fetchTRM({
@@ -63,9 +66,26 @@ function initialize() {
 function bindEvents() {
   elements.searchButton.addEventListener("click", runSearch);
   elements.searchInput.addEventListener("keydown", handleSearchInputKeydown);
+  elements.searchInput.addEventListener("input", handleSearchInputInput);
+  elements.searchInput.addEventListener("focus", handleSearchInputFocus);
+  elements.searchSuggestions.addEventListener("click", handleSuggestionClick);
+  elements.selectedProductsList.addEventListener("click", handleSelectedProductRemove);
+  elements.clearSelectedProducts.addEventListener("click", clearSelectedProducts);
+
+  document.addEventListener("click", (event) => {
+    if (
+      elements.searchComposer.contains(event.target) ||
+      elements.searchSuggestions.contains(event.target)
+    ) {
+      return;
+    }
+
+    hideSearchSuggestions();
+  });
 
   [elements.typeFilter, elements.segFilter, elements.termFilter].forEach((field) => {
     field.addEventListener("change", () => {
+      updateSearchSuggestions();
       if (state.hasSearched) {
         runSearch();
       }
@@ -110,7 +130,10 @@ async function loadProducts() {
     }
 
     const data = await response.json();
-    state.products = Array.isArray(data) ? data : [];
+    state.products = Array.isArray(data)
+      ? data.filter((product) => normalizeText(product.segment) !== "charity")
+      : [];
+
     elements.totalCount.textContent = `${state.products.length.toLocaleString("es-CO")} productos - 3 mayoristas`;
   } catch (error) {
     state.products = [];
@@ -118,25 +141,58 @@ async function loadProducts() {
     elements.totalCount.textContent = "Error cargando datos";
   } finally {
     state.isLoadingProducts = false;
+    updateSearchSuggestions();
   }
 }
 
 function handleSearchInputKeydown(event) {
+  if (event.key === "Escape") {
+    hideSearchSuggestions();
+    return;
+  }
+
   if (event.key === "Enter") {
     event.preventDefault();
     runSearch();
   }
 }
 
-function runSearch() {
-  const query = elements.searchInput.value.trim().toLowerCase();
+function handleSearchInputInput() {
+  updateSearchSuggestions();
+}
 
-  if (!query) {
+function handleSearchInputFocus() {
+  updateSearchSuggestions();
+}
+
+function handleSuggestionClick(event) {
+  const button = event.target.closest("[data-product-name]");
+  if (!button) {
+    return;
+  }
+
+  addSelectedProduct(button.dataset.productName);
+}
+
+function handleSelectedProductRemove(event) {
+  const button = event.target.closest("[data-remove-product]");
+  if (!button) {
+    return;
+  }
+
+  removeSelectedProduct(button.dataset.removeProduct);
+}
+
+function runSearch() {
+  const query = normalizeText(elements.searchInput.value);
+  const hasSelectedProducts = state.selectedProducts.length > 0;
+
+  if (!hasSelectedProducts && !query) {
     state.hasSearched = false;
     state.currentResults = createEmptyResults();
     showEmptyState(elements.resultsArea, {
-      title: "Escribe algo para buscar",
-      message: "Ej: Microsoft 365 Business Basic",
+      title: "Selecciona o escribe algo para buscar",
+      message: "Puedes comparar varios productos al mismo tiempo.",
     });
     return;
   }
@@ -158,6 +214,7 @@ function runSearch() {
   const criteria = getSearchCriteria(query);
   state.hasSearched = true;
   showLoadingState(elements.resultsArea);
+  hideSearchSuggestions();
 
   window.setTimeout(() => {
     const filteredProducts = state.products.filter((product) => matchesProduct(product, criteria));
@@ -170,36 +227,212 @@ function getSearchCriteria(query) {
   return {
     words: query.split(/\s+/).filter(Boolean),
     type: elements.typeFilter.value,
-    segment: elements.segFilter.value.toLowerCase(),
-    term: elements.termFilter.value,
+    segment: normalizeText(elements.segFilter.value),
+    period: elements.termFilter.value,
+    selectedNames: new Set(state.selectedProducts),
   };
 }
 
 function matchesProduct(product, criteria) {
-  const name = String(product.name || "").toLowerCase();
-  const segment = String(product.segment || "").toLowerCase();
-  const term = String(product.term || "").toLowerCase();
-  const billing = String(product.billing || "").toLowerCase();
+  return matchesSelectionOrQuery(product, criteria) && matchesSecondaryFilters(product, criteria);
+}
 
-  const matchesName = criteria.words.every((word) => name.includes(word));
-  if (!matchesName) {
+function matchesSelectionOrQuery(product, criteria) {
+  const productName = String(product.name || "").trim();
+
+  if (criteria.selectedNames.size > 0) {
+    return criteria.selectedNames.has(productName);
+  }
+
+  if (!criteria.words.length) {
     return false;
   }
+
+  const normalizedName = normalizeText(productName);
+  return criteria.words.every((word) => normalizedName.includes(word));
+}
+
+function matchesSecondaryFilters(product, criteria) {
+  const segment = normalizeText(product.segment);
 
   if (criteria.type && product.type !== criteria.type) {
     return false;
   }
 
-  if (criteria.segment && !segment.includes(criteria.segment)) {
+  if (criteria.segment && segment !== criteria.segment) {
     return false;
   }
 
-  if (!criteria.term) {
-    return true;
+  if (criteria.period && getStrictPeriodKey(product) !== criteria.period) {
+    return false;
   }
 
-  const termGroup = TERM_GROUPS[criteria.term] || [criteria.term.toLowerCase()];
-  return termGroup.some((termToken) => term.includes(termToken) || billing.includes(termToken));
+  return true;
+}
+
+function updateSearchSuggestions() {
+  const query = normalizeText(elements.searchInput.value);
+
+  if (!query || state.isLoadingProducts || state.loadError) {
+    state.searchSuggestions = [];
+    renderSearchSuggestions();
+    return;
+  }
+
+  const selectedNames = new Set(state.selectedProducts);
+  const suggestions = [];
+  const seenNames = new Set();
+  const criteria = getSearchCriteria(query);
+
+  for (const product of state.products) {
+    const productName = String(product.name || "").trim();
+
+    if (!productName || selectedNames.has(productName) || seenNames.has(productName)) {
+      continue;
+    }
+
+    if (!matchesSecondaryFilters(product, criteria)) {
+      continue;
+    }
+
+    if (!normalizeText(productName).includes(query)) {
+      continue;
+    }
+
+    suggestions.push(productName);
+    seenNames.add(productName);
+
+    if (suggestions.length >= SUGGESTION_LIMIT) {
+      break;
+    }
+  }
+
+  state.searchSuggestions = suggestions;
+  renderSearchSuggestions();
+}
+
+function renderSearchSuggestions() {
+  const query = normalizeText(elements.searchInput.value);
+
+  if (!query) {
+    elements.searchSuggestions.hidden = true;
+    elements.searchSuggestions.innerHTML = "";
+    return;
+  }
+
+  if (!state.searchSuggestions.length) {
+    elements.searchSuggestions.innerHTML =
+      '<div class="search-suggestion-empty">Sin coincidencias para agregar</div>';
+    elements.searchSuggestions.hidden = false;
+    return;
+  }
+
+  elements.searchSuggestions.innerHTML = state.searchSuggestions
+    .map(
+      (name) => `
+        <button type="button" class="search-suggestion" data-product-name="${escapeAttribute(name)}">
+          ${escapeHtml(name)}
+        </button>
+      `,
+    )
+    .join("");
+
+  elements.searchSuggestions.hidden = false;
+}
+
+function hideSearchSuggestions() {
+  elements.searchSuggestions.hidden = true;
+}
+
+function addSelectedProduct(name) {
+  if (!name || state.selectedProducts.includes(name)) {
+    return;
+  }
+
+  state.selectedProducts = [...state.selectedProducts, name];
+  elements.searchInput.value = "";
+  state.searchSuggestions = [];
+  renderSelectedProducts();
+  renderSearchSuggestions();
+
+  if (state.hasSearched) {
+    runSearch();
+  }
+}
+
+function removeSelectedProduct(name) {
+  state.selectedProducts = state.selectedProducts.filter((item) => item !== name);
+  renderSelectedProducts();
+  updateSearchSuggestions();
+
+  if (!state.hasSearched) {
+    return;
+  }
+
+  if (state.selectedProducts.length || normalizeText(elements.searchInput.value)) {
+    runSearch();
+    return;
+  }
+
+  state.hasSearched = false;
+  state.currentResults = createEmptyResults();
+  showEmptyState(elements.resultsArea, {
+    title: "Selecciona o escribe algo para buscar",
+    message: "Puedes comparar varios productos al mismo tiempo.",
+  });
+}
+
+function clearSelectedProducts() {
+  if (!state.selectedProducts.length) {
+    return;
+  }
+
+  state.selectedProducts = [];
+  renderSelectedProducts();
+  updateSearchSuggestions();
+
+  if (!state.hasSearched) {
+    return;
+  }
+
+  if (normalizeText(elements.searchInput.value)) {
+    runSearch();
+    return;
+  }
+
+  state.hasSearched = false;
+  state.currentResults = createEmptyResults();
+  showEmptyState(elements.resultsArea, {
+    title: "Selecciona o escribe algo para buscar",
+    message: "Puedes comparar varios productos al mismo tiempo.",
+  });
+}
+
+function renderSelectedProducts() {
+  if (!state.selectedProducts.length) {
+    elements.selectedProductsSection.hidden = true;
+    elements.selectedProductsList.innerHTML = "";
+    return;
+  }
+
+  elements.selectedProductsSection.hidden = false;
+  elements.selectedProductsList.innerHTML = state.selectedProducts
+    .map(
+      (name) => `
+        <div class="selected-product-chip">
+          <span class="selected-product-name">${escapeHtml(name)}</span>
+          <button
+            type="button"
+            class="selected-product-remove"
+            data-remove-product="${escapeAttribute(name)}"
+            aria-label="Quitar ${escapeAttribute(name)}"
+          >
+            &times;
+          </button>
+        </div>
+      `,
+    )
+    .join("");
 }
 
 function groupResultsByDistributor(products) {
@@ -211,7 +444,31 @@ function groupResultsByDistributor(products) {
     }
   });
 
+  const selectedOrder = new Map(state.selectedProducts.map((name, index) => [name, index]));
+  Object.values(grouped).forEach((distProducts) => {
+    distProducts.sort((left, right) => compareProducts(left, right, selectedOrder));
+  });
+
   return grouped;
+}
+
+function compareProducts(left, right, selectedOrder) {
+  const leftOrder = selectedOrder.has(left.name) ? selectedOrder.get(left.name) : Number.MAX_SAFE_INTEGER;
+  const rightOrder = selectedOrder.has(right.name) ? selectedOrder.get(right.name) : Number.MAX_SAFE_INTEGER;
+
+  if (leftOrder !== rightOrder) {
+    return leftOrder - rightOrder;
+  }
+
+  const nameCompare = String(left.name || "").localeCompare(String(right.name || ""), "es", {
+    sensitivity: "base",
+  });
+
+  if (nameCompare !== 0) {
+    return nameCompare;
+  }
+
+  return (Number(left.price) || 0) - (Number(right.price) || 0);
 }
 
 function toggleDist(dist) {
@@ -284,7 +541,70 @@ function renderCurrentResults() {
     qty: Math.max(1, parseInt(elements.qtyInput.value, 10) || 1),
     currency: elements.currencySelect.value,
     trm: Math.max(1, Number(elements.trmInput.value) || 4200),
+    selectionCount: state.selectedProducts.length,
   });
+}
+
+function getStrictPeriodKey(product) {
+  const term = canonicalizeTerm(product.term);
+  const billing = canonicalizeBilling(product.billing);
+  const combo = `${term}|${billing}`;
+
+  switch (combo) {
+    case "mensual|mensual":
+      return "mensual_mensual";
+    case "anual|anual":
+      return "anual_anual";
+    case "anual|mensual":
+      return "anual_mensual";
+    case "trianual|anual":
+      return "trianual_anual";
+    case "trianual|trianual":
+      return "trianual_trianual";
+    case "trianual|mensual":
+      return "trianual_mensual";
+    case "onetime|onetime":
+      return "onetime_onetime";
+    default:
+      return "";
+  }
+}
+
+function canonicalizeTerm(term) {
+  switch (normalizeText(term)) {
+    case "p1m":
+    case "mensual":
+      return "mensual";
+    case "p1y":
+    case "anual":
+      return "anual";
+    case "p3y":
+    case "trianual":
+      return "trianual";
+    case "onetime":
+    case "one time":
+      return "onetime";
+    default:
+      return "";
+  }
+}
+
+function canonicalizeBilling(billing) {
+  switch (normalizeText(billing)) {
+    case "monthly":
+    case "mensual":
+      return "mensual";
+    case "annual":
+    case "anual":
+      return "anual";
+    case "triennial":
+    case "trianual":
+      return "trianual";
+    case "onetime":
+      return "onetime";
+    default:
+      return "";
+  }
 }
 
 function createEmptyResults() {
@@ -292,4 +612,20 @@ function createEmptyResults() {
     accumulator[dist] = [];
     return accumulator;
   }, {});
+}
+
+function normalizeText(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function escapeAttribute(value) {
+  return escapeHtml(value).replace(/'/g, "&#39;");
 }
