@@ -269,7 +269,7 @@ function matchesSecondaryFilters(product, criteria) {
     return false;
   }
 
-  if (criteria.period && getStrictPeriodKey(product) !== criteria.period) {
+  if (criteria.period && product.strictPeriodKey !== criteria.period) {
     return false;
   }
 
@@ -443,8 +443,9 @@ function renderSelectedProducts() {
 
 function groupResultsByDistributor(products) {
   const grouped = createEmptyResults();
+  const dedupedProducts = dedupeLogicalProducts(products);
 
-  products.forEach((product) => {
+  dedupedProducts.forEach((product) => {
     if (grouped[product.distributor]) {
       grouped[product.distributor].push(product);
     }
@@ -456,6 +457,39 @@ function groupResultsByDistributor(products) {
   });
 
   return grouped;
+}
+
+function dedupeLogicalProducts(products) {
+  const bestByLogicalKey = new Map();
+
+  products.forEach((product) => {
+    const logicalKey = [product.distributor, product.comparisonKey || ""].join("__");
+    const existing = bestByLogicalKey.get(logicalKey);
+
+    if (!existing || isPreferredProduct(product, existing)) {
+      bestByLogicalKey.set(logicalKey, product);
+    }
+  });
+
+  return Array.from(bestByLogicalKey.values());
+}
+
+function isPreferredProduct(candidate, current) {
+  const candidatePrice = Number(candidate.price) || 0;
+  const currentPrice = Number(current.price) || 0;
+
+  if (candidatePrice !== currentPrice) {
+    return candidatePrice < currentPrice;
+  }
+
+  const candidateName = String(candidate.name || "");
+  const currentName = String(current.name || "");
+
+  if (candidateName.length !== currentName.length) {
+    return candidateName.length < currentName.length;
+  }
+
+  return candidateName.localeCompare(currentName, "es", { sensitivity: "base" }) < 0;
 }
 
 function compareProducts(left, right, selectedOrder) {
@@ -554,8 +588,12 @@ function renderCurrentResults() {
 }
 
 function getStrictPeriodKey(product) {
-  const term = canonicalizeTerm(product.term);
-  const billing = canonicalizeBilling(product.billing);
+  if (product?.strictPeriodKey) {
+    return product.strictPeriodKey;
+  }
+
+  const term = product?.normalizedTerm || canonicalizeTerm(product);
+  const billing = product?.normalizedBilling || canonicalizeBilling(product);
   const combo = `${term}|${billing}`;
 
   switch (combo) {
@@ -578,41 +616,92 @@ function getStrictPeriodKey(product) {
   }
 }
 
-function canonicalizeTerm(term) {
-  switch (normalizeText(term)) {
-    case "p1m":
-    case "mensual":
-      return "mensual";
-    case "p1y":
-    case "anual":
-      return "anual";
-    case "p3y":
-    case "trianual":
-      return "trianual";
-    case "onetime":
-    case "one time":
-      return "onetime";
-    default:
-      return "";
+function canonicalizeTerm(product) {
+  const term = normalizeText(product?.term);
+  const partNumber = normalizeText(product?.partNumber);
+  const name = normalizeText(product?.name)
+    .replace(/\u00a0/g, " ")
+    .replace(/â€“|–/g, "-");
+
+  if (hasAnySuffix(partNumber, ["p3yt", "p3ya", "p3ym", ":p3y"])) {
+    return "trianual";
   }
+
+  if (hasAnySuffix(partNumber, ["p1ya", "p1ym", ":p1y"])) {
+    return "anual";
+  }
+
+  if (hasAnySuffix(partNumber, ["p1mm", ":p1m"])) {
+    return "mensual";
+  }
+
+  if (term.includes("p3y") || term.includes("trianual") || term.includes("trien") || /3\s*year/.test(name)) {
+    return "trianual";
+  }
+
+  if (term.includes("p1y") || term.includes("anual") || /1\s*year/.test(name)) {
+    return "anual";
+  }
+
+  if (term.includes("p1m") || term.includes("mensual") || term.includes("month")) {
+    return "mensual";
+  }
+
+  if (term.includes("onetime") || term.includes("one time")) {
+    return "onetime";
+  }
+
+  return "";
 }
 
-function canonicalizeBilling(billing) {
-  switch (normalizeText(billing)) {
-    case "monthly":
-    case "mensual":
-      return "mensual";
-    case "annual":
-    case "anual":
-      return "anual";
-    case "triennial":
-    case "trianual":
-      return "trianual";
-    case "onetime":
-      return "onetime";
-    default:
-      return "";
+function canonicalizeBilling(product) {
+  const billing = normalizeText(product?.billing);
+  const partNumber = normalizeText(product?.partNumber);
+  const name = normalizeText(product?.name)
+    .replace(/\u00a0/g, " ")
+    .replace(/â€“|–/g, "-");
+
+  if (hasAnySuffix(partNumber, ["p3yt"])) {
+    return "trianual";
   }
+
+  if (hasAnySuffix(partNumber, ["p3ya", "p1ya"])) {
+    return "anual";
+  }
+
+  if (hasAnySuffix(partNumber, ["p3ym", "p1ym", "p1mm", ":p1m"])) {
+    return "mensual";
+  }
+
+  if (/\b(?:nce|csp)\s+(?:com|edu|nfp)\s+tri\b|\((?:nce|csp)\s+(?:com|edu|nfp)\s+tri\)/i.test(name)) {
+    return "trianual";
+  }
+
+  if (/\b(?:nce|csp)\s+(?:com|edu|nfp)\s+ann\b|\((?:nce|csp)\s+(?:com|edu|nfp)\s+ann\)/i.test(name)) {
+    return "anual";
+  }
+
+  if (/\b(?:nce|csp)\s+(?:com|edu|nfp)\s+mth\b|\((?:nce|csp)\s+(?:com|edu|nfp)\s+mth\)/i.test(name)) {
+    return "mensual";
+  }
+
+  if (billing.includes("trien") || billing.includes("trianual")) {
+    return "trianual";
+  }
+
+  if (billing.includes("annual") || billing.includes("anual")) {
+    return "anual";
+  }
+
+  if (billing.includes("monthly") || billing.includes("mensual")) {
+    return "mensual";
+  }
+
+  if (billing.includes("onetime") || billing.includes("one time")) {
+    return "onetime";
+  }
+
+  return "";
 }
 
 function createEmptyResults() {
@@ -627,11 +716,29 @@ function normalizeText(value) {
 }
 
 function enrichProduct(product) {
-  const canonicalName = getCanonicalProductName(product.name);
-  const comparisonKey = `${canonicalName}__${getStrictPeriodKey(product) || "sin_periodo"}`;
+  const canonicalName = String(product.canonicalName || getCanonicalProductName(product.name || "")).trim();
+  const normalizedTerm = String(product.normalizedTerm || canonicalizeTerm(product)).trim();
+  const normalizedBilling = String(product.normalizedBilling || canonicalizeBilling(product)).trim();
+  const strictPeriodKey = String(
+    product.strictPeriodKey ||
+      getStrictPeriodKey({
+        ...product,
+        normalizedTerm,
+        normalizedBilling,
+      }),
+  ).trim();
+  const comparisonKey = [
+    canonicalName,
+    strictPeriodKey || "sin_periodo",
+    product.type || "",
+    normalizeText(product.segment),
+  ].join("__");
   return {
     ...product,
     canonicalName,
+    normalizedTerm,
+    normalizedBilling,
+    strictPeriodKey,
     comparisonKey,
     searchText: normalizeText(`${canonicalName} ${product.name || ""}`),
   };
@@ -663,4 +770,8 @@ function escapeHtml(value) {
 
 function escapeAttribute(value) {
   return escapeHtml(value).replace(/'/g, "&#39;");
+}
+
+function hasAnySuffix(value, suffixes) {
+  return suffixes.some((suffix) => value.endsWith(suffix));
 }

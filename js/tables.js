@@ -13,17 +13,19 @@ const TERM_LABELS = {
   onetime: "One Time",
   anual: "Anual",
   mensual: "Mensual",
+  trianual: "Trianual",
   nan: "-",
   "": "-",
 };
 
 const BILLING_LABELS = {
-  monthly: "Mes",
-  annual: "Ano",
-  triennial: "Trienal",
-  onetime: "Unico",
-  anual: "Ano",
-  mensual: "Mes",
+  monthly: "Mensual",
+  annual: "Anual",
+  triennial: "Trianual",
+  onetime: "One Time",
+  anual: "Anual",
+  mensual: "Mensual",
+  trianual: "Trianual",
   nan: "-",
   "": "-",
 };
@@ -248,7 +250,7 @@ function buildDistributorCard({ dist, products, bestByName, profitPct, qty, curr
               ${escHtml(product.segment || "")}
             </div>
           </td>
-          <td><span class="term-text">${escHtml(formatTerm(product.term))} / ${escHtml(formatBilling(product.billing))}</span></td>
+          <td><span class="term-text">${escHtml(formatTerm(product.normalizedTerm || product.term))} / ${escHtml(formatBilling(product.normalizedBilling || product.billing))}</span></td>
           <td class="td-right price-cell">${getPriceDisplay(unitPrice, currency, trm)}</td>
           <td class="td-right price-cell sale-cell">${getPriceDisplay(saleTotal, currency, trm)}</td>
           <td class="td-right profit-cell ${profit >= 0 ? "profit-positive" : "profit-negative"}">${getPriceDisplay(profit, currency, trm)}</td>
