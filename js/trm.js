@@ -19,12 +19,13 @@ export async function fetchTRM({ statusEl, inputEl, onUpdated }) {
     const data = await response.json();
     const record = data?.[0];
     const trm = Number(record?.valor);
+    const rawTrm = String(record?.valor ?? "").trim();
 
     if (!Number.isFinite(trm) || trm <= 100) {
       throw new Error("TRM value missing");
     }
 
-    inputEl.value = String(Math.round(trm));
+    inputEl.value = rawTrm || String(trm);
     setStatus(statusEl, `oficial ${String(record.vigenciadesde || "").slice(0, 10)}`, "is-success");
 
     if (typeof onUpdated === "function") {
