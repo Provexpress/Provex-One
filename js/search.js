@@ -8,6 +8,7 @@ import {
 import { fetchTRM } from "./trm.js";
 
 const SUGGESTION_LIMIT = 8;
+const CLOUD_CATALOG_PATHS = ["catalogs/cloud_products.json", "products.json"];
 
 const state = {
   products: [],
@@ -124,12 +125,7 @@ async function loadProducts() {
   state.loadError = false;
 
   try {
-    const response = await fetch("products.json");
-    if (!response.ok) {
-      throw new Error(`Products request failed with status ${response.status}`);
-    }
-
-    const data = await response.json();
+    const data = await fetchCatalogData(CLOUD_CATALOG_PATHS);
     state.products = Array.isArray(data)
       ? data
           .filter((product) => normalizeText(product.segment) !== "charity")
@@ -149,6 +145,25 @@ async function loadProducts() {
     state.isLoadingProducts = false;
     updateSearchSuggestions();
   }
+}
+
+async function fetchCatalogData(paths) {
+  let lastError = null;
+
+  for (const path of paths) {
+    try {
+      const response = await fetch(path);
+      if (!response.ok) {
+        throw new Error(`Catalog request failed with status ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError || new Error("Catalog request failed");
 }
 
 function handleSearchInputKeydown(event) {
@@ -212,7 +227,7 @@ function runSearch() {
     showEmptyState(elements.resultsArea, {
       icon: "&#9888;",
       title: "No se pudieron cargar los productos",
-      message: "Revisa products.json e intenta de nuevo.",
+      message: "Revisa catalogs/cloud_products.json o products.json e intenta de nuevo.",
     });
     return;
   }

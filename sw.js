@@ -1,13 +1,16 @@
-const CACHE_NAME = 'licensehub-v7';
+const CACHE_NAME = 'licensehub-v8';
 
 const STATIC_ASSETS = [
   './',
   './index.html',
   './css/styles.css',
+  './js/app.js',
   './js/search.js',
+  './js/networking.js',
   './js/tables.js',
   './js/trm.js',
   './manifest.json',
+  './catalogs/catalog_manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
 ];
@@ -34,7 +37,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
   // products.json → Network First (precios siempre frescos)
-  if (url.pathname.endsWith('products.json')) {
+  if (url.pathname.endsWith('products.json') || url.pathname.includes('/catalogs/')) {
     event.respondWith(networkFirst(event.request));
     return;
   }

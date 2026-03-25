@@ -66,12 +66,26 @@
   </nav>
 
   <main class="max-w-[960px] mx-auto px-4 pt-5 pb-12">
+    <section class="bg-card rounded-card shadow-card p-4 mb-3" aria-label="Apartados comerciales">
+      <div class="flex flex-wrap gap-2 items-center justify-between">
+        <div>
+          <p class="text-[11px] font-semibold text-muted uppercase tracking-[0.06em]">Apartados</p>
+          <p class="text-[13px] text-muted mt-1">Escoge si vas a trabajar cloud o inventario de networking.</p>
+        </div>
+        <div class="flex flex-wrap gap-1.5">
+          <button type="button" class="filter-chip active" data-area-tab="cloud">Cloud</button>
+          <button type="button" class="filter-chip" data-area-tab="networking">Networking</button>
+        </div>
+      </div>
+    </section>
 
+    <div id="cloudView" data-area-view="cloud">
     <!-- SEARCH CARD -->
-    <section class="bg-card rounded-card shadow-card p-5 mb-3" aria-label="Busqueda de licencias">
+    <section class="bg-card rounded-card shadow-card p-5 mb-3" aria-label="Busqueda de licencias cloud">
       <p class="text-[11px] font-semibold text-muted uppercase tracking-[0.06em] mb-3">
-        Buscar licencias
+        Cloud
       </p>
+      <p class="text-[13px] text-muted mb-4">Comparador de licencias Microsoft por mayorista.</p>
       <div class="flex flex-wrap gap-2 items-end">
         <div id="searchComposer" class="flex flex-col gap-1 flex-[2] min-w-[200px] relative">
           <label for="searchInput" class="text-[11px] font-medium text-muted">Nombre del producto</label>
@@ -145,7 +159,7 @@
 
     <!-- QUOTE BAR -->
     <section class="bg-card rounded-card shadow-card px-5 py-3.5 mb-5
-                    flex flex-wrap items-center gap-4" aria-label="Configuracion de cotizacion">
+                    flex flex-wrap items-center gap-4" aria-label="Configuracion de cotizacion cloud">
       <p class="text-[11px] font-semibold text-muted uppercase tracking-[0.06em] whitespace-nowrap">
         Cotización
       </p>
@@ -198,10 +212,60 @@
         <p>Agrega varios productos para compararlos en la misma busqueda</p>
       </div>
     </section>
+    </div>
+
+    <section id="networkingView" data-area-view="networking" hidden>
+      <section class="bg-card rounded-card shadow-card p-5 mb-3" aria-label="Inventario de networking">
+        <p class="text-[11px] font-semibold text-muted uppercase tracking-[0.06em] mb-3">
+          Networking
+        </p>
+        <p class="text-[13px] text-muted mb-4">
+          Explora inventario por marca, familia, ubicacion y fuente.
+        </p>
+        <div class="flex flex-wrap gap-2 items-end">
+          <div class="flex flex-col gap-1 flex-[2] min-w-[220px]">
+            <label for="networkSearchInput" class="text-[11px] font-medium text-muted">Producto o SKU</label>
+            <input type="text" id="networkSearchInput" class="search-input" placeholder="Ej: FG-100F, Catalyst, AIR-DNA">
+          </div>
+          <div class="flex flex-col gap-1 flex-1 min-w-[130px]">
+            <label for="networkBrandFilter" class="text-[11px] font-medium text-muted">Marca</label>
+            <select id="networkBrandFilter" class="search-input">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1 flex-1 min-w-[130px]">
+            <label for="networkFamilyFilter" class="text-[11px] font-medium text-muted">Familia</label>
+            <select id="networkFamilyFilter" class="search-input">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1 flex-1 min-w-[130px]">
+            <label for="networkLocationFilter" class="text-[11px] font-medium text-muted">Ubicacion</label>
+            <select id="networkLocationFilter" class="search-input">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-1 flex-1 min-w-[130px]">
+            <label for="networkSourceFilter" class="text-[11px] font-medium text-muted">Fuente</label>
+            <select id="networkSourceFilter" class="search-input">
+              <option value="">Todas</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section id="networkingResultsArea" aria-live="polite">
+        <div class="empty-state">
+          <div class="icon">&#128736;</div>
+          <h3>Inventario de networking</h3>
+          <p>Filtra por marca, familia o SKU para encontrar disponibilidad.</p>
+        </div>
+      </section>
+    </section>
 
   </main>
 
-  <script type="module" src="js/search.js"></script>
+  <script type="module" src="js/app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {

@@ -1,0 +1,1 @@
+{"areas":[{"id":"cloud","label":"Cloud","kind":"comparison","catalog":"cloud_products.json","records":18708},{"id":"networking","label":"Networking","kind":"inventory","catalog":"networking_inventory.json","records":178,"brands":["Cisco","Fortinet"]}]}
