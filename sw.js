@@ -1,4 +1,4 @@
-const CACHE_NAME = 'licensehub-v4';
+const CACHE_NAME = 'licensehub-v5';
 
 const STATIC_ASSETS = [
   './',

@@ -34,13 +34,14 @@ const MAX_ROWS_PER_DIST = 50;
 const usdFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 20,
 });
 const copFormatter = new Intl.NumberFormat("es-CO", {
   style: "currency",
   currency: "COP",
-  maximumFractionDigits: 0,
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 20,
 });
 
 export function showEmptyState(resultsArea, { icon = "&#128269;", title, message }) {
@@ -149,7 +150,7 @@ export function getPriceDisplay(price, currency, trm) {
   const safePrice = Number(price) || 0;
 
   if (currency === "COP") {
-    return copFormatter.format(Math.round(safePrice * trm));
+    return copFormatter.format(safePrice * trm);
   }
 
   return usdFormatter.format(safePrice);
