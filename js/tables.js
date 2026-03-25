@@ -35,13 +35,13 @@ const usdFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
   minimumFractionDigits: 0,
-  maximumFractionDigits: 20,
+  maximumFractionDigits: 2,
 });
 const copFormatter = new Intl.NumberFormat("es-CO", {
   style: "currency",
   currency: "COP",
   minimumFractionDigits: 0,
-  maximumFractionDigits: 20,
+  maximumFractionDigits: 2,
 });
 
 export function showEmptyState(resultsArea, { icon = "&#128269;", title, message }) {

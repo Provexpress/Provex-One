@@ -19,13 +19,11 @@ export async function fetchTRM({ statusEl, inputEl, onUpdated }) {
     const data = await response.json();
     const record = data?.[0];
     const trm = Number(record?.valor);
-    const rawTrm = String(record?.valor ?? "").trim();
-
     if (!Number.isFinite(trm) || trm <= 100) {
       throw new Error("TRM value missing");
     }
 
-    inputEl.value = rawTrm || String(trm);
+    inputEl.value = formatInputNumber(trm);
     setStatus(statusEl, `oficial ${String(record.vigenciadesde || "").slice(0, 10)}`, "is-success");
 
     if (typeof onUpdated === "function") {
@@ -40,4 +38,8 @@ function setStatus(statusEl, text, modifierClass) {
   statusEl.textContent = text;
   statusEl.classList.remove("is-success", "is-muted");
   statusEl.classList.add(modifierClass);
+}
+
+function formatInputNumber(value) {
+  return Number(value).toFixed(2).replace(/\.?0+$/, "");
 }
