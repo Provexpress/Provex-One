@@ -2,7 +2,14 @@ from pathlib import Path
 
 import pandas as pd
 
-from extractors.common import normalize_lead_time_label, normalize_location_label, resolve_column, safe_int, safe_str
+from extractors.common import (
+    normalize_lead_time_label,
+    normalize_location_label,
+    readable_excel_path,
+    resolve_column,
+    safe_int,
+    safe_str,
+)
 
 FILE_PATH = "data/Inventario Fortinet - TD SYNNEX.xlsx"
 
@@ -13,65 +20,63 @@ def build_networking_fortinet_catalog(base_dir=None):
     if not source_path.exists():
         return []
 
-    xl = pd.ExcelFile(source_path)
     items = []
+    with readable_excel_path(source_path) as readable_path:
+        xl = pd.ExcelFile(readable_path)
 
-    for sheet_name in xl.sheet_names:
-        header_preview = pd.read_excel(source_path, sheet_name=sheet_name, header=None, nrows=1)
-        lead_time = normalize_lead_time_label(header_preview.iat[0, 0]) if not header_preview.empty else ""
-        df = pd.read_excel(source_path, sheet_name=sheet_name, header=2)
+        for sheet_name in xl.sheet_names:
+            header_preview = pd.read_excel(readable_path, sheet_name=sheet_name, header=None, nrows=1)
+            lead_time = normalize_lead_time_label(header_preview.iat[0, 0]) if not header_preview.empty else ""
+            df = pd.read_excel(readable_path, sheet_name=sheet_name, header=2)
 
-        location_col = resolve_column(df.columns, "Ubicación", "Ubicacion")
-        type_col = resolve_column(df.columns, "TIPO")
-        family_col = resolve_column(df.columns, "FAMILIA")
-        sku_col = resolve_column(df.columns, "SKU")
-        stock_col = resolve_column(df.columns, "Unidades Disp.")
-        description_col = resolve_column(df.columns, "Descripción", "Descripcion")
+            location_col = resolve_column(df.columns, "UbicaciÃ³n", "Ubicacion")
+            type_col = resolve_column(df.columns, "TIPO")
+            family_col = resolve_column(df.columns, "FAMILIA")
+            sku_col = resolve_column(df.columns, "SKU")
+            stock_col = resolve_column(df.columns, "Unidades Disp.")
+            description_col = resolve_column(df.columns, "DescripciÃ³n", "Descripcion")
 
-        for _, row in df.iterrows():
-            sku = safe_str(row.get(sku_col))
-            description = safe_str(row.get(description_col))
-            if not sku or not description:
-                continue
+            for _, row in df.iterrows():
+                sku = safe_str(row.get(sku_col))
+                description = safe_str(row.get(description_col))
+                if not sku or not description:
+                    continue
 
-            location = normalize_location_label(row.get(location_col) or sheet_name)
-            item_type = safe_str(row.get(type_col))
-            family = safe_str(row.get(family_col))
+                location = normalize_location_label(row.get(location_col) or sheet_name)
+                item_type = safe_str(row.get(type_col))
+                family = safe_str(row.get(family_col))
 
-            items.append(
-                {
-                    "area": "networking",
-                    "brand": "Fortinet",
-                    "source": "TD SYNNEX",
-                    "sheet": sheet_name,
-                    "material": "",
-                    "sku": sku,
-                    "family": family,
-                    "type": item_type,
-                    "stock": safe_int(row.get(stock_col)),
-                    "price": 0.0,
-                    "currency": "",
-                    "priceText": "",
-                    "availability": lead_time,
-                    "location": location,
-                    "leadTime": lead_time,
-                    "description": description,
-                    "buyUrl": "",
-                    "searchText": " ".join(
-                        filter(
-                            None,
-                            [
-                                "fortinet",
-                                sheet_name.lower(),
-                                location.lower(),
-                                item_type.lower(),
-                                family.lower(),
-                                sku.lower(),
-                                description.lower(),
-                            ],
-                        )
-                    ),
-                }
-            )
+                items.append(
+                    {
+                        "area": "networking",
+                        "brand": "Fortinet",
+                        "source": "TD SYNNEX",
+                        "sheet": sheet_name,
+                        "material": "",
+                        "sku": sku,
+                        "family": family,
+                        "type": item_type,
+                        "stock": safe_int(row.get(stock_col)),
+                        "availability": lead_time,
+                        "location": location,
+                        "leadTime": lead_time,
+                        "description": description,
+                        "buyUrl": "",
+                        "searchText": " ".join(
+                            filter(
+                                None,
+                                [
+                                    "fortinet",
+                                    sheet_name.lower(),
+                                    location.lower(),
+                                    item_type.lower(),
+                                    family.lower(),
+                                    sku.lower(),
+                                    description.lower(),
+                                ],
+                            )
+                        ),
+                    }
+                )
 
     return items

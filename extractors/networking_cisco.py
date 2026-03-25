@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from extractors.common import normalize_location_label, parse_price_cell, resolve_column, safe_int, safe_str
+from extractors.common import normalize_location_label, readable_excel_path, resolve_column, safe_int, safe_str
 
 FILE_PATH = "data/Cisco Ingram.xlsx"
 
@@ -32,59 +32,55 @@ def build_networking_cisco_catalog(base_dir=None):
     if not source_path.exists():
         return []
 
-    df = pd.read_excel(source_path, sheet_name=0)
-    material_col = resolve_column(df.columns, "Material")
-    sku_col = resolve_column(df.columns, "Numero de Parte", "Número de Parte")
-    description_col = resolve_column(df.columns, "Descripcion", "Descripción")
-    stock_col = resolve_column(df.columns, "Qty en Stock")
-    price_col = resolve_column(df.columns, "Venta Unitario")
-    availability_col = resolve_column(df.columns, "Disponibilidad")
-    link_col = resolve_column(df.columns, "Compra ahora en Xvantage!")
-
     items = []
-    for _, row in df.iterrows():
-        sku = safe_str(row.get(sku_col))
-        description = safe_str(row.get(description_col))
-        if not sku or not description:
-            continue
+    with readable_excel_path(source_path) as readable_path:
+        df = pd.read_excel(readable_path, sheet_name=0)
+        material_col = resolve_column(df.columns, "Material")
+        sku_col = resolve_column(df.columns, "Numero de Parte", "NÃºmero de Parte")
+        description_col = resolve_column(df.columns, "Descripcion", "DescripciÃ³n")
+        stock_col = resolve_column(df.columns, "Qty en Stock")
+        availability_col = resolve_column(df.columns, "Disponibilidad")
+        link_col = resolve_column(df.columns, "Compra ahora en Xvantage!")
 
-        price_info = parse_price_cell(row.get(price_col))
-        family = derive_cisco_family(description, sku)
-        item_type = "Servicio" if safe_str(sku).upper().startswith("CON-") else "Hardware"
+        for _, row in df.iterrows():
+            sku = safe_str(row.get(sku_col))
+            description = safe_str(row.get(description_col))
+            if not sku or not description:
+                continue
 
-        items.append(
-            {
-                "area": "networking",
-                "brand": "Cisco",
-                "source": "INGRAM",
-                "sheet": "Hoja1",
-                "material": safe_str(row.get(material_col)),
-                "sku": sku,
-                "family": family,
-                "type": item_type,
-                "stock": safe_int(row.get(stock_col)),
-                "price": price_info["price"],
-                "currency": price_info["currency"],
-                "priceText": price_info["priceText"],
-                "availability": safe_str(row.get(availability_col)),
-                "location": normalize_location_label("COLOMBIA"),
-                "leadTime": safe_str(row.get(availability_col)),
-                "description": description,
-                "buyUrl": safe_str(row.get(link_col)),
-                "searchText": " ".join(
-                    filter(
-                        None,
-                        [
-                            "cisco",
-                            family.lower(),
-                            item_type.lower(),
-                            safe_str(row.get(material_col)).lower(),
-                            sku.lower(),
-                            description.lower(),
-                        ],
-                    )
-                ),
-            }
-        )
+            family = derive_cisco_family(description, sku)
+            item_type = "Servicio" if safe_str(sku).upper().startswith("CON-") else "Hardware"
+
+            items.append(
+                {
+                    "area": "networking",
+                    "brand": "Cisco",
+                    "source": "INGRAM",
+                    "sheet": "Hoja1",
+                    "material": safe_str(row.get(material_col)),
+                    "sku": sku,
+                    "family": family,
+                    "type": item_type,
+                    "stock": safe_int(row.get(stock_col)),
+                    "availability": safe_str(row.get(availability_col)),
+                    "location": normalize_location_label("COLOMBIA"),
+                    "leadTime": safe_str(row.get(availability_col)),
+                    "description": description,
+                    "buyUrl": safe_str(row.get(link_col)),
+                    "searchText": " ".join(
+                        filter(
+                            None,
+                            [
+                                "cisco",
+                                family.lower(),
+                                item_type.lower(),
+                                safe_str(row.get(material_col)).lower(),
+                                sku.lower(),
+                                description.lower(),
+                            ],
+                        )
+                    ),
+                }
+            )
 
     return items

@@ -1,5 +1,8 @@
+from contextlib import contextmanager
 import json
 import re
+import shutil
+import tempfile
 import unicodedata
 from pathlib import Path
 
@@ -176,6 +179,31 @@ def dump_json(path, payload):
     ensure_directory(output_path.parent)
     with output_path.open("w", encoding="utf-8") as file_obj:
         json.dump(payload, file_obj, ensure_ascii=False, separators=(",", ":"))
+
+
+@contextmanager
+def readable_excel_path(path):
+    source_path = Path(path)
+
+    try:
+        with source_path.open("rb"):
+            yield source_path
+            return
+    except PermissionError:
+        pass
+
+    temp_handle = tempfile.NamedTemporaryFile(delete=False, suffix=source_path.suffix)
+    temp_path = Path(temp_handle.name)
+    temp_handle.close()
+    shutil.copy2(source_path, temp_path)
+
+    try:
+        yield temp_path
+    finally:
+        try:
+            temp_path.unlink(missing_ok=True)
+        except OSError:
+            pass
 
 
 def normalize_location_label(value):
