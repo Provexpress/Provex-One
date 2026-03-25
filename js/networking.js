@@ -87,26 +87,61 @@ function enrichItem(item) {
   };
 }
 
-function getBaseItemsForOptions() {
-  return state.items.filter((item) => {
-    if (elements.brandFilter.value && item.brand !== elements.brandFilter.value) {
+function getActiveFilters() {
+  return {
+    query: elements.searchInput?.value || "",
+    brand: elements.brandFilter?.value || "",
+    family: elements.familyFilter?.value || "",
+    location: elements.locationFilter?.value || "",
+    source: elements.sourceFilter?.value || "",
+  };
+}
+
+function matchesItem(item, filters, ignoredKeys = new Set()) {
+  if (!ignoredKeys.has("brand") && filters.brand && item.brand !== filters.brand) {
+    return false;
+  }
+
+  if (!ignoredKeys.has("family") && filters.family && item.family !== filters.family) {
+    return false;
+  }
+
+  if (!ignoredKeys.has("location") && filters.location && item.location !== filters.location) {
+    return false;
+  }
+
+  if (!ignoredKeys.has("source") && filters.source && item.source !== filters.source) {
+    return false;
+  }
+
+  if (!ignoredKeys.has("query")) {
+    const queryWords = normalizeText(filters.query).split(/\s+/).filter(Boolean);
+    if (queryWords.length && !queryWords.every((word) => item.searchText.includes(word))) {
       return false;
     }
+  }
 
-    if (elements.sourceFilter.value && item.source !== elements.sourceFilter.value) {
-      return false;
-    }
-
-    return true;
-  });
+  return true;
 }
 
 function syncFilterOptions() {
-  const baseItems = getBaseItemsForOptions();
-  const availableFamilies = getUniqueValues(baseItems, "family");
-  const availableLocations = getUniqueValues(baseItems, "location");
-  const availableSources = getUniqueValues(state.items, "source");
-  const availableBrands = getUniqueValues(state.items, "brand");
+  const filters = getActiveFilters();
+  const availableBrands = getUniqueValues(
+    state.items.filter((item) => matchesItem(item, filters, new Set(["brand"]))),
+    "brand",
+  );
+  const availableFamilies = getUniqueValues(
+    state.items.filter((item) => matchesItem(item, filters, new Set(["family"]))),
+    "family",
+  );
+  const availableLocations = getUniqueValues(
+    state.items.filter((item) => matchesItem(item, filters, new Set(["location"]))),
+    "location",
+  );
+  const availableSources = getUniqueValues(
+    state.items.filter((item) => matchesItem(item, filters, new Set(["source"]))),
+    "source",
+  );
 
   setSelectOptions(elements.brandFilter, availableBrands, "Todas");
   setSelectOptions(elements.familyFilter, availableFamilies, "Todas");
@@ -210,32 +245,9 @@ function renderInventory() {
 }
 
 function getFilteredItems() {
-  const queryWords = normalizeText(elements.searchInput.value).split(/\s+/).filter(Boolean);
-
+  const filters = getActiveFilters();
   return state.items
-    .filter((item) => {
-      if (elements.brandFilter.value && item.brand !== elements.brandFilter.value) {
-        return false;
-      }
-
-      if (elements.familyFilter.value && item.family !== elements.familyFilter.value) {
-        return false;
-      }
-
-      if (elements.locationFilter.value && item.location !== elements.locationFilter.value) {
-        return false;
-      }
-
-      if (elements.sourceFilter.value && item.source !== elements.sourceFilter.value) {
-        return false;
-      }
-
-      if (!queryWords.length) {
-        return true;
-      }
-
-      return queryWords.every((word) => item.searchText.includes(word));
-    })
+    .filter((item) => matchesItem(item, filters))
     .sort((left, right) => {
       const brandCompare = String(left.brand || "").localeCompare(String(right.brand || ""), "es");
       if (brandCompare !== 0) {
@@ -262,9 +274,13 @@ function setSelectOptions(select, values, allLabel) {
     .join("");
 
   select.innerHTML = options;
+  select.disabled = values.length === 0;
   if (values.includes(previousValue)) {
     select.value = previousValue;
+    return;
   }
+
+  select.value = "";
 }
 
 function getUniqueValues(items, key) {

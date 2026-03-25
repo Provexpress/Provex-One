@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from extractors.common import resolve_column, safe_int, safe_str
+from extractors.common import normalize_lead_time_label, normalize_location_label, resolve_column, safe_int, safe_str
 
 FILE_PATH = "data/Inventario Fortinet - TD SYNNEX.xlsx"
 
@@ -18,7 +18,7 @@ def build_networking_fortinet_catalog(base_dir=None):
 
     for sheet_name in xl.sheet_names:
         header_preview = pd.read_excel(source_path, sheet_name=sheet_name, header=None, nrows=1)
-        lead_time = safe_str(header_preview.iat[0, 0]) if not header_preview.empty else ""
+        lead_time = normalize_lead_time_label(header_preview.iat[0, 0]) if not header_preview.empty else ""
         df = pd.read_excel(source_path, sheet_name=sheet_name, header=2)
 
         location_col = resolve_column(df.columns, "Ubicación", "Ubicacion")
@@ -34,7 +34,7 @@ def build_networking_fortinet_catalog(base_dir=None):
             if not sku or not description:
                 continue
 
-            location = safe_str(row.get(location_col))
+            location = normalize_location_label(row.get(location_col) or sheet_name)
             item_type = safe_str(row.get(type_col))
             family = safe_str(row.get(family_col))
 

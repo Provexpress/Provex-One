@@ -178,6 +178,38 @@ def dump_json(path, payload):
         json.dump(payload, file_obj, ensure_ascii=False, separators=(",", ":"))
 
 
+def normalize_location_label(value):
+    raw_value = safe_str(value)
+    normalized_value = raw_value.upper()
+    location_map = {
+        "COLOMBIA": "Colombia",
+        "BOGOTA": "Bogota",
+        "BOGOTÁ": "Bogota",
+        "MIAMI": "Miami",
+        "TRANSITO COL": "Transito a Colombia",
+        "TRANSITO COLOMBIA": "Transito a Colombia",
+    }
+
+    if normalized_value in location_map:
+        return location_map[normalized_value]
+
+    return normalize_name_text(raw_value)
+
+
+def normalize_lead_time_label(value):
+    raw_value = normalize_name_text(value)
+    if not raw_value:
+        return ""
+
+    normalized_value = raw_value
+    for prefix in ("STOCK BOGOTA - ENTREGA:", "STOCK BOGOTÁ - ENTREGA:", "STOCK MIAMI - ENTREGA:"):
+        normalized_value = normalized_value.replace(prefix, "").strip()
+
+    normalized_value = normalized_value.replace("DÍAS", "dias").replace("DIAS", "dias")
+    normalized_value = normalized_value.replace("SEMANAS", "semanas")
+    return normalized_value
+
+
 def parse_localized_number(value):
     text = safe_str(value).replace(" ", "")
     if not text:

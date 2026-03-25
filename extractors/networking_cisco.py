@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from extractors.common import parse_price_cell, resolve_column, safe_int, safe_str
+from extractors.common import normalize_location_label, parse_price_cell, resolve_column, safe_int, safe_str
 
 FILE_PATH = "data/Cisco Ingram.xlsx"
 
@@ -67,7 +67,7 @@ def build_networking_cisco_catalog(base_dir=None):
                 "currency": price_info["currency"],
                 "priceText": price_info["priceText"],
                 "availability": safe_str(row.get(availability_col)),
-                "location": "Colombia",
+                "location": normalize_location_label("COLOMBIA"),
                 "leadTime": safe_str(row.get(availability_col)),
                 "description": description,
                 "buyUrl": safe_str(row.get(link_col)),
