@@ -205,8 +205,6 @@ function renderInventory() {
               <th>SKU</th>
               <th>Descripcion</th>
               <th class="right">Stock</th>
-              <th>Ubicacion</th>
-              <th>Fuente</th>
               <th class="right">Precio</th>
             </tr>
           </thead>
@@ -227,8 +225,6 @@ function renderInventory() {
           <div class="prod-seg">${escapeHtml(item.availability || item.leadTime || "")}</div>
         </td>
         <td class="td-right price-cell">${(Number(item.stock) || 0).toLocaleString("es-CO")}</td>
-        <td>${escapeHtml(item.location || "-")}</td>
-        <td>${escapeHtml(item.source || "-")}</td>
         <td class="td-right price-cell">${escapeHtml(item.priceText || "-")}</td>
       </tr>
     `;
