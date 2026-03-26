@@ -1,7 +1,7 @@
 import "./search.js";
 import "./networking.js";
 
-const AREA_STORAGE_KEY = "licensehub.activeArea";
+const AREA_STORAGE_KEY = "provex-one.activeArea";
 const DEFAULT_AREA = "cloud";
 
 const areaButtons = Array.from(document.querySelectorAll("[data-area-tab]"));

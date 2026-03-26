@@ -1,4 +1,4 @@
-const CACHE_NAME = 'licensehub-v15';
+const CACHE_NAME = 'provex-one-v1';
 
 const STATIC_ASSETS = [
   './',

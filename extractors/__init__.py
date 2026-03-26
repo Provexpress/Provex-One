@@ -1,1 +1,1 @@
-# Extractors package for LicenseHub catalogs.
+# Extractors package for Provex One catalogs.

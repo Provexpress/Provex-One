@@ -1,4 +1,4 @@
-# LicenseHub - Comparador de Mayoristas Microsoft
+# Provex One - Cloud e Inventario TI
 
 App web minimalista para comparar precios de licencias Microsoft entre **LOL**, **INTCOMEX** e **INGRAM**.
 
