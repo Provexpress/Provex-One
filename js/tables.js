@@ -37,12 +37,6 @@ const usdFormatter = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 0,
   maximumFractionDigits: 2,
 });
-const copFormatter = new Intl.NumberFormat("es-CO", {
-  style: "currency",
-  currency: "COP",
-  minimumFractionDigits: 0,
-  maximumFractionDigits: 2,
-});
 
 export function showEmptyState(resultsArea, { icon = "&#128269;", title, message }) {
   resultsArea.innerHTML = `
@@ -70,8 +64,6 @@ export function renderTables({
   activeMobileDist,
   profitPct,
   qty,
-  currency,
-  trm,
   selectionCount = 0,
 }) {
   const visibleDists = DIST_ORDER.filter((dist) => activeDists.has(dist));
@@ -97,8 +89,6 @@ export function renderTables({
     visibleDists,
     profitPct,
     qty,
-    currency,
-    trm,
     visibleTotal,
   });
 
@@ -123,8 +113,6 @@ export function renderTables({
       bestByName,
       profitPct,
       qty,
-      currency,
-      trm,
     });
   }
 
@@ -146,17 +134,12 @@ export function applyMobileVisibility(resultsArea, activeDist) {
   });
 }
 
-export function getPriceDisplay(price, currency, trm) {
+export function getPriceDisplay(price) {
   const safePrice = Number(price) || 0;
-
-  if (currency === "COP") {
-    return copFormatter.format(safePrice * trm);
-  }
-
   return usdFormatter.format(safePrice);
 }
 
-function buildSummaryStrip({ currentResults, visibleDists, profitPct, qty, currency, trm, visibleTotal }) {
+function buildSummaryStrip({ currentResults, visibleDists, profitPct, qty, visibleTotal }) {
   const allPrices = [];
 
   visibleDists.forEach((dist) => {
@@ -177,15 +160,15 @@ function buildSummaryStrip({ currentResults, visibleDists, profitPct, qty, curre
     <div class="summary-strip">
       <div class="summary-card">
         <div class="summary-label">Precio minimo</div>
-        <div class="summary-val">${getPriceDisplay(minPrice, currency, trm)}</div>
+        <div class="summary-val">${getPriceDisplay(minPrice)}</div>
       </div>
       <div class="summary-card">
         <div class="summary-label">Precio promedio</div>
-        <div class="summary-val">${getPriceDisplay(averagePrice, currency, trm)}</div>
+        <div class="summary-val">${getPriceDisplay(averagePrice)}</div>
       </div>
       <div class="summary-card">
         <div class="summary-label">Venta minima (x${qty})</div>
-        <div class="summary-val green">${getPriceDisplay(minimumSale, currency, trm)}</div>
+        <div class="summary-val green">${getPriceDisplay(minimumSale)}</div>
       </div>
       <div class="summary-card">
         <div class="summary-label">Resultados visibles</div>
@@ -195,7 +178,7 @@ function buildSummaryStrip({ currentResults, visibleDists, profitPct, qty, curre
   `;
 }
 
-function buildDistributorCard({ dist, products, bestByName, profitPct, qty, currency, trm }) {
+function buildDistributorCard({ dist, products, bestByName, profitPct, qty }) {
   const shownProducts = products.slice(0, MAX_ROWS_PER_DIST);
   const badgeClass = `dist-badge-${DIST_CLASS_SUFFIX[dist]}`;
 
@@ -252,9 +235,9 @@ function buildDistributorCard({ dist, products, bestByName, profitPct, qty, curr
             </div>
           </td>
           <td><span class="term-text">${escHtml(formatTerm(product.normalizedTerm || product.term))} / ${escHtml(formatBilling(product.normalizedBilling || product.billing))}</span></td>
-          <td class="td-right price-cell">${getPriceDisplay(unitPrice, currency, trm)}</td>
-          <td class="td-right price-cell sale-cell">${getPriceDisplay(saleTotal, currency, trm)}</td>
-          <td class="td-right profit-cell ${profit >= 0 ? "profit-positive" : "profit-negative"}">${getPriceDisplay(profit, currency, trm)}</td>
+          <td class="td-right price-cell">${getPriceDisplay(unitPrice)}</td>
+          <td class="td-right price-cell sale-cell">${getPriceDisplay(saleTotal)}</td>
+          <td class="td-right profit-cell ${profit >= 0 ? "profit-positive" : "profit-negative"}">${getPriceDisplay(profit)}</td>
         </tr>
       `;
     });

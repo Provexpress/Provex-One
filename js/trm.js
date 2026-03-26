@@ -30,7 +30,8 @@ export async function fetchTRM({ statusEl, inputEl, onUpdated }) {
       onUpdated();
     }
   } catch (error) {
-    setStatus(statusEl, "manual", "is-muted");
+    inputEl.value = "--";
+    setStatus(statusEl, "sin dato oficial", "is-muted");
   }
 }
 

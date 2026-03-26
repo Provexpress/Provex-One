@@ -42,21 +42,21 @@ body.app-body {
 .app-nav {
   background: linear-gradient(180deg, rgba(250, 252, 255, 0.98), rgba(245, 248, 255, 0.96));
   border-bottom-color: rgba(26, 43, 107, 0.10);
-  box-shadow: 0 10px 28px rgba(26, 43, 107, 0.06);
+  box-shadow: 0 14px 34px rgba(26, 43, 107, 0.08);
 }
 
 .brand-logo {
   display: block;
   width: auto;
-  max-width: min(132px, 42vw);
-  height: 34px;
+  max-width: min(182px, 54vw);
+  height: 48px;
   object-fit: contain;
   flex-shrink: 0;
 }
 
 .brand-title {
   color: var(--corp-navy);
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.03em;
@@ -269,6 +269,34 @@ select.search-input { cursor: pointer; }
 .profit-input { width: 68px; }
 .qty-input    { width: 60px; }
 .wide-input   { width: 90px; }
+
+.readonly-input {
+  background: linear-gradient(180deg, rgba(238, 243, 255, 0.95), rgba(247, 250, 255, 0.98));
+  color: var(--text-soft);
+  border-color: rgba(26, 43, 107, 0.12);
+  cursor: default;
+}
+
+.readonly-input:focus {
+  border-color: rgba(26, 43, 107, 0.12);
+  box-shadow: none;
+  background: linear-gradient(180deg, rgba(238, 243, 255, 0.95), rgba(247, 250, 255, 0.98));
+}
+
+.info-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 54px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(21, 101, 192, 0.10), rgba(106, 63, 160, 0.12));
+  border: 1px solid rgba(21, 101, 192, 0.16);
+  color: var(--corp-blue-deep);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
 
 /* ── FILTER CHIPS ─────────────────────────────────── */
 .filter-chip {
@@ -514,6 +542,6 @@ tr:hover td      { background: rgba(21, 101, 192, 0.035); }
   .dist-card     { display: none; }
   .dist-card.mobile-visible { display: block; }
   .selected-product-name { max-width: 190px; }
-  .brand-logo { max-width: 110px; height: 30px; }
-  .brand-title { font-size: 13px; }
+  .brand-logo { max-width: 142px; height: 38px; }
+  .brand-title { font-size: 15px; }
 }

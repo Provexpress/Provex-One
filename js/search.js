@@ -37,7 +37,6 @@ const elements = {
   filterChips: Array.from(document.querySelectorAll(".filter-chip")),
   profitPct: document.getElementById("profitPct"),
   qtyInput: document.getElementById("qtyInput"),
-  currencySelect: document.getElementById("currencySelect"),
   trmInput: document.getElementById("trmInput"),
   trmStatus: document.getElementById("trmStatus"),
   mobileTabs: Array.from(document.querySelectorAll(".dist-tab")),
@@ -56,11 +55,6 @@ function initialize() {
   fetchTRM({
     statusEl: elements.trmStatus,
     inputEl: elements.trmInput,
-    onUpdated: () => {
-      if (state.hasSearched) {
-        renderCurrentResults();
-      }
-    },
   });
 }
 
@@ -99,18 +93,12 @@ function bindEvents() {
     });
   });
 
-  [elements.profitPct, elements.qtyInput, elements.trmInput].forEach((field) => {
+  [elements.profitPct, elements.qtyInput].forEach((field) => {
     field.addEventListener("input", () => {
       if (state.hasSearched) {
         renderCurrentResults();
       }
     });
-  });
-
-  elements.currencySelect.addEventListener("change", () => {
-    if (state.hasSearched) {
-      renderCurrentResults();
-    }
   });
 
   elements.mobileTabs.forEach((tab) => {
@@ -596,8 +584,6 @@ function renderCurrentResults() {
     activeMobileDist: state.activeMobileDist,
     profitPct: Math.max(0, Number(elements.profitPct.value) || 0),
     qty: Math.max(1, parseInt(elements.qtyInput.value, 10) || 1),
-    currency: elements.currencySelect.value,
-    trm: Math.max(1, Number(elements.trmInput.value) || 4200),
     selectionCount: state.selectedProducts.length,
   });
 }

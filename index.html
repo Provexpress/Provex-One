@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Provex One - Cloud e Inventario TI</title>
+  <title>Provex One - Licencias Cloud</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
@@ -52,16 +52,16 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Provex One">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="css/styles.css?v=20260327">
+  <link rel="stylesheet" href="css/styles.css?v=20260326b">
 </head>
 <body class="app-body bg-bg text-primary min-h-screen font-sans antialiased" style="letter-spacing:-0.022em">
 
   <!-- NAV -->
-  <nav class="app-nav sticky top-0 z-50 px-4 sm:px-6 py-3
+  <nav class="app-nav sticky top-0 z-50 px-4 sm:px-6 py-4 sm:py-5
               bg-white/70 backdrop-blur-sm border-b border-sep/50">
     <div class="max-w-[960px] mx-auto flex items-center justify-between gap-4">
       <div class="flex items-center gap-3 min-w-0">
-        <img src="icons/logo.webp" alt="Provexpress" class="brand-logo" width="132" height="34">
+        <img src="icons/logo.webp" alt="Provexpress" class="brand-logo" width="182" height="48">
       </div>
       <div class="text-right min-w-0">
         <div class="brand-title">Provex One</div>
@@ -70,26 +70,12 @@
   </nav>
 
   <main class="max-w-[960px] mx-auto px-4 pt-5 pb-12">
-    <section class="panel-shell bg-card rounded-card shadow-card p-4 mb-3" aria-label="Apartados comerciales">
-      <div class="flex flex-wrap gap-2 items-center justify-between">
-        <div>
-          <p class="text-[11px] font-semibold text-muted uppercase tracking-[0.06em]">Apartados</p>
-          <p class="text-[13px] text-muted mt-1">Escoge si vas a trabajar cloud o inventario de networking.</p>
-        </div>
-        <div class="flex flex-wrap gap-1.5">
-          <button type="button" class="filter-chip active" data-area-tab="cloud">Cloud</button>
-          <button type="button" class="filter-chip" data-area-tab="networking">Networking</button>
-        </div>
-      </div>
-    </section>
-
-    <div id="cloudView" data-area-view="cloud">
     <!-- SEARCH CARD -->
     <section class="panel-shell bg-card rounded-card shadow-card p-5 mb-3" aria-label="Busqueda de licencias cloud">
       <p class="text-[11px] font-semibold text-muted uppercase tracking-[0.06em] mb-3">
         Cloud
       </p>
-      <p class="text-[13px] text-muted mb-4">Comparador de licencias Microsoft por mayorista.</p>
+      <p class="text-[13px] text-muted mb-4">Busqueda rapida y comparacion de licencias Microsoft por mayorista.</p>
       <div class="flex flex-wrap gap-2 items-end">
         <div id="searchComposer" class="flex flex-col gap-1 flex-[2] min-w-[200px] relative">
           <label for="searchInput" class="text-[11px] font-medium text-muted">Nombre del producto</label>
@@ -181,16 +167,13 @@
       </div>
       <div class="hidden sm:block w-px h-5 bg-sep flex-shrink-0"></div>
       <div class="flex items-center gap-1.5">
-        <label for="currencySelect" class="text-[11px] font-medium text-muted">Moneda</label>
-        <select id="currencySelect" class="search-input compact-select">
-          <option value="USD">USD</option>
-          <option value="COP">COP</option>
-        </select>
+        <span class="text-[11px] font-medium text-muted">Moneda</span>
+        <span class="info-badge">USD</span>
       </div>
       <div class="hidden sm:block w-px h-5 bg-sep flex-shrink-0"></div>
       <div class="flex items-center gap-1.5">
         <label for="trmInput" class="text-[11px] font-medium text-muted">TRM</label>
-        <input type="number" id="trmInput" value="4200" step="0.01" class="profit-input wide-input">
+        <input type="text" id="trmInput" value="4200" class="profit-input wide-input readonly-input" readonly aria-readonly="true">
         <span id="trmStatus" class="status-text is-muted"></span>
       </div>
     </section>
@@ -216,57 +199,6 @@
         <p>Agrega varios productos para compararlos en la misma busqueda</p>
       </div>
     </section>
-    </div>
-
-    <section id="networkingView" data-area-view="networking" hidden>
-      <section class="panel-shell bg-card rounded-card shadow-card p-5 mb-3" aria-label="Inventario de networking">
-        <p class="text-[11px] font-semibold text-muted uppercase tracking-[0.06em] mb-3">
-          Networking
-        </p>
-        <p class="text-[13px] text-muted mb-4">
-          Explora inventario por marca, familia, ubicacion y fuente.
-        </p>
-        <div class="flex flex-wrap gap-2 items-end">
-          <div class="flex flex-col gap-1 flex-[2] min-w-[220px]">
-            <label for="networkSearchInput" class="text-[11px] font-medium text-muted">Producto o SKU</label>
-            <input type="text" id="networkSearchInput" class="search-input" placeholder="Ej: FG-100F, Catalyst, AIR-DNA">
-          </div>
-          <div class="flex flex-col gap-1 flex-1 min-w-[130px]">
-            <label for="networkBrandFilter" class="text-[11px] font-medium text-muted">Marca</label>
-            <select id="networkBrandFilter" class="search-input">
-              <option value="">Todas</option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-1 flex-1 min-w-[130px]">
-            <label for="networkFamilyFilter" class="text-[11px] font-medium text-muted">Familia</label>
-            <select id="networkFamilyFilter" class="search-input">
-              <option value="">Todas</option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-1 flex-1 min-w-[130px]">
-            <label for="networkLocationFilter" class="text-[11px] font-medium text-muted">Ubicacion</label>
-            <select id="networkLocationFilter" class="search-input">
-              <option value="">Todas</option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-1 flex-1 min-w-[130px]">
-            <label for="networkSourceFilter" class="text-[11px] font-medium text-muted">Fuente</label>
-            <select id="networkSourceFilter" class="search-input">
-              <option value="">Todas</option>
-            </select>
-          </div>
-        </div>
-      </section>
-
-      <section id="networkingResultsArea" aria-live="polite">
-        <div class="empty-state empty-state-panel">
-          <div class="icon">&#128736;</div>
-          <h3>Inventario de networking</h3>
-          <p>Filtra por marca, familia o SKU para encontrar disponibilidad.</p>
-        </div>
-      </section>
-    </section>
-
   </main>
 
   <script type="module" src="js/app.js"></script>
