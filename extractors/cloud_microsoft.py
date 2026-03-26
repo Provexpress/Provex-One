@@ -8,6 +8,7 @@ from extractors.common import (
     get_canonical_product_name,
     get_strict_period_key,
     normalize_name_text,
+    readable_excel_path,
     resolve_column,
     safe_float,
     safe_str,
@@ -29,6 +30,13 @@ def build_cloud_product(distributor, product_type, part_number, name, term, bill
 
     normalized_term = canonicalize_term(clean_term, clean_part_number, clean_name)
     normalized_billing = canonicalize_billing(clean_billing, clean_part_number, clean_name)
+    strict_period_key = get_strict_period_key(normalized_term, normalized_billing)
+    normalized_price = price
+
+    # Ingram publishes annual-monthly subscriptions as a monthly installment,
+    # while the other wholesalers expose the full annual amount.
+    if distributor == "INGRAM" and strict_period_key == "anual_mensual":
+        normalized_price = price * 12
 
     return {
         "area": "cloud",
@@ -38,105 +46,106 @@ def build_cloud_product(distributor, product_type, part_number, name, term, bill
         "name": clean_name,
         "term": clean_term,
         "billing": clean_billing,
-        "price": price,
+        "price": normalized_price,
         "erp": erp,
         "segment": clean_segment,
         "canonicalName": get_canonical_product_name(clean_name),
         "normalizedTerm": normalized_term,
         "normalizedBilling": normalized_billing,
-        "strictPeriodKey": get_strict_period_key(normalized_term, normalized_billing),
+        "strictPeriodKey": strict_period_key,
     }
 
 
 def extract_lol(path):
     items = []
-    xl = pd.ExcelFile(path)
+    with readable_excel_path(path) as readable_path:
+        xl = pd.ExcelFile(readable_path)
 
-    for sheet, product_type in (("NCE", "NCE"), ("SUSCRIPCION", "SUSCRIPCION"), ("PERPETUO", "PERPETUO")):
-        if sheet not in xl.sheet_names:
-            continue
-
-        df = pd.read_excel(path, sheet_name=sheet)
-        erp_col = resolve_column(df.columns, "ERP Price", "ERP")
-        part_col = resolve_column(df.columns, "NUMERO DE PARTE")
-        name_col = resolve_column(df.columns, "SkuTitle")
-        term_col = resolve_column(df.columns, "TermDuration")
-        billing_col = resolve_column(df.columns, "BillingPlan")
-        price_col = resolve_column(df.columns, "PARTNER PRICE")
-        segment_col = resolve_column(df.columns, "Segment")
-
-        for _, row in df.iterrows():
-            name = safe_str(row.get(name_col))
-            price = safe_float(row.get(price_col, 0))
-
-            if not name or price == 0:
+        for sheet, product_type in (("NCE", "NCE"), ("SUSCRIPCION", "SUSCRIPCION"), ("PERPETUO", "PERPETUO")):
+            if sheet not in xl.sheet_names:
                 continue
 
-            items.append(
-                build_cloud_product(
-                    distributor="LOL",
-                    product_type=product_type,
-                    part_number=safe_str(row.get(part_col)),
-                    name=name,
-                    term=safe_str(row.get(term_col)) or "OneTime",
-                    billing=safe_str(row.get(billing_col)) or ("OneTime" if product_type == "PERPETUO" else ""),
-                    price=price,
-                    erp=safe_float(row.get(erp_col, 0)),
-                    segment=safe_str(row.get(segment_col)),
+            df = pd.read_excel(readable_path, sheet_name=sheet)
+            erp_col = resolve_column(df.columns, "ERP Price", "ERP")
+            part_col = resolve_column(df.columns, "NUMERO DE PARTE")
+            name_col = resolve_column(df.columns, "SkuTitle")
+            term_col = resolve_column(df.columns, "TermDuration")
+            billing_col = resolve_column(df.columns, "BillingPlan")
+            price_col = resolve_column(df.columns, "PARTNER PRICE")
+            segment_col = resolve_column(df.columns, "Segment")
+
+            for _, row in df.iterrows():
+                name = safe_str(row.get(name_col))
+                price = safe_float(row.get(price_col, 0))
+
+                if not name or price == 0:
+                    continue
+
+                items.append(
+                    build_cloud_product(
+                        distributor="LOL",
+                        product_type=product_type,
+                        part_number=safe_str(row.get(part_col)),
+                        name=name,
+                        term=safe_str(row.get(term_col)) or "OneTime",
+                        billing=safe_str(row.get(billing_col)) or ("OneTime" if product_type == "PERPETUO" else ""),
+                        price=price,
+                        erp=safe_float(row.get(erp_col, 0)),
+                        segment=safe_str(row.get(segment_col)),
+                    )
                 )
-            )
 
     return items
 
 
 def extract_intcomex(path):
     items = []
-    xl = pd.ExcelFile(path)
+    with readable_excel_path(path) as readable_path:
+        xl = pd.ExcelFile(readable_path)
 
-    for sheet, product_type in (("NCE", "NCE"), ("PERPETUAL+SW SUBSC", "PERPETUO")):
-        if sheet not in xl.sheet_names:
-            continue
-
-        df = pd.read_excel(path, sheet_name=sheet)
-        erp_col = resolve_column(df.columns, "ERP Price", "ERP")
-        pid_col = resolve_column(df.columns, "ProductId")
-        sid_col = resolve_column(df.columns, "SkuId")
-        name_col = resolve_column(df.columns, "SkuTitle")
-        term_col = resolve_column(df.columns, "TermDuration")
-        billing_col = resolve_column(df.columns, "BillingPlan")
-        price_col = resolve_column(df.columns, "UnitPrice")
-        segment_col = resolve_column(df.columns, "Segment")
-
-        for _, row in df.iterrows():
-            name = safe_str(row.get(name_col))
-            price = safe_float(row.get(price_col, 0))
-
-            if not name or price == 0:
+        for sheet, product_type in (("NCE", "NCE"), ("PERPETUAL+SW SUBSC", "PERPETUO")):
+            if sheet not in xl.sheet_names:
                 continue
 
-            product_id = safe_str(row.get(pid_col))
-            sku_id = safe_str(row.get(sid_col))
+            df = pd.read_excel(readable_path, sheet_name=sheet)
+            erp_col = resolve_column(df.columns, "ERP Price", "ERP")
+            pid_col = resolve_column(df.columns, "ProductId")
+            sid_col = resolve_column(df.columns, "SkuId")
+            name_col = resolve_column(df.columns, "SkuTitle")
+            term_col = resolve_column(df.columns, "TermDuration")
+            billing_col = resolve_column(df.columns, "BillingPlan")
+            price_col = resolve_column(df.columns, "UnitPrice")
+            segment_col = resolve_column(df.columns, "Segment")
 
-            items.append(
-                build_cloud_product(
-                    distributor="INTCOMEX",
-                    product_type=product_type,
-                    part_number=f"{product_id}:{sku_id}" if product_id else sku_id,
-                    name=name,
-                    term=safe_str(row.get(term_col)) or "OneTime",
-                    billing=safe_str(row.get(billing_col)) or ("OneTime" if product_type == "PERPETUO" else ""),
-                    price=price,
-                    erp=safe_float(row.get(erp_col, 0)),
-                    segment=safe_str(row.get(segment_col)),
+            for _, row in df.iterrows():
+                name = safe_str(row.get(name_col))
+                price = safe_float(row.get(price_col, 0))
+
+                if not name or price == 0:
+                    continue
+
+                product_id = safe_str(row.get(pid_col))
+                sku_id = safe_str(row.get(sid_col))
+
+                items.append(
+                    build_cloud_product(
+                        distributor="INTCOMEX",
+                        product_type=product_type,
+                        part_number=f"{product_id}:{sku_id}" if product_id else sku_id,
+                        name=name,
+                        term=safe_str(row.get(term_col)) or "OneTime",
+                        billing=safe_str(row.get(billing_col)) or ("OneTime" if product_type == "PERPETUO" else ""),
+                        price=price,
+                        erp=safe_float(row.get(erp_col, 0)),
+                        segment=safe_str(row.get(segment_col)),
+                    )
                 )
-            )
 
     return items
 
 
 def extract_ingram(path):
     items = []
-    xl = pd.ExcelFile(path)
     sheet_map = {
         "Microsoft NCE (Excluido IVA)": {
             "type": "NCE",
@@ -180,48 +189,51 @@ def extract_ingram(path):
         },
     }
 
-    for sheet, config in sheet_map.items():
-        if sheet not in xl.sheet_names:
-            continue
+    with readable_excel_path(path) as readable_path:
+        xl = pd.ExcelFile(readable_path)
 
-        df = pd.read_excel(path, sheet_name=sheet, header=config["header_row"])
-        name_col = resolve_column(df.columns, *config["name_candidates"])
-        part_col = resolve_column(df.columns, *config["part_candidates"])
-        term_col = resolve_column(df.columns, *config["term_candidates"]) if config["term_candidates"] else None
-        billing_col = (
-            resolve_column(df.columns, *config["billing_candidates"]) if config["billing_candidates"] else None
-        )
-        price_col = resolve_column(df.columns, *config["price_candidates"])
-        segment_col = (
-            resolve_column(df.columns, *config["segment_candidates"]) if config["segment_candidates"] else None
-        )
-
-        if not name_col and len(df.columns) > 2:
-            name_col = list(df.columns)[2]
-
-        if not name_col or not price_col:
-            continue
-
-        for _, row in df.iterrows():
-            name = safe_str(row.get(name_col))
-            price = safe_float(row.get(price_col, 0))
-
-            if not name or price == 0:
+        for sheet, config in sheet_map.items():
+            if sheet not in xl.sheet_names:
                 continue
 
-            items.append(
-                build_cloud_product(
-                    distributor="INGRAM",
-                    product_type=config["type"],
-                    part_number=safe_str(row.get(part_col)),
-                    name=name,
-                    term=safe_str(row.get(term_col)) or "OneTime",
-                    billing=safe_str(row.get(billing_col)) or ("OneTime" if config["type"] == "PERPETUO" else ""),
-                    price=price,
-                    erp=0.0,
-                    segment=safe_str(row.get(segment_col)),
-                )
+            df = pd.read_excel(readable_path, sheet_name=sheet, header=config["header_row"])
+            name_col = resolve_column(df.columns, *config["name_candidates"])
+            part_col = resolve_column(df.columns, *config["part_candidates"])
+            term_col = resolve_column(df.columns, *config["term_candidates"]) if config["term_candidates"] else None
+            billing_col = (
+                resolve_column(df.columns, *config["billing_candidates"]) if config["billing_candidates"] else None
             )
+            price_col = resolve_column(df.columns, *config["price_candidates"])
+            segment_col = (
+                resolve_column(df.columns, *config["segment_candidates"]) if config["segment_candidates"] else None
+            )
+
+            if not name_col and len(df.columns) > 2:
+                name_col = list(df.columns)[2]
+
+            if not name_col or not price_col:
+                continue
+
+            for _, row in df.iterrows():
+                name = safe_str(row.get(name_col))
+                price = safe_float(row.get(price_col, 0))
+
+                if not name or price == 0:
+                    continue
+
+                items.append(
+                    build_cloud_product(
+                        distributor="INGRAM",
+                        product_type=config["type"],
+                        part_number=safe_str(row.get(part_col)),
+                        name=name,
+                        term=safe_str(row.get(term_col)) or "OneTime",
+                        billing=safe_str(row.get(billing_col)) or ("OneTime" if config["type"] == "PERPETUO" else ""),
+                        price=price,
+                        erp=0.0,
+                        segment=safe_str(row.get(segment_col)),
+                    )
+                )
 
     return items
 
