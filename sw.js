@@ -1,4 +1,4 @@
-const CACHE_NAME = 'provex-one-v4';
+const CACHE_NAME = 'provex-one-v5';
 
 const STATIC_ASSETS = [
   './',
@@ -11,8 +11,14 @@ const STATIC_ASSETS = [
   './manifest.json',
   './icons/logo.webp',
   './catalogs/catalog_manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
+  './icons/provex_icon_16.png',
+  './icons/provex_icon_32.png',
+  './icons/provex_icon_64.png',
+  './icons/provex_icon_128.png',
+  './icons/provex_icon_180.png',
+  './icons/provex_icon_192.png',
+  './icons/provex_icon_256.png',
+  './icons/provex_icon_512.png',
 ];
 
 self.addEventListener('install', (event) => {

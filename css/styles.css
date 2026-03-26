@@ -1,6 +1,7 @@
 /* ── CLEAN DESIGN SYSTEM — variables y estilos que Tailwind CDN no cubre ── */
 
 :root {
+  --font-sans:      "Futura PT", "Futura Std", "Futura", "Twentieth Century", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --corp-navy:      #1A2B6B;
   --corp-blue:      #1565C0;
   --corp-purple:    #6A3FA0;
@@ -37,6 +38,7 @@ body.app-body {
   background-color: var(--bg);
   background-image: linear-gradient(180deg, var(--surface-soft) 0%, var(--surface-alt) 100%);
   color: var(--text);
+  font-family: var(--font-sans);
 }
 
 .app-nav {
@@ -48,8 +50,8 @@ body.app-body {
 .brand-logo {
   display: block;
   width: auto;
-  max-width: min(191px, 56vw);
-  height: 50px;
+  max-width: min(220px, 62vw);
+  height: 58px;
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -542,6 +544,6 @@ tr:hover td      { background: rgba(21, 101, 192, 0.035); }
   .dist-card     { display: none; }
   .dist-card.mobile-visible { display: block; }
   .selected-product-name { max-width: 190px; }
-  .brand-logo { max-width: 149px; height: 40px; }
+  .brand-logo { max-width: 171px; height: 46px; }
   .brand-title { font-size: 15px; }
 }
