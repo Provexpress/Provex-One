@@ -6,8 +6,8 @@
   "scope": "/lincensehub/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#F2F2F7",
-  "theme_color": "#007AFF",
+  "background_color": "#F5F7FD",
+  "theme_color": "#1A2B6B",
   "icons": [
     {
       "src": "icons/icon-192.png",

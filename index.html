@@ -14,25 +14,25 @@
       theme: {
         extend: {
           colors: {
-            bg:      '#F2F2F7',
+            bg:      '#F5F7FD',
             card:    '#FFFFFF',
-            primary: '#1C1C1E',
-            muted:   '#8E8E93',
-            sep:     '#D1D1D6',
-            action:  '#007AFF',
-            success: '#34C759',
-            danger:  '#FF3B30',
-            warn:    '#FF9500',
-            lol:     '#FF3B30',
-            intcomex:'#FF9500',
-            ingram:  '#007AFF',
+            primary: '#1A2B6B',
+            muted:   '#677592',
+            sep:     '#D7E0F0',
+            action:  '#1565C0',
+            success: '#16A34A',
+            danger:  '#C62828',
+            warn:    '#D97706',
+            lol:     '#6A3FA0',
+            intcomex:'#2ABFDF',
+            ingram:  '#1565C0',
           },
           fontFamily: {
             sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
           },
           boxShadow: {
-            card: '0 4px 20px rgba(0,0,0,0.04)',
-            btn:  '0 2px 8px rgba(0,0,0,0.06)',
+            card: '0 18px 42px rgba(26, 43, 107, 0.08)',
+            btn:  '0 14px 26px rgba(26, 43, 107, 0.16)',
           },
           borderRadius: {
             card:  '16px',
@@ -47,20 +47,20 @@
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#007AFF">
+  <meta name="theme-color" content="#1A2B6B">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="LicenseHub">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="css/styles.css?v=1773950685">
+  <link rel="stylesheet" href="css/styles.css?v=20260326">
 </head>
-<body class="bg-bg text-primary min-h-screen font-sans antialiased" style="letter-spacing:-0.022em">
+<body class="app-body bg-bg text-primary min-h-screen font-sans antialiased" style="letter-spacing:-0.022em">
 
   <!-- NAV -->
-  <nav class="sticky top-0 z-50 flex items-center px-6 h-[52px]
+  <nav class="app-nav sticky top-0 z-50 flex items-center px-6 h-[52px]
               bg-white/70 backdrop-blur-sm border-b border-sep/50">
     <div class="flex items-center gap-2 text-[15px] font-semibold tracking-tight">
-      <div class="w-2.5 h-2.5 rounded-full bg-action flex-shrink-0"></div>
+      <div class="brand-mark" aria-hidden="true"></div>
       LicenseHub
     </div>
   </nav>
