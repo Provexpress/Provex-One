@@ -104,6 +104,12 @@ body.app-body {
   min-width: 0;
 }
 
+.install-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .install-banner-eyebrow {
   font-size: 11px;
   font-weight: 700;
@@ -135,6 +141,21 @@ body.app-body {
 
 .install-banner-button:hover {
   opacity: 0.92;
+}
+
+.install-banner-dismiss {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 4px;
+  font-family: inherit;
+}
+
+.install-banner-dismiss:hover {
+  color: var(--text);
 }
 
 /* ── INPUTS & SELECTS ─────────────────────────────── */
@@ -593,6 +614,7 @@ tr:hover td      { background: rgba(21, 101, 192, 0.035); }
   .dist-card.mobile-visible { display: block; }
   .selected-product-name { max-width: 190px; }
   .install-banner { flex-direction: column; align-items: stretch; }
+  .install-banner-actions { width: 100%; justify-content: space-between; }
   .install-banner-button { width: 100%; }
   .brand-logo { max-width: 171px; height: 46px; }
   .brand-title { font-size: 15px; }
