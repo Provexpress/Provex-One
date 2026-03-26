@@ -57,16 +57,21 @@
 <body class="app-body bg-bg text-primary min-h-screen font-sans antialiased" style="letter-spacing:-0.022em">
 
   <!-- NAV -->
-  <nav class="app-nav sticky top-0 z-50 flex items-center px-6 h-[52px]
+  <nav class="app-nav sticky top-0 z-50 px-4 sm:px-6 py-3
               bg-white/70 backdrop-blur-sm border-b border-sep/50">
-    <div class="flex items-center gap-2 text-[15px] font-semibold tracking-tight">
-      <div class="brand-mark" aria-hidden="true"></div>
-      LicenseHub
+    <div class="max-w-[960px] mx-auto flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3 min-w-0">
+        <img src="icons/logo.webp" alt="Provexpress" class="brand-logo" width="132" height="34">
+      </div>
+      <div class="text-right min-w-0">
+        <div class="brand-company">Provexpress</div>
+        <div class="brand-product">LicenseHub</div>
+      </div>
     </div>
   </nav>
 
   <main class="max-w-[960px] mx-auto px-4 pt-5 pb-12">
-    <section class="bg-card rounded-card shadow-card p-4 mb-3" aria-label="Apartados comerciales">
+    <section class="panel-shell bg-card rounded-card shadow-card p-4 mb-3" aria-label="Apartados comerciales">
       <div class="flex flex-wrap gap-2 items-center justify-between">
         <div>
           <p class="text-[11px] font-semibold text-muted uppercase tracking-[0.06em]">Apartados</p>
@@ -81,7 +86,7 @@
 
     <div id="cloudView" data-area-view="cloud">
     <!-- SEARCH CARD -->
-    <section class="bg-card rounded-card shadow-card p-5 mb-3" aria-label="Busqueda de licencias cloud">
+    <section class="panel-shell bg-card rounded-card shadow-card p-5 mb-3" aria-label="Busqueda de licencias cloud">
       <p class="text-[11px] font-semibold text-muted uppercase tracking-[0.06em] mb-3">
         Cloud
       </p>
@@ -158,7 +163,7 @@
     </section>
 
     <!-- QUOTE BAR -->
-    <section class="bg-card rounded-card shadow-card px-5 py-3.5 mb-5
+    <section class="panel-shell bg-card rounded-card shadow-card px-5 py-3.5 mb-5
                     flex flex-wrap items-center gap-4" aria-label="Configuracion de cotizacion cloud">
       <p class="text-[11px] font-semibold text-muted uppercase tracking-[0.06em] whitespace-nowrap">
         Cotización
@@ -206,7 +211,7 @@
 
     <!-- RESULTS -->
     <section id="resultsArea" aria-live="polite">
-      <div class="empty-state">
+      <div class="empty-state empty-state-panel">
         <div class="icon">&#128269;</div>
         <h3>Busca o selecciona productos</h3>
         <p>Agrega varios productos para compararlos en la misma busqueda</p>
@@ -215,7 +220,7 @@
     </div>
 
     <section id="networkingView" data-area-view="networking" hidden>
-      <section class="bg-card rounded-card shadow-card p-5 mb-3" aria-label="Inventario de networking">
+      <section class="panel-shell bg-card rounded-card shadow-card p-5 mb-3" aria-label="Inventario de networking">
         <p class="text-[11px] font-semibold text-muted uppercase tracking-[0.06em] mb-3">
           Networking
         </p>
@@ -255,7 +260,7 @@
       </section>
 
       <section id="networkingResultsArea" aria-live="polite">
-        <div class="empty-state">
+        <div class="empty-state empty-state-panel">
           <div class="icon">&#128736;</div>
           <h3>Inventario de networking</h3>
           <p>Filtra por marca, familia o SKU para encontrar disponibilidad.</p>

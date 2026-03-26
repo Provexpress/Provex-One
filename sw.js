@@ -1,4 +1,4 @@
-const CACHE_NAME = 'licensehub-v12';
+const CACHE_NAME = 'licensehub-v14';
 
 const STATIC_ASSETS = [
   './',
@@ -10,6 +10,7 @@ const STATIC_ASSETS = [
   './js/tables.js',
   './js/trm.js',
   './manifest.json',
+  './icons/logo.webp',
   './catalogs/catalog_manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
