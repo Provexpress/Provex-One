@@ -89,6 +89,54 @@ body.app-body {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
 }
 
+.install-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.install-banner[hidden] {
+  display: none;
+}
+
+.install-banner-copy {
+  min-width: 0;
+}
+
+.install-banner-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 4px;
+}
+
+.install-banner-text {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-soft);
+}
+
+.install-banner-button {
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, var(--corp-navy) 0%, var(--corp-blue) 48%, var(--corp-purple) 100%);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 12px 24px rgba(26, 43, 107, 0.14);
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.install-banner-button:hover {
+  opacity: 0.92;
+}
+
 /* ── INPUTS & SELECTS ─────────────────────────────── */
 .search-input {
   width: 100%;
@@ -544,6 +592,8 @@ tr:hover td      { background: rgba(21, 101, 192, 0.035); }
   .dist-card     { display: none; }
   .dist-card.mobile-visible { display: block; }
   .selected-product-name { max-width: 190px; }
+  .install-banner { flex-direction: column; align-items: stretch; }
+  .install-banner-button { width: 100%; }
   .brand-logo { max-width: 171px; height: 46px; }
   .brand-title { font-size: 15px; }
 }
