@@ -286,6 +286,13 @@ select.search-input { cursor: pointer; }
   border: 1px solid rgba(21, 101, 192, 0.16);
 }
 
+.selected-product-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 2px;
+}
+
 .selected-product-name {
   max-width: 280px;
   overflow: hidden;
@@ -294,6 +301,16 @@ select.search-input { cursor: pointer; }
   color: var(--action);
   font-size: 12px;
   font-weight: 600;
+}
+
+.selected-product-meta {
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
 }
 
 .selected-product-remove {
@@ -612,7 +629,8 @@ tr:hover td      { background: rgba(21, 101, 192, 0.035); }
   .dist-tabs     { display: flex; }
   .dist-card     { display: none; }
   .dist-card.mobile-visible { display: block; }
-  .selected-product-name { max-width: 190px; }
+  .selected-product-name,
+  .selected-product-meta { max-width: 190px; }
   .install-banner { flex-direction: column; align-items: stretch; }
   .install-banner-actions { width: 100%; justify-content: space-between; }
   .install-banner-button { width: 100%; }

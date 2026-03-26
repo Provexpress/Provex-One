@@ -9,6 +9,24 @@ import { fetchTRM } from "./trm.js";
 
 const SUGGESTION_LIMIT = 8;
 const CLOUD_CATALOG_PATHS = ["catalogs/cloud_products.json", "products.json"];
+const TYPE_OPTION_DEFS = [
+  { value: "NCE", label: "NCE" },
+  { value: "SUSCRIPCION", label: "Suscripcion" },
+  { value: "PERPETUO", label: "Perpetuo" },
+];
+const SEGMENT_OPTION_DEFS = [
+  { value: "Commercial", label: "Commercial" },
+  { value: "Education", label: "Education" },
+];
+const PERIOD_OPTION_DEFS = [
+  { value: "mensual_mensual", label: "Mensual / Mensual" },
+  { value: "anual_anual", label: "Anual / Anual" },
+  { value: "anual_mensual", label: "Anual / Mensual" },
+  { value: "trianual_anual", label: "Trianual / Anual" },
+  { value: "trianual_trianual", label: "Trianual / Trianual" },
+  { value: "trianual_mensual", label: "Trianual / Mensual" },
+  { value: "onetime_onetime", label: "One Time / OneTime" },
+];
 
 const state = {
   products: [],
@@ -20,6 +38,11 @@ const state = {
   loadError: false,
   selectedProducts: [],
   searchSuggestions: [],
+  autoSelectedFilters: {
+    type: false,
+    segment: false,
+    period: false,
+  },
 };
 
 const elements = {
@@ -78,8 +101,14 @@ function bindEvents() {
     hideSearchSuggestions();
   });
 
-  [elements.typeFilter, elements.segFilter, elements.termFilter].forEach((field) => {
-    field.addEventListener("change", () => {
+  [
+    { element: elements.typeFilter, key: "type" },
+    { element: elements.segFilter, key: "segment" },
+    { element: elements.termFilter, key: "period" },
+  ].forEach(({ element, key }) => {
+    element.addEventListener("change", () => {
+      state.autoSelectedFilters[key] = false;
+      syncCloudFilterOptions();
       updateSearchSuggestions();
       if (state.hasSearched) {
         runSearch();
@@ -131,6 +160,7 @@ async function loadProducts() {
     }
   } finally {
     state.isLoadingProducts = false;
+    syncCloudFilterOptions();
     updateSearchSuggestions();
   }
 }
@@ -167,11 +197,81 @@ function handleSearchInputKeydown(event) {
 }
 
 function handleSearchInputInput() {
+  syncCloudFilterOptions();
   updateSearchSuggestions();
 }
 
 function handleSearchInputFocus() {
+  syncCloudFilterOptions();
   updateSearchSuggestions();
+}
+
+function syncCloudFilterOptions() {
+  if (!state.products.length || state.loadError) {
+    return;
+  }
+
+  const context = getSelectionContext();
+  const activeFilters = getActiveSecondaryFilters();
+  const baseProducts = state.products.filter((product) => matchesSelectionContext(product, context));
+  const productsForOptions = baseProducts.length ? baseProducts : state.products;
+  const autoSelectSingle = context.hasFocus;
+
+  const availableTypes = getOrderedFilterValues(
+    productsForOptions.filter((product) => matchesSecondaryFilters(product, activeFilters, new Set(["type"]))),
+    "type",
+    TYPE_OPTION_DEFS,
+  );
+  const availableSegments = getOrderedFilterValues(
+    productsForOptions.filter((product) => matchesSecondaryFilters(product, activeFilters, new Set(["segment"]))),
+    "segment",
+    SEGMENT_OPTION_DEFS,
+  );
+  const availablePeriods = getOrderedFilterValues(
+    productsForOptions.filter((product) => matchesSecondaryFilters(product, activeFilters, new Set(["period"]))),
+    "strictPeriodKey",
+    PERIOD_OPTION_DEFS,
+  );
+
+  setDynamicSelectOptions("type", elements.typeFilter, availableTypes, {
+    allLabel: "Todos los tipos",
+    autoSelectSingle,
+  });
+  setDynamicSelectOptions("segment", elements.segFilter, availableSegments, {
+    allLabel: "Todos",
+    autoSelectSingle,
+  });
+  setDynamicSelectOptions("period", elements.termFilter, availablePeriods, {
+    allLabel: "Todos",
+    autoSelectSingle,
+  });
+}
+
+function getSelectionContext() {
+  const query = normalizeText(elements.searchInput.value);
+  const words = query.split(/\s+/).filter(Boolean);
+
+  return {
+    words,
+    hasFocus: words.length > 0,
+  };
+}
+
+function getActiveSecondaryFilters() {
+  return {
+    type: elements.typeFilter.value,
+    segment: normalizeText(elements.segFilter.value),
+    period: elements.termFilter.value,
+  };
+}
+
+function matchesSelectionContext(product, context) {
+  if (!context.hasFocus) {
+    return true;
+  }
+
+  const searchableName = product.searchText || normalizeText(product.name || "");
+  return context.words.every((word) => searchableName.includes(word));
 }
 
 function handleSuggestionClick(event) {
@@ -234,24 +334,29 @@ function runSearch() {
 
 function getSearchCriteria(query) {
   return {
-    words: query.split(/\s+/).filter(Boolean),
-    type: elements.typeFilter.value,
-    segment: normalizeText(elements.segFilter.value),
-    period: elements.termFilter.value,
-    selectedNames: new Set(state.selectedProducts),
+    currentInput: {
+      words: query.split(/\s+/).filter(Boolean),
+      type: elements.typeFilter.value,
+      segment: normalizeText(elements.segFilter.value),
+      period: elements.termFilter.value,
+    },
+    selectedProducts: [...state.selectedProducts],
   };
 }
 
 function matchesProduct(product, criteria) {
-  return matchesSelectionOrQuery(product, criteria) && matchesSecondaryFilters(product, criteria);
+  if (criteria.selectedProducts.some((selection) => matchesSelectedProductProfile(product, selection))) {
+    return true;
+  }
+
+  return (
+    matchesSelectionOrQuery(product, criteria.currentInput) &&
+    matchesSecondaryFilters(product, criteria.currentInput)
+  );
 }
 
 function matchesSelectionOrQuery(product, criteria) {
   const productName = String(product.name || "").trim();
-
-  if (criteria.selectedNames.size > 0) {
-    return criteria.selectedNames.has(product.canonicalName);
-  }
 
   if (!criteria.words.length) {
     return false;
@@ -261,18 +366,18 @@ function matchesSelectionOrQuery(product, criteria) {
   return criteria.words.every((word) => searchableName.includes(word));
 }
 
-function matchesSecondaryFilters(product, criteria) {
+function matchesSecondaryFilters(product, criteria, ignoredKeys = new Set()) {
   const segment = normalizeText(product.segment);
 
-  if (criteria.type && product.type !== criteria.type) {
+  if (!ignoredKeys.has("type") && criteria.type && product.type !== criteria.type) {
     return false;
   }
 
-  if (criteria.segment && segment !== criteria.segment) {
+  if (!ignoredKeys.has("segment") && criteria.segment && segment !== criteria.segment) {
     return false;
   }
 
-  if (criteria.period && product.strictPeriodKey !== criteria.period) {
+  if (!ignoredKeys.has("period") && criteria.period && product.strictPeriodKey !== criteria.period) {
     return false;
   }
 
@@ -288,15 +393,20 @@ function updateSearchSuggestions() {
     return;
   }
 
-  const selectedNames = new Set(state.selectedProducts);
+  const activeFilters = getActiveSecondaryFilters();
+  const selectedIds = new Set(state.selectedProducts.map((selection) => selection.id));
   const suggestions = [];
   const seenNames = new Set();
-  const criteria = getSearchCriteria(query);
+  const criteria = {
+    words: query.split(/\s+/).filter(Boolean),
+    ...activeFilters,
+  };
 
   for (const product of state.products) {
     const productName = product.canonicalName || String(product.name || "").trim();
+    const candidateSelectionId = getSelectedProductId(productName, activeFilters);
 
-    if (!productName || selectedNames.has(productName) || seenNames.has(productName)) {
+    if (!productName || selectedIds.has(candidateSelectionId) || seenNames.has(productName)) {
       continue;
     }
 
@@ -354,13 +464,17 @@ function hideSearchSuggestions() {
 }
 
 function addSelectedProduct(name) {
-  if (!name || state.selectedProducts.includes(name)) {
+  const selection = createSelectedProductSelection(name);
+
+  if (!selection || state.selectedProducts.some((item) => item.id === selection.id)) {
     return;
   }
 
-  state.selectedProducts = [...state.selectedProducts, name];
+  state.selectedProducts = [...state.selectedProducts, selection];
   elements.searchInput.value = "";
   state.searchSuggestions = [];
+  resetCurrentInputFilters();
+  syncCloudFilterOptions();
   renderSelectedProducts();
   renderSearchSuggestions();
 
@@ -369,8 +483,9 @@ function addSelectedProduct(name) {
   }
 }
 
-function removeSelectedProduct(name) {
-  state.selectedProducts = state.selectedProducts.filter((item) => item !== name);
+function removeSelectedProduct(selectionId) {
+  state.selectedProducts = state.selectedProducts.filter((item) => item.id !== selectionId);
+  syncCloudFilterOptions();
   renderSelectedProducts();
   updateSearchSuggestions();
 
@@ -397,6 +512,7 @@ function clearSelectedProducts() {
   }
 
   state.selectedProducts = [];
+  syncCloudFilterOptions();
   renderSelectedProducts();
   updateSearchSuggestions();
 
@@ -427,14 +543,21 @@ function renderSelectedProducts() {
   elements.selectedProductsSection.hidden = false;
   elements.selectedProductsList.innerHTML = state.selectedProducts
     .map(
-      (name) => `
+      (selection) => `
         <div class="selected-product-chip">
-          <span class="selected-product-name">${escapeHtml(name)}</span>
+          <div class="selected-product-copy">
+            <span class="selected-product-name">${escapeHtml(selection.name)}</span>
+            ${
+              selection.metaLabel
+                ? `<span class="selected-product-meta">${escapeHtml(selection.metaLabel)}</span>`
+                : ""
+            }
+          </div>
           <button
             type="button"
             class="selected-product-remove"
-            data-remove-product="${escapeAttribute(name)}"
-            aria-label="Quitar ${escapeAttribute(name)}"
+            data-remove-product="${escapeAttribute(selection.id)}"
+            aria-label="Quitar ${escapeAttribute(selection.displayLabel)}"
           >
             &times;
           </button>
@@ -454,9 +577,8 @@ function groupResultsByDistributor(products) {
     }
   });
 
-  const selectedOrder = new Map(state.selectedProducts.map((name, index) => [name, index]));
   Object.values(grouped).forEach((distProducts) => {
-    distProducts.sort((left, right) => compareProducts(left, right, selectedOrder));
+    distProducts.sort((left, right) => compareProducts(left, right, state.selectedProducts));
   });
 
   return grouped;
@@ -495,11 +617,11 @@ function isPreferredProduct(candidate, current) {
   return candidateName.localeCompare(currentName, "es", { sensitivity: "base" }) < 0;
 }
 
-function compareProducts(left, right, selectedOrder) {
+function compareProducts(left, right, selectedProducts) {
   const leftName = left.canonicalName || left.name;
   const rightName = right.canonicalName || right.name;
-  const leftOrder = selectedOrder.has(leftName) ? selectedOrder.get(leftName) : Number.MAX_SAFE_INTEGER;
-  const rightOrder = selectedOrder.has(rightName) ? selectedOrder.get(rightName) : Number.MAX_SAFE_INTEGER;
+  const leftOrder = getSelectedProductOrder(left, selectedProducts);
+  const rightOrder = getSelectedProductOrder(right, selectedProducts);
 
   if (leftOrder !== rightOrder) {
     return leftOrder - rightOrder;
@@ -586,6 +708,65 @@ function renderCurrentResults() {
     qty: Math.max(1, parseInt(elements.qtyInput.value, 10) || 1),
     selectionCount: state.selectedProducts.length,
   });
+}
+
+function createSelectedProductSelection(name) {
+  if (!name) {
+    return null;
+  }
+
+  const filters = getActiveSecondaryFilters();
+  const metaParts = [];
+
+  if (filters.type) {
+    metaParts.push(getOptionLabel(filters.type, TYPE_OPTION_DEFS));
+  }
+
+  if (filters.segment) {
+    metaParts.push(getOptionLabel(filters.segment, SEGMENT_OPTION_DEFS));
+  }
+
+  if (filters.period) {
+    metaParts.push(getOptionLabel(filters.period, PERIOD_OPTION_DEFS));
+  }
+
+  const metaLabel = metaParts.join(" · ");
+
+  return {
+    id: getSelectedProductId(name, filters),
+    name,
+    type: filters.type,
+    segment: filters.segment,
+    period: filters.period,
+    metaLabel,
+    displayLabel: metaLabel ? `${name} · ${metaLabel}` : name,
+  };
+}
+
+function getSelectedProductId(name, filters) {
+  return [name, filters.type || "", filters.segment || "", filters.period || ""].join("__");
+}
+
+function resetCurrentInputFilters() {
+  elements.typeFilter.value = "";
+  elements.segFilter.value = "";
+  elements.termFilter.value = "";
+  state.autoSelectedFilters.type = false;
+  state.autoSelectedFilters.segment = false;
+  state.autoSelectedFilters.period = false;
+}
+
+function matchesSelectedProductProfile(product, selection) {
+  if ((product.canonicalName || product.name) !== selection.name) {
+    return false;
+  }
+
+  return matchesSecondaryFilters(product, selection);
+}
+
+function getSelectedProductOrder(product, selectedProducts) {
+  const index = selectedProducts.findIndex((selection) => matchesSelectedProductProfile(product, selection));
+  return index === -1 ? Number.MAX_SAFE_INTEGER : index;
 }
 
 function getStrictPeriodKey(product) {
@@ -775,4 +956,76 @@ function escapeAttribute(value) {
 
 function hasAnySuffix(value, suffixes) {
   return suffixes.some((suffix) => value.endsWith(suffix));
+}
+
+function getOrderedFilterValues(products, key, optionDefs) {
+  const rawValues = products
+    .map((product) => {
+      if (key === "segment") {
+        return String(product.segment || "").trim();
+      }
+
+      return String(product[key] || "").trim();
+    })
+    .filter(Boolean);
+  const uniqueValues = Array.from(new Set(rawValues));
+  const orderedValues = optionDefs
+    .map((option) => option.value)
+    .filter((value) => uniqueValues.includes(value));
+  const dynamicValues = uniqueValues
+    .filter((value) => !orderedValues.includes(value))
+    .sort((left, right) => left.localeCompare(right, "es", { sensitivity: "base" }));
+
+  return orderedValues.concat(dynamicValues).map((value) => ({
+    value,
+    label: getOptionLabel(value, optionDefs),
+  }));
+}
+
+function getOptionLabel(value, optionDefs) {
+  const normalizedValue = normalizeText(value);
+  const optionDef = optionDefs.find((option) => normalizeText(option.value) === normalizedValue);
+  return optionDef?.label || value;
+}
+
+function setDynamicSelectOptions(filterKey, select, options, { allLabel, autoSelectSingle = false }) {
+  if (!select) {
+    return;
+  }
+
+  const previousValue = select.value;
+  const previousWasAuto = state.autoSelectedFilters[filterKey];
+  select.innerHTML = [`<option value="">${escapeHtml(allLabel)}</option>`]
+    .concat(
+      options.map(
+        (option) =>
+          `<option value="${escapeAttribute(option.value)}">${escapeHtml(option.label)}</option>`,
+      ),
+    )
+    .join("");
+
+  select.disabled = options.length === 0;
+  const availableValues = options.map((option) => option.value);
+  const hasSingleAutoOption = autoSelectSingle && availableValues.length === 1;
+  const nextAutoValue = hasSingleAutoOption ? availableValues[0] : "";
+
+  if (availableValues.includes(previousValue)) {
+    if (previousWasAuto && previousValue !== nextAutoValue) {
+      select.value = "";
+      state.autoSelectedFilters[filterKey] = false;
+      return;
+    }
+
+    select.value = previousValue;
+    return;
+  }
+
+  if (hasSingleAutoOption) {
+    select.value = nextAutoValue;
+    state.autoSelectedFilters[filterKey] = true;
+    return;
+  }
+
+  select.value = "";
+  state.autoSelectedFilters[filterKey] = false;
 }
