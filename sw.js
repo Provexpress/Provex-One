@@ -1,4 +1,4 @@
-const CACHE_NAME = 'provex-one-v7';
+const CACHE_NAME = 'provex-one-v8';
 
 const STATIC_ASSETS = [
   './',
@@ -41,6 +41,15 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
+
+  if (
+    event.request.mode === 'navigate' ||
+    event.request.destination === 'document' ||
+    url.pathname.endsWith('.html')
+  ) {
+    event.respondWith(networkFirst(event.request));
+    return;
+  }
 
   // products.json → Network First (precios siempre frescos)
   if (url.pathname.endsWith('products.json') || url.pathname.includes('/catalogs/')) {
