@@ -345,7 +345,11 @@ function getSearchCriteria(query) {
 }
 
 function matchesProduct(product, criteria) {
-  if (criteria.selectedProducts.some((selection) => matchesSelectedProductProfile(product, selection))) {
+  if (
+    criteria.selectedProducts.some((selection) =>
+      matchesSelectedProductProfile(product, selection, criteria.currentInput),
+    )
+  ) {
     return true;
   }
 
@@ -600,6 +604,13 @@ function dedupeLogicalProducts(products) {
 }
 
 function isPreferredProduct(candidate, current) {
+  const candidateQuality = getProductQualityScore(candidate);
+  const currentQuality = getProductQualityScore(current);
+
+  if (candidateQuality !== currentQuality) {
+    return candidateQuality > currentQuality;
+  }
+
   const candidatePrice = Number(candidate.price) || 0;
   const currentPrice = Number(current.price) || 0;
 
@@ -615,6 +626,36 @@ function isPreferredProduct(candidate, current) {
   }
 
   return candidateName.localeCompare(currentName, "es", { sensitivity: "base" }) < 0;
+}
+
+function getProductQualityScore(product) {
+  let score = 0;
+
+  if (String(product.billing || "").trim()) {
+    score += 3;
+  }
+
+  if (String(product.term || "").trim()) {
+    score += 2;
+  }
+
+  if (String(product.partNumber || "").trim()) {
+    score += 1;
+  }
+
+  if (String(product.normalizedBilling || "").trim()) {
+    score += 1;
+  }
+
+  if (String(product.normalizedTerm || "").trim()) {
+    score += 1;
+  }
+
+  if (String(product.strictPeriodKey || "").trim()) {
+    score += 1;
+  }
+
+  return score;
 }
 
 function compareProducts(left, right, selectedProducts) {
@@ -756,12 +797,16 @@ function resetCurrentInputFilters() {
   state.autoSelectedFilters.period = false;
 }
 
-function matchesSelectedProductProfile(product, selection) {
+function matchesSelectedProductProfile(product, selection, currentInput = {}) {
   if ((product.canonicalName || product.name) !== selection.name) {
     return false;
   }
 
-  return matchesSecondaryFilters(product, selection);
+  return matchesSecondaryFilters(product, {
+    type: selection.type || currentInput.type || "",
+    segment: selection.segment || currentInput.segment || "",
+    period: selection.period || currentInput.period || "",
+  });
 }
 
 function getSelectedProductOrder(product, selectedProducts) {
