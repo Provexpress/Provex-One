@@ -1,11 +1,10 @@
-const CACHE_NAME = 'provex-one-v6';
+const CACHE_NAME = 'provex-one-v7';
 
 const STATIC_ASSETS = [
   './',
   './index.html',
   './css/styles.css',
   './js/app.js',
-  './js/install.js',
   './js/search.js',
   './js/tables.js',
   './js/trm.js',
