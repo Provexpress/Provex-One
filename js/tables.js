@@ -278,18 +278,20 @@ function getVisibleTotal(currentResults, visibleDists) {
 export function buildDistributorCopyText({ dist, products, profitPct, qty }) {
   const shownProducts = products.slice(0, MAX_ROWS_PER_DIST);
   const safeQty = Math.max(1, Number(qty) || 1);
+  const safeProfitPct = Math.max(0, Number(profitPct) || 0);
   const headers = ["No. Parte", "Descripcion", "Cant.", "Moneda", "Precio Uni.", "SubTotal"];
 
   const rows = shownProducts.map((product) => {
-    const unitPrice = Number(product.price) || 0;
-    const subtotal = unitPrice * safeQty;
+    const costUnit = Number(product.price) || 0;
+    const saleUnit = costUnit * (1 + safeProfitPct / 100);
+    const subtotal = saleUnit * safeQty;
 
     return [
       String(product.partNumber || "").trim(),
       getComparableName(product),
       String(safeQty),
       "USD",
-      formatPlainNumber(unitPrice),
+      formatPlainNumber(saleUnit),
       formatPlainNumber(subtotal),
     ];
   });
