@@ -20,6 +20,26 @@ FILES = {
     "INGRAM": "data/Lista de precios Marzo 2026-INGRAM.xlsx",
 }
 
+FILE_PATTERNS = {
+    "LOL": ["Lista de precios *-LOL.xlsx"],
+    "INTCOMEX": ["Lista de precios *-INTCOMEX.xlsx"],
+    "INGRAM": ["Lista de precios *-INGRAM.xlsx"],
+}
+
+
+def resolve_source_file(root_dir, distributor):
+    configured_path = root_dir / FILES[distributor]
+    candidates = []
+
+    if configured_path.exists():
+        candidates.append(configured_path)
+
+    for pattern in FILE_PATTERNS.get(distributor, []):
+        candidates.extend(root_dir.glob(f"data/{pattern}"))
+
+    unique_candidates = sorted({path.resolve() for path in candidates}, key=lambda path: path.stat().st_mtime)
+    return unique_candidates[-1] if unique_candidates else configured_path
+
 
 def build_cloud_product(distributor, product_type, part_number, name, term, billing, price, erp, segment):
     clean_name = normalize_name_text(name)
@@ -242,7 +262,7 @@ def build_cloud_catalog(base_dir=None):
     root_dir = Path(base_dir or Path(__file__).resolve().parent.parent)
     catalog = []
 
-    file_map = {key: root_dir / relative_path for key, relative_path in FILES.items()}
+    file_map = {key: resolve_source_file(root_dir, key) for key in FILES}
 
     if file_map["LOL"].exists():
         catalog.extend(extract_lol(file_map["LOL"]))

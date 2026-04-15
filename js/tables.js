@@ -189,7 +189,16 @@ function buildDistributorCard({ dist, products, bestByName, profitPct, qty }) {
           <div class="dist-badge ${badgeClass}"></div>
           ${escHtml(dist)}
         </div>
-        <div class="dist-count">${products.length.toLocaleString("es-CO")} productos</div>
+        <div class="dist-header-actions">
+          <div class="dist-count">${products.length.toLocaleString("es-CO")} productos</div>
+          ${
+            shownProducts.length
+              ? `<button type="button" class="copy-table-button" data-copy-dist="${dist}">
+                  Copiar tabla
+                </button>`
+              : ""
+          }
+        </div>
       </div>
       <div class="dist-table-wrap">
   `;
@@ -233,6 +242,11 @@ function buildDistributorCard({ dist, products, bestByName, profitPct, qty }) {
               <span class="tag-pill ${tagClass}">${label}</span>
               ${escHtml(product.segment || "")}
             </div>
+            ${
+              product.partNumber
+                ? `<div class="prod-part">P/N: ${escHtml(product.partNumber)}</div>`
+                : ""
+            }
           </td>
           <td><span class="term-text">${escHtml(formatTerm(product.normalizedTerm || product.term))} / ${escHtml(formatBilling(product.normalizedBilling || product.billing))}</span></td>
           <td class="td-right price-cell">${getPriceDisplay(unitPrice)}</td>
@@ -259,6 +273,46 @@ function buildDistributorCard({ dist, products, bestByName, profitPct, qty }) {
 
 function getVisibleTotal(currentResults, visibleDists) {
   return visibleDists.reduce((sum, dist) => sum + currentResults[dist].length, 0);
+}
+
+export function buildDistributorCopyText({ dist, products, profitPct, qty }) {
+  const shownProducts = products.slice(0, MAX_ROWS_PER_DIST);
+  const headers = [
+    "Mayorista",
+    "Producto",
+    "Numero de parte",
+    "Tipo",
+    "Segmento",
+    "Periodo",
+    "P. Unit.",
+    `Venta x${qty}`,
+    "Ganancia",
+  ];
+
+  const rows = shownProducts.map((product) => {
+    const unitPrice = Number(product.price) || 0;
+    const saleUnit = unitPrice * (1 + profitPct / 100);
+    const saleTotal = saleUnit * qty;
+    const costTotal = unitPrice * qty;
+    const profit = saleTotal - costTotal;
+    const periodLabel = `${formatTerm(product.normalizedTerm || product.term)} / ${formatBilling(
+      product.normalizedBilling || product.billing,
+    )}`;
+
+    return [
+      dist,
+      getComparableName(product),
+      String(product.partNumber || "").trim(),
+      getTypeMeta(product.type).label,
+      String(product.segment || "").trim(),
+      periodLabel,
+      formatPlainNumber(unitPrice),
+      formatPlainNumber(saleTotal),
+      formatPlainNumber(profit),
+    ];
+  });
+
+  return [headers, ...rows].map((row) => row.map(toClipboardCell).join("\t")).join("\n");
 }
 
 function getBestByName(currentResults, visibleDists) {
@@ -307,6 +361,14 @@ function formatBilling(billing) {
   const normalized = String(billing ?? "").trim();
   const key = normalized.toLowerCase();
   return BILLING_LABELS[key] || normalized || "-";
+}
+
+function formatPlainNumber(value) {
+  return (Number(value) || 0).toFixed(2);
+}
+
+function toClipboardCell(value) {
+  return String(value ?? "").replace(/\r?\n/g, " ").trim();
 }
 
 function escHtml(value) {

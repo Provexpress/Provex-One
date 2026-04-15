@@ -243,6 +243,21 @@ select.search-input { cursor: pointer; }
   display: none;
 }
 
+.search-warning {
+  border: 1px solid rgba(217, 119, 6, 0.20);
+  background: linear-gradient(180deg, rgba(255, 247, 237, 0.96), rgba(255, 251, 245, 0.98));
+  color: #9A5B00;
+  border-radius: 12px;
+  padding: 11px 13px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.search-warning[hidden] {
+  display: none;
+}
+
 .selected-products-head {
   display: flex;
   align-items: center;
@@ -513,8 +528,36 @@ select.search-input { cursor: pointer; }
   background: linear-gradient(90deg, rgba(238, 243, 255, 0.86), rgba(255, 255, 255, 0.92));
 }
 .dist-name  { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; color: var(--text); }
+.dist-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
 .dist-badge { width: 8px; height: 8px; border-radius: 50%; }
 .dist-count { font-size: 12px; color: var(--muted); font-weight: 500; }
+.copy-table-button {
+  border: 1px solid rgba(21, 101, 192, 0.18);
+  background: rgba(255, 255, 255, 0.84);
+  color: var(--corp-blue-deep);
+  border-radius: 999px;
+  padding: 6px 11px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s, opacity 0.15s;
+  font-family: inherit;
+}
+.copy-table-button:hover:not(:disabled) {
+  background: rgba(21, 101, 192, 0.08);
+  border-color: rgba(21, 101, 192, 0.28);
+  transform: translateY(-1px);
+}
+.copy-table-button:disabled {
+  opacity: 0.72;
+  cursor: default;
+}
 
 .dist-badge-lol      { background: var(--lol); }
 .dist-badge-intcomex { background: var(--intcomex); }
@@ -554,6 +597,13 @@ tr:hover td      { background: rgba(21, 101, 192, 0.035); }
 
 .prod-name { font-weight: 500; color: var(--text); font-size: 13px; }
 .prod-seg  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.prod-part {
+  font-size: 11px;
+  color: var(--text-soft);
+  margin-top: 3px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  word-break: break-all;
+}
 .term-text { font-size: 12px; color: var(--muted); }
 
 .price-cell { font-weight: 500; font-variant-numeric: tabular-nums; }
@@ -636,4 +686,5 @@ tr:hover td      { background: rgba(21, 101, 192, 0.035); }
   .install-banner-button { width: 100%; }
   .brand-logo { max-width: 171px; height: 46px; }
   .brand-title { font-size: 15px; }
+  .dist-header-actions { width: 100%; justify-content: space-between; }
 }

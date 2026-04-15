@@ -1,4 +1,5 @@
 import {
+  buildDistributorCopyText,
   DIST_ORDER,
   applyMobileVisibility,
   renderTables,
@@ -53,6 +54,7 @@ const elements = {
   searchSuggestions: document.getElementById("searchSuggestions"),
   selectedProductsSection: document.getElementById("selectedProductsSection"),
   selectedProductsList: document.getElementById("selectedProductsList"),
+  searchWarning: document.getElementById("searchWarning"),
   clearSelectedProducts: document.getElementById("clearSelectedProducts"),
   typeFilter: document.getElementById("typeFilter"),
   segFilter: document.getElementById("segFilter"),
@@ -73,6 +75,7 @@ function initialize() {
   syncFilterChips();
   syncMobileTabs();
   renderSelectedProducts();
+  renderSearchWarning();
   loadProducts();
 
   fetchTRM({
@@ -89,6 +92,7 @@ function bindEvents() {
   elements.searchSuggestions.addEventListener("click", handleSuggestionClick);
   elements.selectedProductsList.addEventListener("click", handleSelectedProductRemove);
   elements.clearSelectedProducts.addEventListener("click", clearSelectedProducts);
+  elements.resultsArea.addEventListener("click", handleResultsAreaClick);
 
   document.addEventListener("click", (event) => {
     if (
@@ -110,6 +114,7 @@ function bindEvents() {
       state.autoSelectedFilters[key] = false;
       syncCloudFilterOptions();
       updateSearchSuggestions();
+      renderSearchWarning();
       if (state.hasSearched) {
         runSearch();
       }
@@ -162,6 +167,7 @@ async function loadProducts() {
     state.isLoadingProducts = false;
     syncCloudFilterOptions();
     updateSearchSuggestions();
+    renderSearchWarning();
   }
 }
 
@@ -199,11 +205,13 @@ function handleSearchInputKeydown(event) {
 function handleSearchInputInput() {
   syncCloudFilterOptions();
   updateSearchSuggestions();
+  renderSearchWarning();
 }
 
 function handleSearchInputFocus() {
   syncCloudFilterOptions();
   updateSearchSuggestions();
+  renderSearchWarning();
 }
 
 function syncCloudFilterOptions() {
@@ -290,6 +298,29 @@ function handleSelectedProductRemove(event) {
   }
 
   removeSelectedProduct(button.dataset.removeProduct);
+}
+
+async function handleResultsAreaClick(event) {
+  const button = event.target.closest("[data-copy-dist]");
+  if (!button) {
+    return;
+  }
+
+  const dist = button.dataset.copyDist;
+  const products = state.currentResults?.[dist] || [];
+  if (!dist || !products.length) {
+    return;
+  }
+
+  const text = buildDistributorCopyText({
+    dist,
+    products,
+    profitPct: Math.max(0, Number(elements.profitPct.value) || 0),
+    qty: Math.max(1, parseInt(elements.qtyInput.value, 10) || 1),
+  });
+
+  const copied = await copyTextToClipboard(text);
+  flashCopyButtonState(button, copied ? "Copiado" : "No se pudo copiar");
 }
 
 function runSearch() {
@@ -408,7 +439,11 @@ function updateSearchSuggestions() {
 
   for (const product of state.products) {
     const productName = product.canonicalName || String(product.name || "").trim();
-    const candidateSelectionId = getSelectedProductId(productName, activeFilters);
+    const candidateSelectionId = getSelectedProductId(productName, activeFilters, {
+      type: Boolean(activeFilters.type),
+      segment: Boolean(activeFilters.segment),
+      period: Boolean(activeFilters.period),
+    });
 
     if (!productName || selectedIds.has(candidateSelectionId) || seenNames.has(productName)) {
       continue;
@@ -481,6 +516,7 @@ function addSelectedProduct(name) {
   syncCloudFilterOptions();
   renderSelectedProducts();
   renderSearchSuggestions();
+  renderSearchWarning();
 
   if (state.hasSearched) {
     runSearch();
@@ -492,6 +528,7 @@ function removeSelectedProduct(selectionId) {
   syncCloudFilterOptions();
   renderSelectedProducts();
   updateSearchSuggestions();
+  renderSearchWarning();
 
   if (!state.hasSearched) {
     return;
@@ -519,6 +556,7 @@ function clearSelectedProducts() {
   syncCloudFilterOptions();
   renderSelectedProducts();
   updateSearchSuggestions();
+  renderSearchWarning();
 
   if (!state.hasSearched) {
     return;
@@ -751,41 +789,105 @@ function renderCurrentResults() {
   });
 }
 
+async function copyTextToClipboard(text) {
+  if (!text) {
+    return false;
+  }
+
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // Fallback below.
+    }
+  }
+
+  const helper = document.createElement("textarea");
+  helper.value = text;
+  helper.setAttribute("readonly", "readonly");
+  helper.style.position = "fixed";
+  helper.style.top = "-9999px";
+  helper.style.opacity = "0";
+  document.body.appendChild(helper);
+  helper.focus();
+  helper.select();
+
+  let copied = false;
+  try {
+    copied = document.execCommand("copy");
+  } catch {
+    copied = false;
+  }
+
+  document.body.removeChild(helper);
+  return copied;
+}
+
+function flashCopyButtonState(button, label) {
+  if (!button) {
+    return;
+  }
+
+  const originalLabel = button.dataset.originalLabel || button.textContent.trim() || "Copiar tabla";
+  button.dataset.originalLabel = originalLabel;
+  button.textContent = label;
+  button.disabled = true;
+
+  window.setTimeout(() => {
+    button.textContent = originalLabel;
+    button.disabled = false;
+  }, 1400);
+}
+
 function createSelectedProductSelection(name) {
   if (!name) {
     return null;
   }
 
   const filters = getActiveSecondaryFilters();
+  const locks = {
+    type: Boolean(filters.type) && !state.autoSelectedFilters.type,
+    segment: Boolean(filters.segment) && !state.autoSelectedFilters.segment,
+    period: Boolean(filters.period) && !state.autoSelectedFilters.period,
+  };
   const metaParts = [];
 
-  if (filters.type) {
+  if (locks.type) {
     metaParts.push(getOptionLabel(filters.type, TYPE_OPTION_DEFS));
   }
 
-  if (filters.segment) {
+  if (locks.segment) {
     metaParts.push(getOptionLabel(filters.segment, SEGMENT_OPTION_DEFS));
   }
 
-  if (filters.period) {
+  if (locks.period) {
     metaParts.push(getOptionLabel(filters.period, PERIOD_OPTION_DEFS));
   }
 
   const metaLabel = metaParts.join(" · ");
 
   return {
-    id: getSelectedProductId(name, filters),
+    id: getSelectedProductId(name, filters, locks),
     name,
-    type: filters.type,
-    segment: filters.segment,
-    period: filters.period,
+    type: locks.type ? filters.type : "",
+    segment: locks.segment ? filters.segment : "",
+    period: locks.period ? filters.period : "",
+    typeLocked: locks.type,
+    segmentLocked: locks.segment,
+    periodLocked: locks.period,
     metaLabel,
     displayLabel: metaLabel ? `${name} · ${metaLabel}` : name,
   };
 }
 
-function getSelectedProductId(name, filters) {
-  return [name, filters.type || "", filters.segment || "", filters.period || ""].join("__");
+function getSelectedProductId(name, filters, locks = {}) {
+  return [
+    name,
+    locks.type ? filters.type || "" : "",
+    locks.segment ? filters.segment || "" : "",
+    locks.period ? filters.period || "" : "",
+  ].join("__");
 }
 
 function resetCurrentInputFilters() {
@@ -803,15 +905,93 @@ function matchesSelectedProductProfile(product, selection, currentInput = {}) {
   }
 
   return matchesSecondaryFilters(product, {
-    type: selection.type || currentInput.type || "",
-    segment: selection.segment || currentInput.segment || "",
-    period: selection.period || currentInput.period || "",
+    type: selection.typeLocked ? selection.type : currentInput.type || "",
+    segment: selection.segmentLocked ? selection.segment : currentInput.segment || "",
+    period: selection.periodLocked ? selection.period : currentInput.period || "",
   });
 }
 
 function getSelectedProductOrder(product, selectedProducts) {
   const index = selectedProducts.findIndex((selection) => matchesSelectedProductProfile(product, selection));
   return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+}
+
+function renderSearchWarning() {
+  if (!elements.searchWarning) {
+    return;
+  }
+
+  const message = getSearchWarningMessage();
+  elements.searchWarning.hidden = !message;
+  elements.searchWarning.textContent = message;
+}
+
+function getSearchWarningMessage() {
+  if (!state.products.length || state.loadError) {
+    return "";
+  }
+
+  const currentInput = {
+    type: elements.typeFilter.value,
+    segment: normalizeText(elements.segFilter.value),
+    period: elements.termFilter.value,
+  };
+
+  if (currentInput.type) {
+    const conflictingSelections = state.selectedProducts.filter(
+      (selection) => selection.typeLocked && selection.type && selection.type !== currentInput.type,
+    );
+
+    if (conflictingSelections.length) {
+      const lockedTypes = Array.from(
+        new Set(conflictingSelections.map((selection) => getOptionLabel(selection.type, TYPE_OPTION_DEFS))),
+      );
+      return `Hay productos seleccionados fijados como ${lockedTypes.join(
+        ", ",
+      )}. Si quieres ver solo ${getOptionLabel(
+        currentInput.type,
+        TYPE_OPTION_DEFS,
+      )}, quita esos chips y agrégalos de nuevo con ese tipo.`;
+    }
+  }
+
+  if (!currentInput.type) {
+    const ambiguousSelections = state.selectedProducts.filter((selection) => {
+      if (selection.typeLocked) {
+        return false;
+      }
+
+      return getMatchingTypesForSelection(selection, currentInput).length > 1;
+    });
+
+    if (ambiguousSelections.length) {
+      const sampleNames = ambiguousSelections
+        .slice(0, 2)
+        .map((selection) => selection.name)
+        .join(", ");
+      return `${sampleNames} existe en varios tipos. Elige "Tipo" para evitar mezclar NCE, Suscripción o Perpetuo.`;
+    }
+  }
+
+  return "";
+}
+
+function getMatchingTypesForSelection(selection, currentInput) {
+  return Array.from(
+    new Set(
+      state.products
+        .filter((product) => (product.canonicalName || product.name) === selection.name)
+        .filter((product) =>
+          matchesSecondaryFilters(product, {
+            type: "",
+            segment: selection.segmentLocked ? selection.segment : currentInput.segment || "",
+            period: selection.periodLocked ? selection.period : currentInput.period || "",
+          }),
+        )
+        .map((product) => product.type)
+        .filter(Boolean),
+    ),
+  );
 }
 
 function getStrictPeriodKey(product) {
