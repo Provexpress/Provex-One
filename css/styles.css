@@ -89,11 +89,35 @@ body.app-body {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
 }
 
-.price-update-banner {
+.maintenance-main {
+  min-height: calc(100vh - 104px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.price-update-screen {
+  width: 100%;
+  max-width: 720px;
   background:
     linear-gradient(180deg, rgba(255, 251, 235, 0.98), rgba(255, 247, 221, 0.96)),
     linear-gradient(135deg, rgba(217, 119, 6, 0.10), rgba(26, 43, 107, 0.04));
   border-color: rgba(217, 119, 6, 0.22);
+  text-align: center;
+}
+
+.price-update-screen-mark {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 18px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--warn);
+  background: rgba(217, 119, 6, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
 }
 
 .price-update-banner-copy {
@@ -110,17 +134,31 @@ body.app-body {
 }
 
 .price-update-banner-title {
-  margin: 0 0 6px;
-  font-size: 15px;
+  margin: 0 0 10px;
+  font-size: clamp(26px, 4.2vw, 40px);
   font-weight: 700;
   color: var(--corp-navy);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
 }
 
 .price-update-banner-text {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.5;
+  margin: 0 auto;
+  max-width: 54ch;
+  font-size: 15px;
+  line-height: 1.65;
   color: var(--text-soft);
+}
+
+.price-update-banner-note {
+  margin: 14px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.app-content-disabled {
+  display: none;
 }
 
 .install-banner {
