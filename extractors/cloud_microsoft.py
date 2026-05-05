@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 import pandas as pd
 
@@ -26,6 +27,36 @@ FILE_PATTERNS = {
     "INGRAM": ["Lista de precios *-INGRAM.xlsx"],
 }
 
+MONTHS_ES = {
+    "enero": 1,
+    "febrero": 2,
+    "marzo": 3,
+    "abril": 4,
+    "mayo": 5,
+    "junio": 6,
+    "julio": 7,
+    "agosto": 8,
+    "septiembre": 9,
+    "setiembre": 9,
+    "octubre": 10,
+    "noviembre": 11,
+    "diciembre": 12,
+}
+
+
+def parse_price_list_period(path):
+    match = re.search(
+        r"Lista\s+de\s+precios\s+([A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)\s+(\d{4})",
+        path.stem,
+        re.IGNORECASE,
+    )
+    if not match:
+        return (0, 0)
+
+    month = MONTHS_ES.get(match.group(1).lower())
+    year = int(match.group(2))
+    return (year, month or 0)
+
 
 def resolve_source_file(root_dir, distributor):
     configured_path = root_dir / FILES[distributor]
@@ -37,7 +68,10 @@ def resolve_source_file(root_dir, distributor):
     for pattern in FILE_PATTERNS.get(distributor, []):
         candidates.extend(root_dir.glob(f"data/{pattern}"))
 
-    unique_candidates = sorted({path.resolve() for path in candidates}, key=lambda path: path.stat().st_mtime)
+    unique_candidates = sorted(
+        {path.resolve() for path in candidates},
+        key=lambda path: (*parse_price_list_period(path), path.stat().st_mtime),
+    )
     return unique_candidates[-1] if unique_candidates else configured_path
 
 
@@ -123,7 +157,11 @@ def extract_intcomex(path):
     with readable_excel_path(path) as readable_path:
         xl = pd.ExcelFile(readable_path)
 
-        for sheet, product_type in (("NCE", "NCE"), ("PERPETUAL+SW SUBSC", "PERPETUO")):
+        for sheet, product_type in (
+            ("NCE", "NCE"),
+            ("PERPETUAL+SW SUBSC", "PERPETUO"),
+            ("SWSUBSC+PERPETUAL", None),
+        ):
             if sheet not in xl.sheet_names:
                 continue
 
@@ -134,8 +172,9 @@ def extract_intcomex(path):
             name_col = resolve_column(df.columns, "SkuTitle")
             term_col = resolve_column(df.columns, "TermDuration")
             billing_col = resolve_column(df.columns, "BillingPlan")
-            price_col = resolve_column(df.columns, "UnitPrice")
+            price_col = resolve_column(df.columns, "UnitPrice", "PROVEXPRESS")
             segment_col = resolve_column(df.columns, "Segment")
+            tags_col = resolve_column(df.columns, "Tags")
 
             for _, row in df.iterrows():
                 name = safe_str(row.get(name_col))
@@ -146,15 +185,20 @@ def extract_intcomex(path):
 
                 product_id = safe_str(row.get(pid_col))
                 sku_id = safe_str(row.get(sid_col))
+                clean_product_type = product_type
+                if clean_product_type is None:
+                    tags = safe_str(row.get(tags_col)).lower()
+                    clean_product_type = "SUSCRIPCION" if "subscription" in tags else "PERPETUO"
 
                 items.append(
                     build_cloud_product(
                         distributor="INTCOMEX",
-                        product_type=product_type,
+                        product_type=clean_product_type,
                         part_number=f"{product_id}:{sku_id}" if product_id else sku_id,
                         name=name,
                         term=safe_str(row.get(term_col)) or "OneTime",
-                        billing=safe_str(row.get(billing_col)) or ("OneTime" if product_type == "PERPETUO" else ""),
+                        billing=safe_str(row.get(billing_col))
+                        or ("OneTime" if clean_product_type == "PERPETUO" else ""),
                         price=price,
                         erp=safe_float(row.get(erp_col, 0)),
                         segment=safe_str(row.get(segment_col)),
