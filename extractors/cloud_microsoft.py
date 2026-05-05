@@ -172,7 +172,7 @@ def extract_intcomex(path):
             name_col = resolve_column(df.columns, "SkuTitle")
             term_col = resolve_column(df.columns, "TermDuration")
             billing_col = resolve_column(df.columns, "BillingPlan")
-            price_col = resolve_column(df.columns, "UnitPrice", "PROVEXPRESS")
+            price_col = resolve_column(df.columns, "PROVEXPRESS", "UnitPrice")
             segment_col = resolve_column(df.columns, "Segment")
             tags_col = resolve_column(df.columns, "Tags")
 
