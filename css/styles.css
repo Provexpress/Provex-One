@@ -89,6 +89,40 @@ body.app-body {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
 }
 
+.price-update-banner {
+  background:
+    linear-gradient(180deg, rgba(255, 251, 235, 0.98), rgba(255, 247, 221, 0.96)),
+    linear-gradient(135deg, rgba(217, 119, 6, 0.10), rgba(26, 43, 107, 0.04));
+  border-color: rgba(217, 119, 6, 0.22);
+}
+
+.price-update-banner-copy {
+  min-width: 0;
+}
+
+.price-update-banner-eyebrow {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--warn);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.price-update-banner-title {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--corp-navy);
+}
+
+.price-update-banner-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-soft);
+}
+
 .install-banner {
   display: flex;
   align-items: center;
