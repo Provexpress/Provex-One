@@ -52,20 +52,21 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Provex One">
   <link rel="apple-touch-icon" sizes="180x180" href="icons/provex_icon_180.png">
-  <link rel="stylesheet" href="css/styles.css?v=20260507a">
+  <link rel="stylesheet" href="css/styles.css?v=20260508a">
 </head>
 <body class="app-body auth-pending bg-bg text-primary min-h-screen font-sans antialiased" style="letter-spacing:-0.022em">
   <section class="auth-gate" id="authGate" aria-label="Inicio de sesion corporativo">
-    <div class="auth-card panel-shell rounded-card shadow-card p-6 sm:p-8">
-      <img src="icons/logo.webp" alt="Provexpress" class="auth-logo" width="260" height="70">
-      <p class="auth-eyebrow">Acceso corporativo</p>
-      <h1 class="auth-title">Ingresa a Provex One con tu cuenta Microsoft.</h1>
+    <div class="auth-card">
+      <img src="icons/icono-provexpress.png" alt="Provexpress" class="auth-logo" width="88" height="88">
+      <p class="auth-eyebrow">Provex One</p>
+      <h1 class="auth-title">Acceso corporativo</h1>
       <p class="auth-copy">
-        Usa tu correo corporativo de Provexpress para acceder a la plataforma de licencias cloud.
+        Ingresa con tu cuenta Microsoft corporativa para consultar licencias cloud de Provexpress.
       </p>
       <button type="button" id="authConnectBtn" class="auth-button">
         <span>Conectar con Microsoft</span>
       </button>
+      <p class="auth-note">Solo usuarios autorizados por la compania.</p>
       <p id="authStatus" class="auth-status" aria-live="polite">Esperando autenticacion</p>
     </div>
   </section>
