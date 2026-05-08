@@ -1,4 +1,4 @@
-# Provex One - Cloud e Inventario TI
+# Provex One - Licencias Cloud
 
 App web minimalista para comparar precios de licencias Microsoft entre **LOL**, **INTCOMEX** e **INGRAM**.
 

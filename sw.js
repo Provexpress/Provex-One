@@ -5,6 +5,8 @@ const STATIC_ASSETS = [
   './index.html',
   './css/styles.css',
   './js/app.js',
+  './js/auth.js',
+  './js/auth-config.js',
   './js/search.js',
   './js/tables.js',
   './js/trm.js',
@@ -68,6 +70,8 @@ self.addEventListener('fetch', (event) => {
   // Tailwind CDN y Google Fonts → Network First
   if (
     url.hostname.includes('cdn.tailwindcss.com') ||
+    url.hostname.includes('alcdn.msauth.net') ||
+    url.hostname.includes('cdn.jsdelivr.net') ||
     url.hostname.includes('fonts.googleapis.com') ||
     url.hostname.includes('fonts.gstatic.com')
   ) {

@@ -1,1 +1,3 @@
-import "./search.js";
+import { initializeAuthApp } from "./auth.js";
+
+initializeAuthApp();
