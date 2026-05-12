@@ -115,7 +115,13 @@ def extract_lol(path):
     with readable_excel_path(path) as readable_path:
         xl = pd.ExcelFile(readable_path)
 
-        for sheet, product_type in (("NCE", "NCE"), ("SUSCRIPCION", "SUSCRIPCION"), ("PERPETUO", "PERPETUO")):
+        for sheet, product_type in (
+            ("NCE", "NCE"),
+            ("SUSCRIPCION", "SUSCRIPCION"),
+            ("Subscription", "SUSCRIPCION"),
+            ("PERPETUO", "PERPETUO"),
+            ("Perpetual", "PERPETUO"),
+        ):
             if sheet not in xl.sheet_names:
                 continue
 
@@ -125,7 +131,7 @@ def extract_lol(path):
             name_col = resolve_column(df.columns, "SkuTitle")
             term_col = resolve_column(df.columns, "TermDuration")
             billing_col = resolve_column(df.columns, "BillingPlan")
-            price_col = resolve_column(df.columns, "PARTNER PRICE")
+            price_col = resolve_column(df.columns, "UnitPrice", "PARTNER PRICE")
             segment_col = resolve_column(df.columns, "Segment")
 
             for _, row in df.iterrows():
