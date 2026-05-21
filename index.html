@@ -57,17 +57,35 @@
 <body class="app-body auth-pending bg-bg text-primary min-h-screen font-sans antialiased" style="letter-spacing:-0.022em">
   <section class="auth-gate" id="authGate" aria-label="Inicio de sesion corporativo">
     <div class="auth-card">
-      <img src="icons/icono-provexpress.png" alt="Provexpress" class="auth-logo" width="88" height="88">
-      <p class="auth-eyebrow">Provex One</p>
-      <h1 class="auth-title">Acceso corporativo</h1>
-      <p class="auth-copy">
-        Ingresa con tu cuenta Microsoft corporativa para consultar licencias cloud de Provexpress.
-      </p>
-      <button type="button" id="authConnectBtn" class="auth-button">
-        <span>Conectar con Microsoft</span>
-      </button>
-      <p class="auth-note">Solo usuarios autorizados por la compania.</p>
-      <p id="authStatus" class="auth-status" aria-live="polite">Esperando autenticacion</p>
+      <div class="auth-brand-panel">
+        <img src="icons/logo.webp" alt="Provexpress" class="auth-brand-logo" width="220" height="58">
+        <span class="auth-chip">Provex One</span>
+        <h2>Licencias cloud con acceso seguro.</h2>
+        <p>Consulta precios, mayoristas y comparativos desde una sesion corporativa autorizada.</p>
+        <div class="auth-feature-row">
+          <span class="auth-feature-dot"></span>
+          Busqueda rapida para decisiones comerciales.
+        </div>
+        <div class="auth-feature-row">
+          <span class="auth-feature-dot purple"></span>
+          Acceso limitado a usuarios autorizados.
+        </div>
+      </div>
+
+      <div class="auth-action-panel">
+        <img src="icons/icono-provexpress.png" alt="" class="auth-logo" width="76" height="76">
+        <p class="auth-eyebrow">Acceso corporativo</p>
+        <h1 class="auth-title">Ingresar a Provex One</h1>
+        <p class="auth-copy">
+          Usa tu cuenta Microsoft 365 para consultar licencias cloud de Provexpress.
+        </p>
+        <button type="button" id="authConnectBtn" class="auth-button">
+          <span class="auth-button-icon">M365</span>
+          <span>Continuar con Microsoft 365</span>
+        </button>
+        <p class="auth-note">Solo usuarios autorizados por la compania.</p>
+        <p id="authStatus" class="auth-status" aria-live="polite">Esperando autenticacion</p>
+      </div>
     </div>
   </section>
 
