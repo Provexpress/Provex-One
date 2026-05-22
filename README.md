@@ -82,7 +82,7 @@ git push
 Busca en `index.html`:
 
 ```html
-<input type="number" id="profitPct" class="profit-input" value="20" min="0" max="999">
+<input type="number" id="profitPct" class="profit-input" value="6" min="6" max="999">
 ```
 
 ### Cambiar la TRM por defecto

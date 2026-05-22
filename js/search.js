@@ -9,6 +9,7 @@ import {
 import { fetchTRM } from "./trm.js";
 
 const SUGGESTION_LIMIT = 8;
+const MIN_PROFIT_PCT = 6;
 const CLOUD_CATALOG_PATHS = ["catalogs/cloud_products.json", "products.json"];
 const TYPE_OPTION_DEFS = [
   { value: "NCE", label: "NCE" },
@@ -72,6 +73,7 @@ initialize();
 
 function initialize() {
   bindEvents();
+  enforceMinProfitPct({ force: true });
   syncFilterChips();
   syncMobileTabs();
   renderSelectedProducts();
@@ -127,12 +129,24 @@ function bindEvents() {
     });
   });
 
-  [elements.profitPct, elements.qtyInput].forEach((field) => {
-    field.addEventListener("input", () => {
-      if (state.hasSearched) {
-        renderCurrentResults();
-      }
-    });
+  elements.profitPct.addEventListener("input", () => {
+    enforceMinProfitPct();
+    if (state.hasSearched) {
+      renderCurrentResults();
+    }
+  });
+
+  elements.profitPct.addEventListener("blur", () => {
+    enforceMinProfitPct({ force: true });
+    if (state.hasSearched) {
+      renderCurrentResults();
+    }
+  });
+
+  elements.qtyInput.addEventListener("input", () => {
+    if (state.hasSearched) {
+      renderCurrentResults();
+    }
   });
 
   elements.mobileTabs.forEach((tab) => {
@@ -315,7 +329,7 @@ async function handleResultsAreaClick(event) {
   const text = buildDistributorCopyText({
     dist,
     products,
-    profitPct: Math.max(0, Number(elements.profitPct.value) || 0),
+    profitPct: getProfitPct(),
     qty: Math.max(1, parseInt(elements.qtyInput.value, 10) || 1),
   });
 
@@ -783,10 +797,25 @@ function renderCurrentResults() {
     currentResults: state.currentResults,
     activeDists: state.activeDists,
     activeMobileDist: state.activeMobileDist,
-    profitPct: Math.max(0, Number(elements.profitPct.value) || 0),
+    profitPct: getProfitPct(),
     qty: Math.max(1, parseInt(elements.qtyInput.value, 10) || 1),
     selectionCount: state.selectedProducts.length,
   });
+}
+
+function getProfitPct() {
+  const value = Number(elements.profitPct.value);
+  return Number.isFinite(value) ? Math.max(MIN_PROFIT_PCT, value) : MIN_PROFIT_PCT;
+}
+
+function enforceMinProfitPct({ force = false } = {}) {
+  if (!elements.profitPct.value && !force) {
+    return;
+  }
+
+  if (getProfitPct() !== Number(elements.profitPct.value)) {
+    elements.profitPct.value = String(MIN_PROFIT_PCT);
+  }
 }
 
 async function copyTextToClipboard(text) {

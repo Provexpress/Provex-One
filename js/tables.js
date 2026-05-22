@@ -31,6 +31,7 @@ const BILLING_LABELS = {
 };
 
 const MAX_ROWS_PER_DIST = 50;
+const MIN_PROFIT_PCT = 6;
 const usdFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
@@ -278,7 +279,7 @@ function getVisibleTotal(currentResults, visibleDists) {
 export function buildDistributorCopyText({ dist, products, profitPct, qty }) {
   const shownProducts = products.slice(0, MAX_ROWS_PER_DIST);
   const safeQty = Math.max(1, Number(qty) || 1);
-  const safeProfitPct = Math.max(0, Number(profitPct) || 0);
+  const safeProfitPct = Math.max(MIN_PROFIT_PCT, Number(profitPct) || 0);
   const headers = ["No. Parte", "Descripcion", "Cant.", "Moneda", "Precio Uni.", "SubTotal"];
 
   const rows = shownProducts.map((product) => {
