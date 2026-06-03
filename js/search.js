@@ -1083,7 +1083,7 @@ function canonicalizeTerm(product) {
     return "mensual";
   }
 
-  if (term.includes("onetime") || term.includes("one time")) {
+  if (term.includes("onetime") || term.includes("one time") || term.includes("perpetual")) {
     return "onetime";
   }
 

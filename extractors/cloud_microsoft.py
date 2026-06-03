@@ -114,14 +114,18 @@ def extract_lol(path):
     items = []
     with readable_excel_path(path) as readable_path:
         xl = pd.ExcelFile(readable_path)
-
-        for sheet, product_type in (
+        sheet_types = [
             ("NCE", "NCE"),
             ("SUSCRIPCION", "SUSCRIPCION"),
             ("Subscription", "SUSCRIPCION"),
             ("PERPETUO", "PERPETUO"),
             ("Perpetual", "PERPETUO"),
-        ):
+        ]
+
+        if not any(sheet in xl.sheet_names for sheet, _ in sheet_types) and "Lista de precios" in xl.sheet_names:
+            sheet_types.append(("Lista de precios", "NCE"))
+
+        for sheet, product_type in sheet_types:
             if sheet not in xl.sheet_names:
                 continue
 
@@ -167,6 +171,7 @@ def extract_intcomex(path):
             ("NCE", "NCE"),
             ("PERPETUAL+SW SUBSC", "PERPETUO"),
             ("SWSUBSC+PERPETUAL", None),
+            ("SERVERSUBSCPERPETUAL", None),
         ):
             if sheet not in xl.sheet_names:
                 continue

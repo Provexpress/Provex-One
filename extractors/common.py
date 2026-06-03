@@ -112,7 +112,7 @@ def canonicalize_term(term, part_number, name):
     if "p1m" in normalized_term or "mensual" in normalized_term or "month" in normalized_term:
         return "mensual"
 
-    if "onetime" in normalized_term or "one time" in normalized_term:
+    if "onetime" in normalized_term or "one time" in normalized_term or "perpetual" in normalized_term:
         return "onetime"
 
     return ""
