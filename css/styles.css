@@ -45,6 +45,15 @@ body.auth-pending {
   overflow: hidden;
 }
 
+body.maintenance-mode {
+  overflow: hidden;
+}
+
+body.maintenance-mode .auth-gate,
+body.maintenance-mode .app-shell {
+  display: none;
+}
+
 .app-shell {
   min-height: 100vh;
 }
@@ -351,6 +360,102 @@ body.auth-pending {
   border-radius: inherit;
   pointer-events: none;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.maintenance-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  box-sizing: border-box;
+  display: none;
+  place-items: center;
+  padding: 24px;
+  background:
+    linear-gradient(180deg, rgba(238, 243, 255, 0.98), rgba(245, 247, 253, 0.98)),
+    linear-gradient(135deg, rgba(217, 119, 6, 0.10), rgba(21, 101, 192, 0.08));
+}
+
+body.maintenance-mode .maintenance-gate {
+  display: grid;
+}
+
+.maintenance-gate::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-top: 4px solid transparent;
+  border-image: linear-gradient(90deg, var(--corp-navy), var(--corp-blue), var(--corp-purple), var(--corp-cyan)) 1;
+  pointer-events: none;
+}
+
+.maintenance-card {
+  position: relative;
+  box-sizing: border-box;
+  width: min(720px, calc(100vw - 48px));
+  padding: 34px;
+  border: 1px solid rgba(217, 119, 6, 0.22);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(255, 251, 235, 0.98), rgba(255, 247, 221, 0.96)),
+    linear-gradient(135deg, rgba(217, 119, 6, 0.10), rgba(26, 43, 107, 0.04));
+  box-shadow: 0 24px 54px rgba(26, 43, 107, 0.14);
+  text-align: center;
+}
+
+.maintenance-logo {
+  display: block;
+  width: min(220px, 72%);
+  height: auto;
+  margin: 0 auto 22px;
+  object-fit: contain;
+}
+
+.maintenance-mark {
+  display: grid;
+  width: 72px;
+  height: 72px;
+  place-items: center;
+  margin: 0 auto 18px;
+  border-radius: 999px;
+  background: rgba(217, 119, 6, 0.12);
+  color: var(--warn);
+  font-size: 34px;
+  font-weight: 800;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.maintenance-eyebrow {
+  margin: 0 0 6px;
+  color: var(--warn);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.maintenance-title {
+  max-width: 620px;
+  margin: 0 auto 12px;
+  color: var(--corp-navy);
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+}
+
+.maintenance-text {
+  max-width: 58ch;
+  margin: 0 auto;
+  color: var(--text-soft);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.maintenance-note {
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .install-banner {
@@ -943,6 +1048,12 @@ tr:hover td      { background: rgba(21, 101, 192, 0.035); }
   .dist-tabs     { display: flex; }
   .dist-card     { display: none; }
   .dist-card.mobile-visible { display: block; }
+  .maintenance-gate { padding: 18px; }
+  .maintenance-card { width: min(720px, calc(100vw - 36px)); padding: 24px 20px; border-radius: 14px; }
+  .maintenance-logo { width: min(190px, 76%); margin-bottom: 18px; }
+  .maintenance-mark { width: 62px; height: 62px; font-size: 30px; }
+  .maintenance-title { font-size: 28px; }
+  .maintenance-text { font-size: 13px; }
   .auth-card {
     display: block;
     min-height: 0;

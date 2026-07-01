@@ -52,9 +52,22 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Provex One">
   <link rel="apple-touch-icon" sizes="180x180" href="icons/provex_icon_180.png">
-  <link rel="stylesheet" href="css/styles.css?v=20260508a">
+  <link rel="stylesheet" href="css/styles.css?v=20260701a">
 </head>
-<body class="app-body auth-pending bg-bg text-primary min-h-screen font-sans antialiased" style="letter-spacing:-0.022em">
+<body class="app-body auth-pending maintenance-mode bg-bg text-primary min-h-screen font-sans antialiased" style="letter-spacing:-0.022em">
+  <section class="maintenance-gate" id="maintenanceGate" aria-label="Aviso de mantenimiento por actualizacion de precios">
+    <div class="maintenance-card" role="status" aria-live="polite">
+      <img src="icons/logo.webp" alt="Provexpress" class="maintenance-logo" width="220" height="58">
+      <div class="maintenance-mark">!</div>
+      <p class="maintenance-eyebrow">Actualizacion de precios</p>
+      <h1 class="maintenance-title">Provex One esta temporalmente en mantenimiento.</h1>
+      <p class="maintenance-text">
+        Estamos actualizando y validando las listas de precios. La consulta de licencias volvera a estar disponible cuando finalice la revision.
+      </p>
+      <p class="maintenance-note">Gracias por tu paciencia.</p>
+    </div>
+  </section>
+
   <section class="auth-gate" id="authGate" aria-label="Inicio de sesion corporativo">
     <div class="auth-card">
       <div class="auth-brand-panel">
