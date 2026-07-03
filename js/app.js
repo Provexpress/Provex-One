@@ -1,6 +1,6 @@
 import { initializeAuthApp } from "./auth.js";
 
-const PRICE_UPDATE_MAINTENANCE = true;
+const PRICE_UPDATE_MAINTENANCE = false;
 
 if (PRICE_UPDATE_MAINTENANCE) {
   document.body.classList.add("maintenance-mode");
