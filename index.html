@@ -54,7 +54,8 @@
   <link rel="apple-touch-icon" sizes="180x180" href="icons/provex_icon_180.png">
   <link rel="stylesheet" href="css/styles.css?v=20260701a">
 </head>
-<body class="app-body auth-pending maintenance-mode bg-bg text-primary min-h-screen font-sans antialiased" style="letter-spacing:-0.022em">
+<body class="app-body auth-pending bg-bg text-primary min-h-screen font-sans antialiased" style="letter-spacing:-0.022em">
+  <!-- Mantenimiento para futuras actualizaciones
   <section class="maintenance-gate" id="maintenanceGate" aria-label="Aviso de mantenimiento por actualizacion de precios">
     <div class="maintenance-card" role="status" aria-live="polite">
       <img src="icons/logo.webp" alt="Provexpress" class="maintenance-logo" width="220" height="58">
@@ -67,6 +68,7 @@
       <p class="maintenance-note">Gracias por tu paciencia.</p>
     </div>
   </section>
+  -->
 
   <section class="auth-gate" id="authGate" aria-label="Inicio de sesion corporativo">
     <div class="auth-card">
@@ -190,10 +192,10 @@
 
       <!-- Chips -->
       <div class="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-sep" aria-label="Mayoristas activos">
-        <button type="button" class="filter-chip active" data-dist="LOL">
+        <button type="button" class="filter-chip" data-dist="LOL">
           <span class="chip-dot chip-dot-lol"></span>LOL
         </button>
-        <button type="button" class="filter-chip active" data-dist="INTCOMEX">
+        <button type="button" class="filter-chip" data-dist="INTCOMEX">
           <span class="chip-dot chip-dot-intcomex"></span>INTCOMEX
         </button>
         <button type="button" class="filter-chip active" data-dist="INGRAM">
@@ -235,13 +237,13 @@
 
     <!-- MOBILE TABS -->
     <div id="distTabs" class="dist-tabs" aria-label="Mayoristas en movil">
-      <button type="button" class="dist-tab active" data-dist="LOL">
+      <button type="button" class="dist-tab" data-dist="LOL">
         <span class="dist-tab-dot dist-tab-dot-lol"></span>LOL
       </button>
       <button type="button" class="dist-tab" data-dist="INTCOMEX">
         <span class="dist-tab-dot dist-tab-dot-intcomex"></span>INTCOMEX
       </button>
-      <button type="button" class="dist-tab" data-dist="INGRAM">
+      <button type="button" class="dist-tab active" data-dist="INGRAM">
         <span class="dist-tab-dot dist-tab-dot-ingram"></span>INGRAM
       </button>
     </div>
