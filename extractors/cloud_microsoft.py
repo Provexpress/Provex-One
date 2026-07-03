@@ -225,7 +225,7 @@ def extract_ingram(path):
         "Microsoft NCE (Excluido IVA)": {
             "type": "NCE",
             "header_row": 4,
-            "name_candidates": ("Connect SKU Title", "SkuTitle"),
+            "name_candidates": ("Connect SKU Title", "SkuTitle", "Descripción", "Descripcion"),
             "part_candidates": ("MPN ID",),
             "term_candidates": ("Permanencia",),
             "billing_candidates": ("Facturacion", "Facturación", "BillingPlan"),
