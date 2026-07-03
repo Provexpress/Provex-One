@@ -788,8 +788,9 @@ select.search-input { cursor: pointer; }
   appearance: none;
   font-family: inherit;
 }
-.filter-chip:hover        { border-color: var(--action); color: var(--action); background: var(--action-soft); }
+.filter-chip:hover:not(:disabled) { border-color: var(--action); color: var(--action); background: var(--action-soft); }
 .filter-chip.active       { background: linear-gradient(135deg, rgba(21, 101, 192, 0.10), rgba(106, 63, 160, 0.12)); border-color: rgba(21, 101, 192, 0.22); color: var(--corp-blue-deep); font-weight: 600; }
+.filter-chip:disabled, .dist-tab:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(100%); }
 
 .chip-dot              { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 .chip-dot-lol          { background: var(--lol); }
