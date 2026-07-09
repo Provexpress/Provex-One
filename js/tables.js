@@ -1,8 +1,7 @@
-export const DIST_ORDER = ["LOL", "INTCOMEX", "INGRAM"];
+export const DIST_ORDER = ["LOL", "INGRAM"];
 
-const DIST_CLASS_SUFFIX = {
+export const DIST_CLASS_SUFFIX = {
   LOL: "lol",
-  INTCOMEX: "intcomex",
   INGRAM: "ingram",
 };
 

@@ -32,7 +32,7 @@ const PERIOD_OPTION_DEFS = [
 
 const state = {
   products: [],
-  activeDists: new Set(["INGRAM"]),
+  activeDists: new Set(["INGRAM", "LOL"]),
   currentResults: createEmptyResults(),
   hasSearched: false,
   activeMobileDist: "INGRAM",

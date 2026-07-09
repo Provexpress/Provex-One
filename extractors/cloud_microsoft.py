@@ -17,13 +17,11 @@ from extractors.common import (
 
 FILES = {
     "LOL": "data/Lista de precios Marzo 2026-LOL.xlsx",
-    "INTCOMEX": "data/Lista de precios Marzo 2026-INTCOMEX.xlsx",
     "INGRAM": "data/Lista de precios Marzo 2026-INGRAM.xlsx",
 }
 
 FILE_PATTERNS = {
     "LOL": ["Lista de precios *-LOL.xlsx"],
-    "INTCOMEX": ["Lista de precios *-INTCOMEX.xlsx"],
     "INGRAM": ["Lista de precios *-INGRAM.xlsx"],
 }
 
@@ -162,63 +160,6 @@ def extract_lol(path):
     return items
 
 
-def extract_intcomex(path):
-    items = []
-    with readable_excel_path(path) as readable_path:
-        xl = pd.ExcelFile(readable_path)
-
-        for sheet, product_type in (
-            ("NCE", "NCE"),
-            ("PERPETUAL+SW SUBSC", "PERPETUO"),
-            ("SWSUBSC+PERPETUAL", None),
-            ("SERVERSUBSCPERPETUAL", None),
-        ):
-            if sheet not in xl.sheet_names:
-                continue
-
-            df = pd.read_excel(readable_path, sheet_name=sheet)
-            erp_col = resolve_column(df.columns, "ERP Price", "ERP")
-            pid_col = resolve_column(df.columns, "ProductId")
-            sid_col = resolve_column(df.columns, "SkuId")
-            name_col = resolve_column(df.columns, "SkuTitle")
-            term_col = resolve_column(df.columns, "TermDuration")
-            billing_col = resolve_column(df.columns, "BillingPlan")
-            price_col = resolve_column(df.columns, "PROVEXPRESS", "UnitPrice")
-            segment_col = resolve_column(df.columns, "Segment")
-            tags_col = resolve_column(df.columns, "Tags")
-
-            for _, row in df.iterrows():
-                name = safe_str(row.get(name_col))
-                price = safe_float(row.get(price_col, 0))
-
-                if not name or price == 0:
-                    continue
-
-                product_id = safe_str(row.get(pid_col))
-                sku_id = safe_str(row.get(sid_col))
-                clean_product_type = product_type
-                if clean_product_type is None:
-                    tags = safe_str(row.get(tags_col)).lower()
-                    clean_product_type = "SUSCRIPCION" if "subscription" in tags else "PERPETUO"
-
-                items.append(
-                    build_cloud_product(
-                        distributor="INTCOMEX",
-                        product_type=clean_product_type,
-                        part_number=f"{product_id}:{sku_id}" if product_id else sku_id,
-                        name=name,
-                        term=safe_str(row.get(term_col)) or "OneTime",
-                        billing=safe_str(row.get(billing_col))
-                        or ("OneTime" if clean_product_type == "PERPETUO" else ""),
-                        price=price,
-                        erp=safe_float(row.get(erp_col, 0)),
-                        segment=safe_str(row.get(segment_col)),
-                    )
-                )
-
-    return items
-
-
 def extract_ingram(path):
     items = []
     sheet_map = {
@@ -321,9 +262,6 @@ def build_cloud_catalog(base_dir=None):
 
     if file_map["LOL"].exists():
         catalog.extend(extract_lol(file_map["LOL"]))
-
-    if file_map["INTCOMEX"].exists():
-        catalog.extend(extract_intcomex(file_map["INTCOMEX"]))
 
     if file_map["INGRAM"].exists():
         catalog.extend(extract_ingram(file_map["INGRAM"]))

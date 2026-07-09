@@ -18,7 +18,6 @@
   --danger:         #C62828;
   --warn:           #D97706;
   --lol:            var(--corp-purple);
-  --intcomex:       var(--corp-cyan);
   --ingram:         var(--corp-blue);
   --sep:            #D7E0F0;
   --muted:          #677592;
@@ -794,7 +793,6 @@ select.search-input { cursor: pointer; }
 
 .chip-dot              { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 .chip-dot-lol          { background: var(--lol); }
-.chip-dot-intcomex     { background: var(--intcomex); }
 .chip-dot-ingram       { background: var(--ingram); }
 
 /* ── STATUS TRM ───────────────────────────────────── */
@@ -831,7 +829,6 @@ select.search-input { cursor: pointer; }
 }
 .dist-tab-dot          { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
 .dist-tab-dot-lol      { background: var(--lol); }
-.dist-tab-dot-intcomex { background: var(--intcomex); }
 .dist-tab-dot-ingram   { background: var(--ingram); }
 
 /* ── SUMMARY STRIP ────────────────────────────────── */
@@ -930,7 +927,6 @@ select.search-input { cursor: pointer; }
 }
 
 .dist-badge-lol      { background: var(--lol); }
-.dist-badge-intcomex { background: var(--intcomex); }
 .dist-badge-ingram   { background: var(--ingram); }
 
 .dist-table-wrap { overflow-x: auto; }
