@@ -1,6 +1,6 @@
 # Provex One - Licencias Cloud
 
-App web minimalista para comparar precios de licencias Microsoft entre **LOL** e **INGRAM**.
+App web para comparar precios de licencias Microsoft entre **LOL** e **INGRAM**, y calcular costos y cotizaciones de **Acronis Cyber Cloud**.
 
 ---
 
@@ -40,6 +40,10 @@ App web minimalista para comparar precios de licencias Microsoft entre **LOL** e
 - Configuracion de rentabilidad, cantidad y moneda
 - Conversion USD a COP con TRM ajustable
 - Vista responsive para movil y desktop
+- Calculadora Acronis por solucion o por servicio
+- Siete niveles de compromiso mensual y precios por grupo de datacenter
+- Aplicacion automatica del consumo minimo, rentabilidad, TRM y estimado anual
+- Busqueda de conceptos Acronis y copia de la cotizacion
 
 ---
 
@@ -72,6 +76,14 @@ git add products.json
 git commit -m "Update: listas de precios"
 git push
 ```
+
+Para actualizar solamente la calculadora Acronis, coloca en la raiz el archivo con nombre `Calculadora Acronis*.xlsx` y ejecuta:
+
+```bash
+python -m extractors.acronis
+```
+
+Se utilizara automaticamente el archivo Acronis mas reciente y se regenerara `catalogs/acronis_products.json`.
 
 ---
 

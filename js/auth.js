@@ -8,7 +8,7 @@ const MSAL_SOURCES = [
 const state = {
   msalApp: null,
   currentAccount: null,
-  cloudBooted: false,
+  appBooted: false,
 };
 
 const elements = {
@@ -140,9 +140,14 @@ async function logoutMicrosoft() {
 async function unlockApp() {
   setAuthenticatedUi();
 
-  if (!state.cloudBooted) {
-    await import("./search.js");
-    state.cloudBooted = true;
+  if (!state.appBooted) {
+    const modules = await Promise.allSettled([import("./search.js"), import("./acronis.js")]);
+    modules.forEach((moduleResult) => {
+      if (moduleResult.status === "rejected") {
+        console.error("Provex One module init error", moduleResult.reason);
+      }
+    });
+    state.appBooted = true;
   }
 }
 

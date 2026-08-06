@@ -1079,3 +1079,803 @@ tr:hover td      { background: rgba(21, 101, 192, 0.035); }
   .auth-logout-button { padding: 8px 10px; font-size: 11px; }
   .dist-header-actions { width: 100%; justify-content: space-between; }
 }
+
+/* ── WORKSPACE NAVIGATION ── */
+
+.workspace-switcher {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+}
+
+.workspace-switcher-label {
+  margin: 0;
+  color: var(--corp-navy);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.workspace-switcher-copy {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.workspace-switcher-tabs,
+.acronis-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--sep);
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+
+.workspace-tab,
+.acronis-tab {
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  transition: color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.workspace-tab {
+  min-height: 38px;
+  padding: 8px 14px;
+}
+
+.workspace-tab:hover,
+.acronis-tab:hover {
+  color: var(--corp-blue);
+}
+
+.workspace-tab.active,
+.acronis-tab.active {
+  background: #fff;
+  color: var(--corp-blue);
+  box-shadow: 0 5px 16px rgba(26, 43, 107, 0.09);
+}
+
+.workspace-tab:focus-visible,
+.acronis-tab:focus-visible,
+.acronis-category-toggle:focus-visible,
+.acronis-copy-button:focus-visible,
+.acronis-text-button:focus-visible {
+  outline: 3px solid var(--action-ring);
+  outline-offset: 2px;
+}
+
+/* ── ACRONIS CALCULATOR ── */
+
+.acronis-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  overflow: hidden;
+  margin-bottom: 14px;
+  padding: 26px 28px;
+  background:
+    radial-gradient(circle at 86% 18%, rgba(42, 191, 223, 0.18), transparent 18rem),
+    linear-gradient(135deg, #fff 0%, #f3f7ff 100%);
+}
+
+.acronis-hero::after {
+  position: absolute;
+  right: -72px;
+  bottom: -105px;
+  width: 240px;
+  height: 240px;
+  border: 38px solid rgba(21, 101, 192, 0.05);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+.acronis-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--corp-blue);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.acronis-kicker::before {
+  width: 8px;
+  height: 8px;
+  border-radius: 3px;
+  background: linear-gradient(135deg, var(--corp-blue), var(--corp-cyan));
+  box-shadow: 0 0 0 5px rgba(42, 191, 223, 0.10);
+  content: "";
+}
+
+.acronis-hero h1 {
+  max-width: 700px;
+  margin: 9px 0 8px;
+  color: var(--corp-navy);
+  font-size: clamp(25px, 3.5vw, 36px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.08;
+}
+
+.acronis-hero p {
+  max-width: 700px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.acronis-release {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 0 0 150px;
+  flex-direction: column;
+  padding: 15px 16px;
+  border: 1px solid rgba(21, 101, 192, 0.13);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: var(--shadow-soft);
+}
+
+.acronis-release span,
+.acronis-release small {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.acronis-release strong {
+  margin: 3px 0;
+  color: var(--corp-navy);
+  font-size: 18px;
+}
+
+.acronis-controls {
+  display: grid;
+  grid-template-columns: minmax(210px, 1.1fr) minmax(220px, 1.25fr) minmax(120px, 0.55fr) minmax(130px, 0.65fr);
+  gap: 14px;
+  margin-bottom: 14px;
+  padding: 17px;
+}
+
+.acronis-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.acronis-field label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.acronis-input-suffix {
+  position: relative;
+}
+
+.acronis-input-suffix input {
+  width: 100%;
+  padding-right: 34px;
+}
+
+.acronis-input-suffix > span {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  transform: translateY(-50%);
+}
+
+.acronis-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+}
+
+.acronis-tab {
+  min-height: 36px;
+  padding: 7px 13px;
+}
+
+.acronis-tab span {
+  display: inline-flex;
+  min-width: 22px;
+  justify-content: center;
+  margin-left: 5px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(103, 117, 146, 0.10);
+  font-size: 10px;
+}
+
+.acronis-tab.active span {
+  background: rgba(21, 101, 192, 0.10);
+}
+
+.acronis-search {
+  display: flex;
+  width: min(390px, 100%);
+  min-height: 42px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid var(--sep);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--muted);
+}
+
+.acronis-search:focus-within {
+  border-color: rgba(21, 101, 192, 0.52);
+  box-shadow: 0 0 0 3px var(--action-ring);
+}
+
+.acronis-search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.acronis-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 16px;
+  align-items: start;
+}
+
+.acronis-category {
+  overflow: hidden;
+  margin-bottom: 10px;
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 8px 22px rgba(26, 43, 107, 0.05);
+}
+
+.acronis-category.has-value {
+  border-color: rgba(21, 101, 192, 0.26);
+}
+
+.acronis-category-toggle {
+  display: flex;
+  width: 100%;
+  min-height: 58px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 13px 16px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.acronis-category-toggle:hover {
+  background: rgba(238, 243, 255, 0.72);
+}
+
+.acronis-category-title {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 11px;
+}
+
+.acronis-chevron {
+  color: var(--corp-blue);
+  font-size: 11px;
+  transition: transform 0.16s ease;
+}
+
+.acronis-category.open .acronis-chevron {
+  transform: rotate(90deg);
+}
+
+.acronis-category-title strong {
+  display: block;
+  color: var(--corp-navy);
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.acronis-category-title small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.acronis-category-total {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+.acronis-category.has-value .acronis-category-total {
+  color: var(--success);
+}
+
+.acronis-category-body {
+  display: none;
+  border-top: 1px solid var(--sep);
+}
+
+.acronis-category.open .acronis-category-body {
+  display: block;
+}
+
+.acronis-column-heads,
+.acronis-product-row {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) 82px 104px 112px;
+  gap: 12px;
+  align-items: center;
+}
+
+.acronis-column-heads {
+  padding: 8px 16px;
+  background: var(--surface-alt);
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.acronis-column-heads span:not(:first-child) {
+  text-align: right;
+}
+
+.acronis-subcategory {
+  padding: 10px 16px 5px;
+  color: var(--corp-purple);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.acronis-product-row {
+  min-height: 64px;
+  padding: 9px 16px;
+  border-top: 1px solid rgba(215, 224, 240, 0.72);
+}
+
+.acronis-product-row.active {
+  background: rgba(21, 101, 192, 0.035);
+}
+
+.acronis-product-row.unavailable {
+  background: rgba(103, 117, 146, 0.035);
+}
+
+.acronis-product-name {
+  min-width: 0;
+}
+
+.acronis-product-name strong {
+  display: block;
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.acronis-product-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 9.5px;
+  line-height: 1.35;
+}
+
+.acronis-product-note {
+  color: var(--warn);
+}
+
+.acronis-unavailable {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 4px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(198, 40, 40, 0.08);
+  color: var(--danger);
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.acronis-quantity {
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 8px;
+  border: 1px solid var(--sep);
+  border-radius: 8px;
+  outline: 0;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.acronis-quantity:focus {
+  border-color: var(--corp-blue);
+  box-shadow: 0 0 0 3px var(--action-ring);
+}
+
+.acronis-quantity:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.acronis-unit-price,
+.acronis-line-total {
+  color: var(--muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  text-align: right;
+}
+
+.acronis-line-total {
+  color: var(--text);
+  font-size: 12px;
+}
+
+.acronis-product-row.active .acronis-line-total {
+  color: var(--success);
+}
+
+.acronis-summary {
+  position: sticky;
+  top: 92px;
+  padding: 18px;
+}
+
+.acronis-summary-head,
+.acronis-summary-lines > div,
+.acronis-annual {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.acronis-summary-head > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.acronis-summary-head span {
+  color: var(--corp-navy);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.acronis-summary-head strong {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.acronis-text-button {
+  border: 0;
+  background: transparent;
+  color: var(--corp-blue);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.acronis-selected-items {
+  display: flex;
+  max-height: 172px;
+  flex-direction: column;
+  gap: 7px;
+  overflow: auto;
+  margin: 14px 0;
+  padding: 10px;
+  border: 1px solid var(--sep);
+  border-radius: 10px;
+  background: var(--surface-alt);
+}
+
+.acronis-no-selection {
+  margin: 4px 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.acronis-selected-line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+}
+
+.acronis-selected-line span {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.acronis-selected-line strong {
+  color: var(--text);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.acronis-summary-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 0;
+  border-top: 1px solid var(--sep);
+  border-bottom: 1px solid var(--sep);
+}
+
+.acronis-summary-lines span,
+.acronis-annual span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.acronis-summary-lines strong,
+.acronis-annual strong {
+  color: var(--text);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.acronis-commitment-notice {
+  margin: 12px 0;
+  padding: 9px 10px;
+  border: 1px solid rgba(217, 119, 6, 0.18);
+  border-radius: 8px;
+  background: rgba(217, 119, 6, 0.06);
+  color: #8b4a06;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.acronis-commitment-notice.is-covered {
+  border-color: rgba(22, 163, 74, 0.18);
+  background: rgba(22, 163, 74, 0.06);
+  color: #08762d;
+}
+
+.acronis-grand-total {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 4px;
+}
+
+.acronis-grand-total span,
+.acronis-sale-card span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.acronis-grand-total strong {
+  color: var(--corp-navy);
+  font-size: 25px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+}
+
+.acronis-sale-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 13px;
+  padding: 13px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, var(--corp-navy), var(--corp-blue-deep));
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(26, 43, 107, 0.16);
+}
+
+.acronis-sale-card span,
+.acronis-sale-card small {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.acronis-sale-card strong {
+  font-size: 23px;
+  font-variant-numeric: tabular-nums;
+}
+
+.acronis-sale-card small {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.acronis-annual {
+  margin: 12px 0;
+}
+
+.acronis-copy-button {
+  width: 100%;
+  min-height: 42px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--corp-blue);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 10px 20px rgba(21, 101, 192, 0.18);
+}
+
+.acronis-copy-button:hover {
+  background: var(--action-strong);
+}
+
+.acronis-copy-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.acronis-fair-use {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.acronis-loader {
+  width: 26px;
+  height: 26px;
+  margin: 0 auto 10px;
+  border: 3px solid var(--sep);
+  border-top-color: var(--corp-blue);
+  border-radius: 50%;
+  animation: acronis-spin 0.7s linear infinite;
+}
+
+@keyframes acronis-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 960px) {
+  .acronis-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .acronis-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .acronis-summary {
+    position: static;
+  }
+}
+
+@media (max-width: 720px) {
+  .workspace-switcher,
+  .acronis-hero,
+  .acronis-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .workspace-switcher-tabs,
+  .acronis-tabs,
+  .acronis-search {
+    width: 100%;
+  }
+
+  .workspace-tab,
+  .acronis-tab {
+    flex: 1;
+  }
+
+  .acronis-release {
+    flex-basis: auto;
+  }
+
+  .acronis-column-heads {
+    display: none;
+  }
+
+  .acronis-product-row {
+    grid-template-columns: 86px minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px 12px;
+    padding-block: 12px;
+  }
+
+  .acronis-product-name {
+    grid-column: 1 / -1;
+  }
+
+  .acronis-unit-price::before,
+  .acronis-line-total::before {
+    display: block;
+    margin-bottom: 2px;
+    color: var(--muted);
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .acronis-unit-price::before { content: "Precio/u"; }
+  .acronis-line-total::before { content: "Total"; }
+
+  .acronis-unit-price,
+  .acronis-line-total {
+    text-align: left;
+  }
+}
+
+@media (max-width: 520px) {
+  .workspace-switcher-tabs,
+  .acronis-tabs {
+    flex-direction: column;
+  }
+
+  .acronis-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .acronis-hero {
+    padding: 22px 20px;
+  }
+
+  .acronis-product-name {
+    grid-column: 1 / -1;
+  }
+}

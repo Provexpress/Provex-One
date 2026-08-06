@@ -6,10 +6,11 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 from extractors.cloud_microsoft import build_cloud_catalog
+from extractors.acronis import build_acronis_catalog
 from extractors.common import dump_json
 
 
-def build_manifest(cloud_catalog):
+def build_manifest(cloud_catalog, acronis_catalog):
     return {
         "areas": [
             {
@@ -19,6 +20,13 @@ def build_manifest(cloud_catalog):
                 "catalog": "cloud_products.json",
                 "records": len(cloud_catalog),
             },
+            {
+                "id": "acronis",
+                "label": "Calculadora Acronis",
+                "kind": "calculator",
+                "catalog": "acronis_products.json",
+                "records": len(acronis_catalog["solution"]) + len(acronis_catalog["service"]),
+            },
         ]
     }
 
@@ -26,9 +34,11 @@ def build_manifest(cloud_catalog):
 def main():
     catalogs_dir = ROOT_DIR / "catalogs"
     cloud_catalog = build_cloud_catalog(ROOT_DIR)
-    manifest = build_manifest(cloud_catalog)
+    acronis_catalog = build_acronis_catalog(ROOT_DIR)
+    manifest = build_manifest(cloud_catalog, acronis_catalog)
 
     dump_json(catalogs_dir / "cloud_products.json", cloud_catalog)
+    dump_json(catalogs_dir / "acronis_products.json", acronis_catalog)
     dump_json(catalogs_dir / "catalog_manifest.json", manifest)
 
     # Keep compatibility with the current cloud app.
@@ -36,6 +46,10 @@ def main():
 
     print("Catalogos generados:")
     print(f"  Cloud: {len(cloud_catalog)} registros")
+    print(
+        "  Acronis: "
+        f"{len(acronis_catalog['solution']) + len(acronis_catalog['service'])} registros"
+    )
     print(f"  Productos root compatibles: {len(cloud_catalog)} registros")
 
 

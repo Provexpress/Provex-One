@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Provex One - Licencias Cloud</title>
+  <title>Provex One</title>
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -51,7 +51,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Provex One">
   <link rel="apple-touch-icon" sizes="180x180" href="icons/provex_icon_180.png">
-  <link rel="stylesheet" href="css/styles.css?v=20260701a">
+  <link rel="stylesheet" href="css/styles.css?v=20260806a">
 </head>
 <body class="app-body auth-pending bg-bg text-primary min-h-screen font-sans antialiased" style="letter-spacing:-0.022em">
   <!-- Mantenimiento para futuras actualizaciones
@@ -107,7 +107,7 @@
   <!-- NAV -->
   <nav class="app-nav sticky top-0 z-50 px-4 sm:px-6 py-4 sm:py-5
               bg-white/70 backdrop-blur-sm border-b border-sep/50">
-    <div class="max-w-[960px] mx-auto flex items-center justify-between gap-4">
+    <div class="max-w-[1180px] mx-auto flex items-center justify-between gap-4">
       <div class="flex items-center gap-3 min-w-0">
         <img src="icons/logo.webp" alt="Provexpress" class="brand-logo" width="220" height="58">
       </div>
@@ -123,7 +123,25 @@
     </div>
   </nav>
 
-  <main class="max-w-[960px] mx-auto px-4 pt-5 pb-12">
+  <main class="max-w-[1180px] mx-auto px-4 pt-5 pb-12">
+    <section class="workspace-switcher panel-shell" aria-label="Herramientas de Provex One">
+      <div>
+        <p class="workspace-switcher-label">Herramientas</p>
+        <p class="workspace-switcher-copy">Selecciona el espacio de trabajo que necesitas.</p>
+      </div>
+      <div class="workspace-switcher-tabs" role="tablist" aria-label="Cambiar herramienta">
+        <button type="button" id="cloudWorkspaceTab" class="workspace-tab active" role="tab"
+                aria-selected="true" aria-controls="cloudView" data-workspace="cloud">
+          Licencias Microsoft
+        </button>
+        <button type="button" id="acronisWorkspaceTab" class="workspace-tab" role="tab"
+                aria-selected="false" aria-controls="acronisView" data-workspace="acronis">
+          Calculadora Acronis
+        </button>
+      </div>
+    </section>
+
+    <section id="cloudView" class="workspace-view" role="tabpanel" aria-labelledby="cloudWorkspaceTab">
     <!-- SEARCH CARD -->
     <section class="panel-shell bg-card rounded-card shadow-card p-5 mb-3" aria-label="Busqueda de licencias cloud">
       <p class="text-[11px] font-semibold text-muted uppercase tracking-[0.06em] mb-3">
@@ -247,6 +265,111 @@
         <div class="icon">&#128269;</div>
         <h3>Busca o selecciona productos</h3>
         <p>Agrega varios productos para compararlos en la misma busqueda</p>
+      </div>
+    </section>
+    </section>
+
+    <section id="acronisView" class="workspace-view" role="tabpanel"
+             aria-labelledby="acronisWorkspaceTab" hidden>
+      <section class="acronis-hero panel-shell">
+        <div>
+          <span class="acronis-kicker">Acronis Cyber Cloud</span>
+          <h1>Calcula el costo y la venta en un solo lugar</h1>
+          <p>Selecciona el compromiso, el datacenter y las cantidades. Provex One aplica automáticamente el nivel de precio y el mínimo mensual.</p>
+        </div>
+        <div class="acronis-release">
+          <span>Lista vigente</span>
+          <strong id="acronisPriceList">Cargando…</strong>
+          <small>Precios en USD</small>
+        </div>
+      </section>
+
+      <section class="acronis-controls panel-shell" aria-label="Configuración de la calculadora Acronis">
+        <div class="acronis-field">
+          <label for="acronisCommitment">Compromiso mínimo mensual</label>
+          <select id="acronisCommitment" class="search-input"></select>
+        </div>
+        <div class="acronis-field">
+          <label for="acronisDatacenter">Datacenter</label>
+          <select id="acronisDatacenter" class="search-input"></select>
+        </div>
+        <div class="acronis-field compact">
+          <label for="acronisProfit">Rentabilidad</label>
+          <div class="acronis-input-suffix">
+            <input type="number" id="acronisProfit" value="6" min="6" max="999" class="search-input">
+            <span>%</span>
+          </div>
+        </div>
+        <div class="acronis-field compact">
+          <label for="acronisTrm">TRM</label>
+          <input type="text" id="acronisTrm" value="4200" class="search-input readonly-input" readonly aria-readonly="true">
+          <span id="acronisTrmStatus" class="status-text is-muted"></span>
+        </div>
+      </section>
+
+      <div class="acronis-toolbar panel-shell">
+        <div class="acronis-tabs" role="tablist" aria-label="Tipo de licenciamiento Acronis">
+          <button type="button" class="acronis-tab active" role="tab" aria-selected="true" data-acronis-mode="solution">
+            Por solución <span id="acronisSolutionCount">0</span>
+          </button>
+          <button type="button" class="acronis-tab" role="tab" aria-selected="false" data-acronis-mode="service">
+            Por servicio <span id="acronisServiceCount">0</span>
+          </button>
+        </div>
+        <label class="acronis-search" for="acronisSearch">
+          <span aria-hidden="true">⌕</span>
+          <input type="search" id="acronisSearch" placeholder="Buscar servicio, SKU o categoría" autocomplete="off">
+        </label>
+      </div>
+
+      <div class="acronis-layout">
+        <section id="acronisCatalog" class="acronis-catalog" aria-live="polite">
+          <div class="empty-state empty-state-panel">
+            <div class="acronis-loader" aria-hidden="true"></div>
+            <h3>Cargando calculadora</h3>
+            <p>Preparando precios y servicios de Acronis.</p>
+          </div>
+        </section>
+
+        <aside class="acronis-summary panel-shell" aria-label="Resumen de cotización Acronis">
+          <div class="acronis-summary-head">
+            <div>
+              <span>Resumen mensual</span>
+              <strong id="acronisSelectedCount">0 seleccionados</strong>
+            </div>
+            <button type="button" id="acronisReset" class="acronis-text-button">Limpiar</button>
+          </div>
+
+          <div id="acronisSelectedItems" class="acronis-selected-items">
+            <p class="acronis-no-selection">Agrega cantidades para construir la cotización.</p>
+          </div>
+
+          <div class="acronis-summary-lines">
+            <div><span>Consumo calculado</span><strong id="acronisUsageUsd">US$0,00</strong></div>
+            <div><span>Mínimo contratado</span><strong id="acronisMinimumUsd">US$0,00</strong></div>
+          </div>
+
+          <div id="acronisCommitmentNotice" class="acronis-commitment-notice"></div>
+
+          <div class="acronis-grand-total">
+            <span>Costo mensual facturable</span>
+            <strong id="acronisBilledUsd">US$0,00</strong>
+          </div>
+
+          <div class="acronis-sale-card">
+            <span>Venta sugerida mensual</span>
+            <strong id="acronisSaleUsd">US$0,00</strong>
+            <small id="acronisSaleCop">COP $0</small>
+          </div>
+
+          <div class="acronis-annual">
+            <span>Venta anual estimada</span>
+            <strong id="acronisAnnualUsd">US$0,00</strong>
+          </div>
+
+          <button type="button" id="acronisCopy" class="acronis-copy-button">Copiar cotización</button>
+          <p class="acronis-fair-use">* Los servicios con almacenamiento ilimitado están sujetos a la política de uso justo de Acronis.</p>
+        </aside>
       </div>
     </section>
   </main>
