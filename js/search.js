@@ -1,7 +1,6 @@
 import {
   buildDistributorCopyText,
   DIST_ORDER,
-  applyMobileVisibility,
   renderTables,
   showEmptyState,
   showLoadingState,

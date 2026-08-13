@@ -1,4 +1,6 @@
 
+export const DIST_ORDER = ["LOL"];
+
 export const DIST_CLASS_SUFFIX = {
   LOL: "lol",
 };
@@ -117,12 +119,6 @@ export function renderTables({
   html += "</div>";
   resultsArea.innerHTML = html;
   
-}
-
-  const resolvedDist = activeDist || cards[0].dataset.dist;
-  cards.forEach((card) => {
-    card.classList.toggle("mobile-visible", card.dataset.dist === resolvedDist);
-  });
 }
 
 export function getPriceDisplay(price) {
