@@ -11,8 +11,7 @@ const SUGGESTION_LIMIT = 8;
 const MIN_PROFIT_PCT = 6;
 const CLOUD_CATALOG_PATHS = ["catalogs/cloud_products.json", "products.json"];
 const TYPE_OPTION_DEFS = [
-  { value: "NCE", label: "NCE" },
-  { value: "SUSCRIPCION", label: "Suscripcion" },
+  { value: "SUSCRIPCION", label: "Suscripción" },
   { value: "PERPETUO", label: "Perpetuo" },
 ];
 const SEGMENT_OPTION_DEFS = [
@@ -406,8 +405,12 @@ function matchesSelectionOrQuery(product, criteria) {
 function matchesSecondaryFilters(product, criteria, ignoredKeys = new Set()) {
   const segment = normalizeText(product.segment);
 
-  if (!ignoredKeys.has("type") && criteria.type && product.type !== criteria.type) {
-    return false;
+  if (!ignoredKeys.has("type") && criteria.type) {
+    const isSub = criteria.type === "SUSCRIPCION" || criteria.type === "NCE";
+    const prodIsSub = product.type === "SUSCRIPCION" || product.type === "NCE";
+    if (isSub ? !prodIsSub : product.type !== criteria.type) {
+      return false;
+    }
   }
 
   if (!ignoredKeys.has("segment") && criteria.segment && segment !== criteria.segment) {
