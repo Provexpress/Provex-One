@@ -1,8 +1,6 @@
-export const DIST_ORDER = ["LOL", "INGRAM"];
 
 export const DIST_CLASS_SUFFIX = {
   LOL: "lol",
-  INGRAM: "ingram",
 };
 
 const TERM_LABELS = {

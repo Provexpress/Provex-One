@@ -1,12 +1,3 @@
-# Provex One - Licencias Cloud
-
-App web para comparar precios de licencias Microsoft entre **LOL** e **INGRAM**, y calcular costos y cotizaciones de **Acronis Cyber Cloud**.
-
----
-
-## Stack
-
-- **Frontend:** HTML + CSS + Vanilla JS (sin frameworks, 0 dependencias)
 - **Base de datos:** `products.json` estatico
 - **Hosting sugerido:** GitHub Pages, Netlify, Vercel o servidor local
 

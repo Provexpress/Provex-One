@@ -32,10 +32,10 @@ const PERIOD_OPTION_DEFS = [
 
 const state = {
   products: [],
-  activeDists: new Set(["INGRAM", "LOL"]),
+  activeDists: new Set(["LOL"]),
   currentResults: createEmptyResults(),
   hasSearched: false,
-  activeMobileDist: "INGRAM",
+  activeMobileDist: "LOL",
   isLoadingProducts: true,
   loadError: false,
   selectedProducts: [],
@@ -292,7 +292,8 @@ function matchesSelectionContext(product, context) {
     return true;
   }
 
-  const searchableName = product.searchText || normalizeText(product.name || "");
+  const partNumberText = normalizeText(product.partNumber || "");
+  const searchableName = (product.searchText || normalizeText(product.name || "")) + " " + partNumberText;
   return context.words.every((word) => searchableName.includes(word));
 }
 
