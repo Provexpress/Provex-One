@@ -73,8 +73,6 @@ initialize();
 function initialize() {
   bindEvents();
   enforceMinProfitPct({ force: true });
-  syncFilterChips();
-  syncMobileTabs();
   renderSelectedProducts();
   renderSearchWarning();
   loadProducts();
