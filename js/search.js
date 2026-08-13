@@ -123,11 +123,6 @@ function bindEvents() {
     });
   });
 
-  elements.filterChips.forEach((chip) => {
-    chip.addEventListener("click", () => {
-      toggleDist(chip.dataset.dist);
-    });
-  });
 
   elements.profitPct.addEventListener("input", () => {
     enforceMinProfitPct();
@@ -149,11 +144,6 @@ function bindEvents() {
     }
   });
 
-  elements.mobileTabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      setActiveMobileDist(tab.dataset.dist);
-    });
-  });
 }
 
 async function loadProducts() {
@@ -732,11 +722,6 @@ function compareProducts(left, right, selectedProducts) {
   return (Number(left.price) || 0) - (Number(right.price) || 0);
 }
 
-function toggleDist(dist) {
-  if (!dist) {
-    return;
-  }
-
   if (state.activeDists.has(dist)) {
     if (state.activeDists.size === 1) {
       return;
@@ -754,11 +739,6 @@ function toggleDist(dist) {
     renderCurrentResults();
   }
 }
-
-function setActiveMobileDist(dist) {
-  if (!state.activeDists.has(dist)) {
-    return;
-  }
 
   state.activeMobileDist = dist;
   updateMobileTabState();

@@ -116,15 +116,8 @@ export function renderTables({
 
   html += "</div>";
   resultsArea.innerHTML = html;
-  applyMobileVisibility(resultsArea, activeMobileDist);
+  
 }
-
-export function applyMobileVisibility(resultsArea, activeDist) {
-  const cards = Array.from(resultsArea.querySelectorAll(".dist-card"));
-
-  if (!cards.length) {
-    return;
-  }
 
   const resolvedDist = activeDist || cards[0].dataset.dist;
   cards.forEach((card) => {
@@ -231,7 +224,7 @@ function buildDistributorCard({ dist, products, bestByName, profitPct, qty }) {
 
       html += `
         <tr class="${isBestPrice ? "best-price" : ""}">
-          <td class="td-name">
+          <td class="td-name" data-label="Producto">
             <div class="prod-name">
               ${escHtml(String(productDisplayName || "").substring(0, 70))}
               ${isBestPrice ? '<span class="best-badge">Mejor</span>' : ""}
@@ -246,10 +239,10 @@ function buildDistributorCard({ dist, products, bestByName, profitPct, qty }) {
                 : ""
             }
           </td>
-          <td><span class="term-text">${escHtml(formatTerm(product.normalizedTerm || product.term))} / ${escHtml(formatBilling(product.normalizedBilling || product.billing))}</span></td>
-          <td class="td-right price-cell">${getPriceDisplay(unitPrice)}</td>
-          <td class="td-right price-cell sale-cell">${getPriceDisplay(saleTotal)}</td>
-          <td class="td-right profit-cell ${profit >= 0 ? "profit-positive" : "profit-negative"}">${getPriceDisplay(profit)}</td>
+          <td data-label="Periodo"><span class="term-text">${escHtml(formatTerm(product.normalizedTerm || product.term))} / ${escHtml(formatBilling(product.normalizedBilling || product.billing))}</span></td>
+          <td class="td-right price-cell" data-label="P. Unit.">${getPriceDisplay(unitPrice)}</td>
+          <td class="td-right price-cell sale-cell" data-label="Venta">${getPriceDisplay(saleTotal)}</td>
+          <td class="td-right profit-cell ${profit >= 0 ? "profit-positive" : "profit-negative"}" data-label="Ganancia">${getPriceDisplay(profit)}</td>
         </tr>
       `;
     });

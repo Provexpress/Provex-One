@@ -1875,3 +1875,73 @@ tr:hover td      { background: rgba(21, 101, 192, 0.035); }
     grid-column: 1 / -1;
   }
 }
+
+/* ── RESPONSIVE TABLE CARDS (MOBILE) ──────────────── */
+@media (max-width: 768px) {
+  /* Ocultar el encabezado de mayorista porque ahora solo es LOL */
+  .dist-header {
+    display: none;
+  }
+  
+  .dist-table-wrap {
+    overflow: visible;
+  }
+  
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+  
+  thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+  
+  tr {
+    margin-bottom: 16px;
+    border: 1px solid var(--sep);
+    border-radius: var(--btn-radius, 12px);
+    background: #fff;
+    padding: 12px;
+    box-shadow: 0 4px 12px rgba(26, 43, 107, 0.05);
+  }
+  
+  td {
+    border: none;
+    position: relative;
+    padding: 8px 0 !important;
+    text-align: right !important;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--sep) !important;
+  }
+  
+  td:last-child {
+    border-bottom: 0 !important;
+  }
+  
+  td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    text-align: left;
+    margin-right: 12px;
+  }
+  
+  .td-name {
+    flex-direction: column;
+    align-items: flex-start !important;
+    text-align: left !important;
+  }
+  
+  .td-name::before {
+    display: none;
+  }
+  
+  .prod-name {
+    margin-bottom: 6px;
+  }
+}
