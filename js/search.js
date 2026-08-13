@@ -722,55 +722,6 @@ function compareProducts(left, right, selectedProducts) {
   return (Number(left.price) || 0) - (Number(right.price) || 0);
 }
 
-  if (state.activeDists.has(dist)) {
-    if (state.activeDists.size === 1) {
-      return;
-    }
-
-    state.activeDists.delete(dist);
-  } else {
-    state.activeDists.add(dist);
-  }
-
-  syncFilterChips();
-  syncMobileTabs();
-
-  if (state.hasSearched) {
-    renderCurrentResults();
-  }
-}
-
-  state.activeMobileDist = dist;
-  updateMobileTabState();
-
-  if (state.hasSearched) {
-    applyMobileVisibility(elements.resultsArea, state.activeMobileDist);
-  }
-}
-
-function syncFilterChips() {
-  elements.filterChips.forEach((chip) => {
-    chip.classList.toggle("active", state.activeDists.has(chip.dataset.dist));
-  });
-}
-
-function syncMobileTabs() {
-  elements.mobileTabs.forEach((tab) => {
-    tab.hidden = !state.activeDists.has(tab.dataset.dist);
-  });
-
-  if (!state.activeDists.has(state.activeMobileDist)) {
-    state.activeMobileDist = DIST_ORDER.find((dist) => state.activeDists.has(dist)) || DIST_ORDER[0];
-  }
-
-  updateMobileTabState();
-}
-
-function updateMobileTabState() {
-  elements.mobileTabs.forEach((tab) => {
-    tab.classList.toggle("active", tab.dataset.dist === state.activeMobileDist);
-  });
-}
 
 function renderCurrentResults() {
   renderTables({
