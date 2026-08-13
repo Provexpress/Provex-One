@@ -1,4 +1,4 @@
-const CACHE_NAME = 'provex-one-v24';
+const CACHE_NAME = 'provex-one-v25';
 
 const STATIC_ASSETS = [
   './',
@@ -47,6 +47,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
+  if (!url.protocol.startsWith('http')) return;
 
   if (
     event.request.mode === 'navigate' ||
