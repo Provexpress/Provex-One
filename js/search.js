@@ -1110,7 +1110,7 @@ function enrichProduct(product) {
     normalizedBilling,
     strictPeriodKey,
     comparisonKey,
-    searchText: normalizeText(`${canonicalName} ${product.name || ""}`),
+    searchText: normalizeText(`${canonicalName} ${product.name || ""} ${product.partNumber || ""} ${product.productId || ""}`),
   };
 }
 

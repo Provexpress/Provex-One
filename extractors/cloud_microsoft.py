@@ -13,9 +13,10 @@ from extractors.common import (
     safe_str,
 )
 
-def build_cloud_product(distributor, product_type, part_number, name, term, billing, price, erp, segment):
+def build_cloud_product(distributor, product_type, part_number, name, term, billing, price, erp, segment, product_id=""):
     clean_name = normalize_name_text(name)
     clean_part_number = safe_str(part_number)
+    clean_product_id = safe_str(product_id)
     clean_term = safe_str(term)
     clean_billing = safe_str(billing)
     clean_segment = safe_str(segment)
@@ -30,6 +31,7 @@ def build_cloud_product(distributor, product_type, part_number, name, term, bill
         "distributor": distributor,
         "type": product_type,
         "partNumber": clean_part_number,
+        "productId": clean_product_id,
         "name": clean_name,
         "term": clean_term,
         "billing": clean_billing,
@@ -68,7 +70,8 @@ def extract_lol(path):
 
             df = pd.read_excel(readable_path, sheet_name=sheet)
             erp_col = resolve_column(df.columns, "ERP Price", "ERP")
-            part_col = resolve_column(df.columns, "NUMERO DE PARTE", "Numero Parte", "Part Number")
+            product_id_col = resolve_column(df.columns, "ProductId", "Product Id", "ProductID")
+            part_col = resolve_column(df.columns, "NUMERO DE PARTE", "Numero Parte", "Part Number", "ProductId", "Product Id", "ProductID")
             name_col = resolve_column(df.columns, "SkuTitle", "Descripción", "Descripcion")
             term_col = resolve_column(df.columns, "TermDuration")
             billing_col = resolve_column(df.columns, "BillingPlan")
@@ -82,17 +85,21 @@ def extract_lol(path):
                 if not name or price == 0:
                     continue
 
+                product_id = safe_str(row.get(product_id_col))
+                part_number = safe_str(row.get(part_col)) or product_id
+
                 items.append(
                     build_cloud_product(
                         distributor="LOL",
                         product_type=product_type,
-                        part_number=safe_str(row.get(part_col)),
+                        part_number=part_number,
                         name=name,
                         term=safe_str(row.get(term_col)) or "OneTime",
                         billing=safe_str(row.get(billing_col)) or ("OneTime" if product_type == "PERPETUO" else ""),
                         price=price,
                         erp=safe_float(row.get(erp_col, 0)),
                         segment=safe_str(row.get(segment_col)),
+                        product_id=product_id,
                     )
                 )
 
