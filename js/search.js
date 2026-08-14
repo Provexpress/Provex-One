@@ -17,6 +17,7 @@ const TYPE_OPTION_DEFS = [
 const SEGMENT_OPTION_DEFS = [
   { value: "Commercial", label: "Commercial" },
   { value: "Education", label: "Education" },
+  { value: "Charity", label: "Charity / NonProfit" },
 ];
 const PERIOD_OPTION_DEFS = [
   { value: "mensual_mensual", label: "Mensual / Mensual" },
@@ -149,9 +150,7 @@ async function loadProducts() {
   try {
     const data = await fetchCatalogData(CLOUD_CATALOG_PATHS);
     state.products = Array.isArray(data)
-      ? data
-          .filter((product) => normalizeText(product.segment) !== "charity")
-          .map(enrichProduct)
+      ? data.map(enrichProduct)
       : [];
 
     if (elements.totalCount) {
