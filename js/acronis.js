@@ -350,7 +350,8 @@ function updateSummary() {
   const commitment = Number(state.data.commitments[state.tierIndex]) || 0;
   const billed = Math.max(usage, commitment);
   const profit = getProfit();
-  const sale = billed * (1 + profit / 100);
+  const marginRatio = Math.min(0.99, profit / 100);
+  const sale = billed / (1 - marginRatio);
   const trm = parseTrm(elements.trm.value);
 
   elements.selectedCount.textContent = `${entries.length.toLocaleString("es-CO")} seleccionados`;
@@ -408,10 +409,11 @@ async function copyQuote() {
   const usage = entries.reduce((sum, entry) => sum + entry.quantity * entry.price, 0);
   const commitment = Number(state.data.commitments[state.tierIndex]) || 0;
   const billed = Math.max(usage, commitment);
-  const sale = billed * (1 + getProfit() / 100);
+  const marginRatio = Math.min(0.99, getProfit() / 100);
+  const sale = billed / (1 - marginRatio);
   const rows = entries.map(({ item, quantity, price }) => {
     const sku = item.skus.All || item.skus[state.dcGroup] || "";
-    const saleUnit = price * (1 + getProfit() / 100);
+    const saleUnit = price / (1 - marginRatio);
     return [
       sku,
       displayDescription(item.description),
@@ -421,7 +423,7 @@ async function copyQuote() {
       (saleUnit * quantity).toFixed(2),
     ].join("\t");
   });
-  const commitmentAdjustment = Math.max(0, billed - usage) * (1 + getProfit() / 100);
+  const commitmentAdjustment = Math.max(0, billed - usage) / (1 - marginRatio);
   if (commitmentAdjustment > 0) {
     rows.push(
       [

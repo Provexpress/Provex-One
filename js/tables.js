@@ -141,7 +141,8 @@ function buildSummaryStrip({ currentResults, visibleDists, profitPct, qty, visib
 
   const minPrice = Math.min(...allPrices);
   const averagePrice = allPrices.reduce((sum, value) => sum + value, 0) / allPrices.length;
-  const minimumSale = minPrice * (1 + profitPct / 100) * qty;
+  const marginRatio = Math.min(0.99, profitPct / 100);
+  const minimumSale = (minPrice / (1 - marginRatio)) * qty;
 
   return `
     <div class="summary-strip">
@@ -209,7 +210,8 @@ function buildDistributorCard({ dist, products, bestByName, profitPct, qty }) {
 
     shownProducts.forEach((product) => {
       const unitPrice = Number(product.price) || 0;
-      const saleUnit = unitPrice * (1 + profitPct / 100);
+      const marginRatio = Math.min(0.99, profitPct / 100);
+      const saleUnit = unitPrice / (1 - marginRatio);
       const saleTotal = saleUnit * qty;
       const costTotal = unitPrice * qty;
       const profit = saleTotal - costTotal;
@@ -270,7 +272,8 @@ export function buildDistributorCopyText({ dist, products, profitPct, qty }) {
 
   const rows = shownProducts.map((product) => {
     const costUnit = Number(product.price) || 0;
-    const saleUnit = costUnit * (1 + safeProfitPct / 100);
+    const marginRatio = Math.min(0.99, safeProfitPct / 100);
+    const saleUnit = costUnit / (1 - marginRatio);
     const subtotal = saleUnit * safeQty;
 
     return [
