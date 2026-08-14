@@ -1101,8 +1101,11 @@ function enrichProduct(product) {
     product.type || "",
     normalizeText(product.segment),
   ].join("__");
+  const rawType = String(product.type || "").trim();
+  const type = rawType.toUpperCase() === "NCE" ? "SUSCRIPCION" : rawType;
   return {
     ...product,
+    type,
     canonicalName,
     normalizedTerm,
     normalizedBilling,

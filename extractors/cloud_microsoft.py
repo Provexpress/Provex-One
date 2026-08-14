@@ -60,7 +60,7 @@ def extract_lol(path):
             if "perpetual" in name_lower or "perpetuo" in name_lower:
                 sheet_types.append(("Lista de precios", "PERPETUO"))
             else:
-                sheet_types.append(("Lista de precios", "NCE"))
+                sheet_types.append(("Lista de precios", "SUSCRIPCION"))
 
         for sheet, product_type in sheet_types:
             if sheet not in xl.sheet_names:
