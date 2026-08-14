@@ -72,7 +72,7 @@ def extract_lol(path):
             name_col = resolve_column(df.columns, "SkuTitle", "Descripción", "Descripcion")
             term_col = resolve_column(df.columns, "TermDuration")
             billing_col = resolve_column(df.columns, "BillingPlan")
-            price_col = resolve_column(df.columns, "UnitPrice", "PARTNER PRICE")
+            price_col = resolve_column(df.columns, "UnitPrice", "Unit Price", "Unit_Price")
             segment_col = resolve_column(df.columns, "Segment")
 
             for _, row in df.iterrows():
