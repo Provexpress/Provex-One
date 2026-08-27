@@ -203,10 +203,9 @@ function populateControls() {
   const targetIndex = state.data.commitments.indexOf(4000);
   state.tierIndex = targetIndex >= 0 ? targetIndex : 3;
 
-  elements.commitment.innerHTML = `
-    <option value="${state.tierIndex}">${formatUsdTotal(4000)} / mes</option>
-  `;
-  elements.commitment.value = String(state.tierIndex);
+  if (elements.commitment) {
+    elements.commitment.value = `${formatUsdTotal(4000)} / mes`;
+  }
 
   elements.datacenter.innerHTML = ["G1", "G2"]
     .map((group) => {
