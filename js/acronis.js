@@ -253,7 +253,7 @@ function renderCatalog() {
     .map(({ name, items: categoryItems }, categoryIndex) => {
       const categoryKey = `${state.mode}:${name}`;
       const open = state.search || state.openCategories.has(categoryKey);
-      const total = categoryItems.reduce((sum, item) => sum + lineSaleTotal(item), 0);
+      const total = categoryItems.reduce((sum, item) => sum + lineTotal(item), 0);
       let lastSubcategory = null;
       const rows = categoryItems
         .map((item) => {
@@ -281,7 +281,7 @@ function renderCatalog() {
           </button>
           <div class="acronis-category-body">
             <div class="acronis-column-heads">
-              <span>Concepto</span><span>Cantidad</span><span>Precio Venta/u</span><span>Total</span>
+              <span>Concepto</span><span>Cantidad</span><span>Precio/u</span><span>Total</span>
             </div>
             ${rows}
           </div>
@@ -292,12 +292,12 @@ function renderCatalog() {
 }
 
 function renderProductRow(item) {
-  const salePrice = unitSalePrice(item);
+  const price = unitPrice(item);
   const quantity = getQuantity(item.id);
-  const unavailable = salePrice === null;
+  const unavailable = price === null;
   const sku = item.skus.All || item.skus[state.dcGroup] || "";
   const note = formatNote(item.note);
-  const total = unavailable ? 0 : salePrice * quantity;
+  const total = unavailable ? 0 : price * quantity;
 
   return `
     <div class="acronis-product-row ${quantity > 0 && !unavailable ? "active" : ""} ${unavailable ? "unavailable" : ""}" data-acronis-row="${escapeAttribute(item.id)}">
@@ -312,7 +312,7 @@ function renderProductRow(item) {
       <input type="number" min="0" step="1" inputmode="numeric" class="acronis-quantity"
              value="${quantity || 0}" data-acronis-quantity="${escapeAttribute(item.id)}"
              aria-label="Cantidad para ${escapeAttribute(displayDescription(item.description))}" ${unavailable ? "disabled" : ""}>
-      <div class="acronis-unit-price" data-unit-price>${unavailable ? "—" : formatUsdUnit(salePrice)}</div>
+      <div class="acronis-unit-price" data-unit-price>${unavailable ? "—" : formatUsdUnit(price)}</div>
       <div class="acronis-line-total" data-line-total>${unavailable ? "—" : formatUsdTotal(total)}</div>
     </div>
   `;
@@ -321,24 +321,24 @@ function renderProductRow(item) {
 function updateVisibleCalculations() {
   elements.catalog.querySelectorAll("[data-acronis-row]").forEach((row) => {
     const item = findItem(row.dataset.acronisRow);
-    const salePrice = unitSalePrice(item);
+    const price = unitPrice(item);
     const quantity = getQuantity(item.id);
-    const total = salePrice === null ? 0 : salePrice * quantity;
-    row.classList.toggle("active", quantity > 0 && salePrice !== null);
+    const total = price === null ? 0 : price * quantity;
+    row.classList.toggle("active", quantity > 0 && price !== null);
     const unitPriceEl = row.querySelector("[data-unit-price]");
     if (unitPriceEl) {
-      unitPriceEl.textContent = salePrice === null ? "—" : formatUsdUnit(salePrice);
+      unitPriceEl.textContent = price === null ? "—" : formatUsdUnit(price);
     }
     const lineTotalEl = row.querySelector("[data-line-total]");
     if (lineTotalEl) {
-      lineTotalEl.textContent = salePrice === null ? "—" : formatUsdTotal(total);
+      lineTotalEl.textContent = price === null ? "—" : formatUsdTotal(total);
     }
   });
 
   elements.catalog.querySelectorAll("[data-category-card]").forEach((card) => {
     const total = Array.from(card.querySelectorAll("[data-acronis-row]")).reduce((sum, row) => {
       const item = findItem(row.dataset.acronisRow);
-      return sum + lineSaleTotal(item);
+      return sum + lineTotal(item);
     }, 0);
     card.classList.toggle("has-value", total > 0);
     const catTotalEl = card.querySelector("[data-category-total]");
@@ -392,9 +392,7 @@ function updateSummary() {
   elements.selectedItems.innerHTML = entries.length
     ? entries
         .map(({ item, quantity, price }) => {
-          const marginRatio = Math.min(0.99, profit / 100);
-          const saleUnit = price === null ? null : price / (1 - marginRatio);
-          const value = saleUnit === null ? "No disponible" : formatUsdTotal(quantity * saleUnit);
+          const value = price === null ? "No disponible" : formatUsdTotal(quantity * price);
           return `
             <div class="acronis-selected-line">
               <span title="${escapeAttribute(displayDescription(item.description))}">${quantity} × ${escapeHtml(displayDescription(item.description))}</span>
@@ -520,23 +518,9 @@ function unitPrice(item) {
   return Number.isFinite(Number(price)) ? Number(price) : null;
 }
 
-function unitSalePrice(item) {
-  const cost = unitPrice(item);
-  if (cost === null) {
-    return null;
-  }
-  const marginRatio = Math.min(0.99, getProfit() / 100);
-  return cost / (1 - marginRatio);
-}
-
 function lineTotal(item) {
   const price = unitPrice(item);
   return price === null ? 0 : price * getQuantity(item.id);
-}
-
-function lineSaleTotal(item) {
-  const sale = unitSalePrice(item);
-  return sale === null ? 0 : sale * getQuantity(item.id);
 }
 
 function getQuantity(id) {
