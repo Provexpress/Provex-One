@@ -126,6 +126,9 @@ function bindEvents() {
     updateSummary();
   });
 
+  elements.profit.addEventListener("focus", () => {
+    elements.profit.select();
+  });
   elements.profit.addEventListener("input", () => {
     updateSummary();
   });
@@ -518,10 +521,12 @@ function getProfit() {
 }
 
 function enforceProfit({ force = false } = {}) {
-  if (!elements.profit.value && !force) {
+  const raw = String(elements.profit.value || "").trim();
+  if (!raw && !force) {
     return;
   }
-  if (Number(elements.profit.value) < MIN_PROFIT_PCT || !Number.isFinite(Number(elements.profit.value))) {
+  const val = Number(raw);
+  if (!raw || !Number.isFinite(val) || val < MIN_PROFIT_PCT) {
     elements.profit.value = String(MIN_PROFIT_PCT);
   }
 }

@@ -165,6 +165,10 @@ function bindEvents() {
   });
 
 
+  elements.profitPct.addEventListener("focus", () => {
+    elements.profitPct.select();
+  });
+
   elements.profitPct.addEventListener("input", () => {
     if (state.hasSearched) {
       renderCurrentResults();
@@ -176,6 +180,10 @@ function bindEvents() {
     if (state.hasSearched) {
       renderCurrentResults();
     }
+  });
+
+  elements.qtyInput.addEventListener("focus", () => {
+    elements.qtyInput.select();
   });
 
   elements.qtyInput.addEventListener("input", () => {
@@ -786,11 +794,12 @@ function getProfitPct() {
 }
 
 function enforceMinProfitPct({ force = false } = {}) {
-  if (!elements.profitPct.value && !force) {
+  const raw = String(elements.profitPct.value || "").trim();
+  if (!raw && !force) {
     return;
   }
-
-  if (getProfitPct() !== Number(elements.profitPct.value)) {
+  const val = Number(raw);
+  if (!raw || !Number.isFinite(val) || val < MIN_PROFIT_PCT) {
     elements.profitPct.value = String(MIN_PROFIT_PCT);
   }
 }
