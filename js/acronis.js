@@ -27,7 +27,7 @@ const copFormatter = new Intl.NumberFormat("es-CO", {
 const state = {
   data: null,
   mode: "solution",
-  tierIndex: 0,
+  tierIndex: 3,
   dcGroup: "G1",
   datacenterLabel: "",
   quantities: new Map(),
@@ -200,12 +200,12 @@ function populateControls() {
   elements.solutionCount.textContent = getFilteredItems("solution").length.toLocaleString("es-CO");
   elements.serviceCount.textContent = getFilteredItems("service").length.toLocaleString("es-CO");
 
-  elements.commitment.innerHTML = state.data.commitments
-    .map(
-      (commitment, index) =>
-        `<option value="${index}">${formatUsdTotal(commitment)} / mes</option>`,
-    )
-    .join("");
+  const targetIndex = state.data.commitments.indexOf(4000);
+  state.tierIndex = targetIndex >= 0 ? targetIndex : 3;
+
+  elements.commitment.innerHTML = `
+    <option value="${state.tierIndex}">${formatUsdTotal(4000)} / mes</option>
+  `;
   elements.commitment.value = String(state.tierIndex);
 
   elements.datacenter.innerHTML = ["G1", "G2"]
