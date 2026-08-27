@@ -29,6 +29,31 @@ const PERIOD_OPTION_DEFS = [
   { value: "onetime_onetime", label: "One Time / OneTime" },
 ];
 
+// Abreviaturas y aliases de busqueda. Cada palabra del query se expande
+// antes de tokenizar, permitiendo busquedas mas naturales y flexibles.
+const SEARCH_ALIASES = {
+  "m365":   "microsoft 365",
+  "o365":   "office 365",
+  "biz":    "business",
+  "std":    "standard",
+  "prem":   "premium",
+  "ent":    "enterprise",
+  "ess":    "essentials",
+  "exch":   "exchange",
+  "spo":    "sharepoint",
+  "def":    "defender",
+  "proj":   "project",
+  "vis":    "visio",
+  "aad":    "entra",
+  "win":    "windows",
+  "subs":   "subscription",
+  "bp":     "business premium",
+  "bs":     "business standard",
+  "bb":     "business basic",
+  "teams":  "teams",
+  "intune": "intune",
+};
+
 const state = {
   products: [],
   activeDists: new Set(["LOL"]),
@@ -67,6 +92,25 @@ const elements = {
   mobileTabs: Array.from(document.querySelectorAll(".dist-tab")),
   resultsArea: document.getElementById("resultsArea"),
 };
+
+// Expande cada palabra del query usando el mapa de aliases, palabra por palabra.
+// "m365 biz std" → "microsoft 365 business standard"
+function expandAliases(query) {
+  return query
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => SEARCH_ALIASES[word] || word)
+    .join(" ");
+}
+
+// Devuelve true si TODAS las palabras del query coinciden como prefijo
+// de AL MENOS UNA palabra del texto del producto.
+// "busi" → "business" ✓    "stand" → "standard" ✓
+function queryWordsMatchProduct(queryWords, productWords) {
+  return queryWords.every((qw) =>
+    productWords.some((pw) => pw.startsWith(qw)),
+  );
+}
 
 initialize();
 
@@ -255,7 +299,7 @@ function syncCloudFilterOptions() {
 }
 
 function getSelectionContext() {
-  const query = normalizeText(elements.searchInput.value);
+  const query = expandAliases(normalizeText(elements.searchInput.value));
   const words = query.split(/\s+/).filter(Boolean);
 
   return {
@@ -277,9 +321,10 @@ function matchesSelectionContext(product, context) {
     return true;
   }
 
-  const partNumberText = normalizeText(product.partNumber || "");
-  const searchableName = (product.searchText || normalizeText(product.name || "")) + " " + partNumberText;
-  return context.words.every((word) => searchableName.includes(word));
+  const productWords =
+    product.searchWords ||
+    (product.searchText || normalizeText(product.name || "")).split(/\s+/).filter(Boolean);
+  return queryWordsMatchProduct(context.words, productWords);
 }
 
 function handleSuggestionClick(event) {
@@ -364,9 +409,10 @@ function runSearch() {
 }
 
 function getSearchCriteria(query) {
+  const expandedQuery = expandAliases(query);
   return {
     currentInput: {
-      words: query.split(/\s+/).filter(Boolean),
+      words: expandedQuery.split(/\s+/).filter(Boolean),
       type: elements.typeFilter.value,
       segment: normalizeText(elements.segFilter.value),
       period: elements.termFilter.value,
@@ -391,14 +437,14 @@ function matchesProduct(product, criteria) {
 }
 
 function matchesSelectionOrQuery(product, criteria) {
-  const productName = String(product.name || "").trim();
-
   if (!criteria.words.length) {
     return false;
   }
 
-  const searchableName = product.searchText || normalizeText(productName);
-  return criteria.words.every((word) => searchableName.includes(word));
+  const productWords =
+    product.searchWords ||
+    (product.searchText || normalizeText(String(product.name || "").trim())).split(/\s+/).filter(Boolean);
+  return queryWordsMatchProduct(criteria.words, productWords);
 }
 
 function matchesSecondaryFilters(product, criteria, ignoredKeys = new Set()) {
@@ -436,8 +482,9 @@ function updateSearchSuggestions() {
   const selectedIds = new Set(state.selectedProducts.map((selection) => selection.id));
   const suggestions = [];
   const seenNames = new Set();
+  const expandedQuery = expandAliases(query);
   const criteria = {
-    words: query.split(/\s+/).filter(Boolean),
+    words: expandedQuery.split(/\s+/).filter(Boolean),
     ...activeFilters,
   };
 
@@ -457,7 +504,10 @@ function updateSearchSuggestions() {
       continue;
     }
 
-    if (!(product.searchText || normalizeText(productName)).includes(query)) {
+    const productWords =
+      product.searchWords ||
+      (product.searchText || normalizeText(productName)).split(/\s+/).filter(Boolean);
+    if (!queryWordsMatchProduct(criteria.words, productWords)) {
       continue;
     }
 
@@ -1102,6 +1152,7 @@ function enrichProduct(product) {
   ].join("__");
   const rawType = String(product.type || "").trim();
   const type = rawType.toUpperCase() === "NCE" ? "SUSCRIPCION" : rawType;
+  const searchText = normalizeText(`${canonicalName} ${product.name || ""} ${product.partNumber || ""} ${product.productId || ""}`);
   return {
     ...product,
     type,
@@ -1110,7 +1161,8 @@ function enrichProduct(product) {
     normalizedBilling,
     strictPeriodKey,
     comparisonKey,
-    searchText: normalizeText(`${canonicalName} ${product.name || ""} ${product.partNumber || ""} ${product.productId || ""}`),
+    searchText,
+    searchWords: searchText.split(/\s+/).filter(Boolean),
   };
 }
 
