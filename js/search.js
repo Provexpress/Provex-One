@@ -166,7 +166,6 @@ function bindEvents() {
 
 
   elements.profitPct.addEventListener("input", () => {
-    enforceMinProfitPct();
     if (state.hasSearched) {
       renderCurrentResults();
     }
@@ -398,14 +397,11 @@ function runSearch() {
 
   const criteria = getSearchCriteria(query);
   state.hasSearched = true;
-  showLoadingState(elements.resultsArea);
   hideSearchSuggestions();
 
-  window.setTimeout(() => {
-    const filteredProducts = state.products.filter((product) => matchesProduct(product, criteria));
-    state.currentResults = groupResultsByDistributor(filteredProducts);
-    renderCurrentResults();
-  }, 30);
+  const filteredProducts = state.products.filter((product) => matchesProduct(product, criteria));
+  state.currentResults = groupResultsByDistributor(filteredProducts);
+  renderCurrentResults();
 }
 
 function getSearchCriteria(query) {
@@ -1235,7 +1231,7 @@ function setDynamicSelectOptions(filterKey, select, options, { allLabel, autoSel
 
   const previousValue = select.value;
   const previousWasAuto = state.autoSelectedFilters[filterKey];
-  select.innerHTML = [`<option value="">${escapeHtml(allLabel)}</option>`]
+  const newHtml = [`<option value="">${escapeHtml(allLabel)}</option>`]
     .concat(
       options.map(
         (option) =>
@@ -1243,6 +1239,10 @@ function setDynamicSelectOptions(filterKey, select, options, { allLabel, autoSel
       ),
     )
     .join("");
+
+  if (select.innerHTML !== newHtml) {
+    select.innerHTML = newHtml;
+  }
 
   select.disabled = options.length === 0;
   const availableValues = options.map((option) => option.value);

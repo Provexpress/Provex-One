@@ -127,7 +127,6 @@ function bindEvents() {
   });
 
   elements.profit.addEventListener("input", () => {
-    enforceProfit();
     updateSummary();
   });
   elements.profit.addEventListener("blur", () => {
