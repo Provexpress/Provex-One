@@ -9,7 +9,8 @@ const TERM_LABELS = {
   p1m: "Mensual",
   p1y: "Anual",
   p3y: "Trianual",
-  onetime: "One Time",
+  onetime: "Pago único",
+  "one time": "Pago único",
   anual: "Anual",
   mensual: "Mensual",
   trianual: "Trianual",
@@ -21,7 +22,8 @@ const BILLING_LABELS = {
   monthly: "Mensual",
   annual: "Anual",
   triennial: "Trianual",
-  onetime: "One Time",
+  onetime: "Pago único",
+  "one time": "Pago único",
   anual: "Anual",
   mensual: "Mensual",
   trianual: "Trianual",
@@ -237,7 +239,7 @@ function buildDistributorCard({ dist, products, bestByName, profitPct, qty }) {
                 : ""
             }
           </td>
-          <td data-label="Periodo"><span class="term-text">${escHtml(formatTerm(product.normalizedTerm || product.term))} / ${escHtml(formatBilling(product.normalizedBilling || product.billing))}</span></td>
+          <td data-label="Periodo"><span class="term-text">${escHtml(product.type === "PERPETUO" || product.strictPeriodKey === "onetime_onetime" ? "Pago único" : `${formatTerm(product.normalizedTerm || product.term)} / ${formatBilling(product.normalizedBilling || product.billing)}`)}</span></td>
           <td class="td-right price-cell" data-label="P. Unit.">${getPriceDisplay(unitPrice)}</td>
           <td class="td-right price-cell sale-cell" data-label="Venta">${getPriceDisplay(saleTotal)}</td>
           <td class="td-right profit-cell ${profit >= 0 ? "profit-positive" : "profit-negative"}" data-label="Ganancia">${getPriceDisplay(profit)}</td>
@@ -319,10 +321,10 @@ function getTypeMeta(type) {
   }
 
   if (type === "SUSCRIPCION") {
-    return { tagClass: "tag-subs", label: "SUBS" };
+    return { tagClass: "tag-subs", label: "SOFTWARE SUBS" };
   }
 
-  return { tagClass: "tag-perp", label: "PERP" };
+  return { tagClass: "tag-perp", label: "PERPETUO" };
 }
 
 function formatTerm(term) {

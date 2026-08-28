@@ -13,7 +13,19 @@ from extractors.common import (
     safe_str,
 )
 
-def build_cloud_product(distributor, product_type, part_number, name, term, billing, price, erp, segment, product_id=""):
+
+def build_cloud_product(
+    distributor,
+    product_type,
+    part_number,
+    name,
+    term,
+    billing,
+    price,
+    erp,
+    segment,
+    product_id="",
+):
     clean_name = normalize_name_text(name)
     clean_part_number = safe_str(part_number)
     clean_product_id = safe_str(product_id)
@@ -21,10 +33,34 @@ def build_cloud_product(distributor, product_type, part_number, name, term, bill
     clean_billing = safe_str(billing)
     clean_segment = safe_str(segment)
 
-    normalized_term = canonicalize_term(clean_term, clean_part_number, clean_name)
-    normalized_billing = canonicalize_billing(clean_billing, clean_part_number, clean_name)
-    strict_period_key = get_strict_period_key(normalized_term, normalized_billing)
-    normalized_price = price
+    # Exclude Charity / NonProfit products
+    seg_upper = clean_segment.upper()
+    name_upper = clean_name.upper()
+    if (
+        "CHARITY" in seg_upper
+        or "NONPROFIT" in seg_upper
+        or "NFP" in seg_upper
+        or "NON-PROFIT" in name_upper
+        or "NONPROFIT" in name_upper
+    ):
+        return None
+
+    # Normalize segment names to Commercial or Education
+    if "EDU" in seg_upper or "FACULTY" in seg_upper or "STUDENT" in seg_upper:
+        normalized_segment = "Education"
+    else:
+        normalized_segment = "Commercial"
+
+    if product_type == "PERPETUO":
+        clean_term = "OneTime"
+        clean_billing = "OneTime"
+        normalized_term = "onetime"
+        normalized_billing = "onetime"
+        strict_period_key = "onetime_onetime"
+    else:
+        normalized_term = canonicalize_term(clean_term, clean_part_number, clean_name)
+        normalized_billing = canonicalize_billing(clean_billing, clean_part_number, clean_name)
+        strict_period_key = get_strict_period_key(normalized_term, normalized_billing)
 
     return {
         "area": "cloud",
@@ -35,9 +71,9 @@ def build_cloud_product(distributor, product_type, part_number, name, term, bill
         "name": clean_name,
         "term": clean_term,
         "billing": clean_billing,
-        "price": normalized_price,
+        "price": price,
         "erp": erp,
-        "segment": clean_segment,
+        "segment": normalized_segment,
         "canonicalName": get_canonical_product_name(clean_name),
         "normalizedTerm": normalized_term,
         "normalizedBilling": normalized_billing,
@@ -49,59 +85,105 @@ def extract_lol(path):
     items = []
     with readable_excel_path(path) as readable_path:
         xl = pd.ExcelFile(readable_path)
-        sheet_types = [
-            ("NCE", "NCE"),
-            ("SUSCRIPCION", "SUSCRIPCION"),
-            ("Subscription", "SUSCRIPCION"),
-            ("PERPETUO", "PERPETUO"),
-            ("Perpetual", "PERPETUO"),
-        ]
+        sheet_names = xl.sheet_names
 
-        if not any(sheet in xl.sheet_names for sheet, _ in sheet_types) and "Lista de precios" in xl.sheet_names:
-            name_lower = path.name.lower()
-            if "perpetual" in name_lower or "perpetuo" in name_lower:
-                sheet_types.append(("Lista de precios", "PERPETUO"))
-            else:
-                sheet_types.append(("Lista de precios", "SUSCRIPCION"))
-
-        for sheet, product_type in sheet_types:
-            if sheet not in xl.sheet_names:
-                continue
-
+        for sheet in sheet_names:
+            s_lower = sheet.lower()
             df = pd.read_excel(readable_path, sheet_name=sheet)
-            erp_col = resolve_column(df.columns, "ERP Price", "ERP")
+
+            erp_col = resolve_column(df.columns, "ERP Price", "ERP", "ERP_Price")
             product_id_col = resolve_column(df.columns, "ProductId", "Product Id", "ProductID")
-            part_col = resolve_column(df.columns, "NUMERO DE PARTE", "Numero Parte", "Part Number", "ProductId", "Product Id", "ProductID")
-            name_col = resolve_column(df.columns, "SkuTitle", "Descripción", "Descripcion")
-            term_col = resolve_column(df.columns, "TermDuration")
-            billing_col = resolve_column(df.columns, "BillingPlan")
-            price_col = resolve_column(df.columns, "UnitPrice", "Unit Price", "Unit_Price")
+            part_col = resolve_column(
+                df.columns,
+                "NUMERO DE PARTE",
+                "Numero Parte",
+                "Part Number",
+                "ProductId",
+                "Product Id",
+                "ProductID",
+            )
+            name_col = resolve_column(
+                df.columns,
+                "SkuTitle",
+                "Descripción",
+                "Descripcion",
+                "Product Title",
+                "Title",
+                "ProductTitle",
+            )
+            term_col = resolve_column(df.columns, "TermDuration", "Term")
+            billing_col = resolve_column(df.columns, "BillingPlan", "Billing Plan", "Billing")
+            price_col = resolve_column(
+                df.columns,
+                "PARTNER PRICE",
+                "Partner Price",
+                "UnitPrice",
+                "Unit Price",
+                "Unit_Price",
+                "Price",
+            )
             segment_col = resolve_column(df.columns, "Segment")
 
-            for _, row in df.iterrows():
-                name = safe_str(row.get(name_col))
-                price = safe_float(row.get(price_col, 0))
+            # Determine default type from sheet or filename
+            default_type = "NCE"
+            if "perpetu" in s_lower:
+                default_type = "PERPETUO"
+            elif "suscrip" in s_lower or "subscript" in s_lower:
+                default_type = "SUSCRIPCION"
+            elif "nce" in s_lower:
+                default_type = "NCE"
+            elif "perpetu" in path.name.lower():
+                default_type = "SUSCRIPCION"
+            else:
+                default_type = "NCE"
 
-                if not name or price == 0:
+            for _, row in df.iterrows():
+                name = safe_str(row.get(name_col)) if name_col else ""
+                price = safe_float(row.get(price_col, 0)) if price_col else 0.0
+
+                if not name or price <= 0:
                     continue
 
-                product_id = safe_str(row.get(product_id_col))
-                part_number = safe_str(row.get(part_col)) or product_id
+                product_id = safe_str(row.get(product_id_col)) if product_id_col else ""
+                part_number = (
+                    safe_str(row.get(part_col)) if part_col else product_id
+                ) or product_id
+                raw_term = safe_str(row.get(term_col)) if term_col else ""
+                raw_billing = safe_str(row.get(billing_col)) if billing_col else ""
+                raw_segment = safe_str(row.get(segment_col)) if segment_col else ""
+                erp = safe_float(row.get(erp_col, 0)) if erp_col else 0.0
 
-                items.append(
-                    build_cloud_product(
-                        distributor="LOL",
-                        product_type=product_type,
-                        part_number=part_number,
-                        name=name,
-                        term=safe_str(row.get(term_col)) or "OneTime",
-                        billing=safe_str(row.get(billing_col)) or ("OneTime" if product_type == "PERPETUO" else ""),
-                        price=price,
-                        erp=safe_float(row.get(erp_col, 0)),
-                        segment=safe_str(row.get(segment_col)),
-                        product_id=product_id,
-                    )
+                # Fine-grained classification into NCE, SUSCRIPCION (Software Subscriptions), or PERPETUO
+                row_type = default_type
+                if default_type == "PERPETUO":
+                    row_type = "PERPETUO"
+                elif "perpetu" in path.name.lower() or "perpetual" in path.name.lower():
+                    if raw_billing.lower() == "onetime" or raw_term.lower() == "onetime":
+                        row_type = "PERPETUO"
+                    else:
+                        row_type = "SUSCRIPCION"
+                elif (
+                    "server" in name.lower()
+                    and ("1 year" in name.lower() or "3 year" in name.lower())
+                    and ("azure" in name.lower() or "esu" in name.lower() or "sql" in name.lower())
+                ):
+                    row_type = "SUSCRIPCION"
+
+                prod = build_cloud_product(
+                    distributor="LOL",
+                    product_type=row_type,
+                    part_number=part_number,
+                    name=name,
+                    term=raw_term or ("OneTime" if row_type == "PERPETUO" else ""),
+                    billing=raw_billing
+                    or ("OneTime" if row_type == "PERPETUO" else ""),
+                    price=price,
+                    erp=erp,
+                    segment=raw_segment,
+                    product_id=product_id,
                 )
+                if prod:
+                    items.append(prod)
 
     return items
 
@@ -112,17 +194,45 @@ def build_cloud_catalog(base_dir=None):
 
     data_dir = root_dir / "data"
     lol_files = list(data_dir.glob("*LOL.xlsx"))
-    
+
+    # Prefer current month files (AGO26)
     ago_files = [f for f in lol_files if "AGO26" in f.name.upper()]
     if ago_files:
         target_files = ago_files
     else:
         if lol_files:
-            target_files = sorted(lol_files, key=lambda f: f.stat().st_mtime)[-1:]
+            target_files = sorted(lol_files, key=lambda f: f.stat().st_mtime)[-2:]
         else:
             target_files = []
 
+    seen_keys = set()
     for f in target_files:
-        catalog.extend(extract_lol(f))
+        for item in extract_lol(f):
+            key = (
+                item["type"],
+                item["partNumber"],
+                item["normalizedTerm"],
+                item["normalizedBilling"],
+                item["segment"],
+            )
+            if key not in seen_keys:
+                seen_keys.add(key)
+                catalog.append(item)
+
+    # Include perpetual licenses from earlier lists (e.g. Abril/Marzo) if available
+    abril_files = [f for f in lol_files if "ABRIL" in f.name.upper() or "MARZO" in f.name.upper()]
+    for f in abril_files:
+        for item in extract_lol(f):
+            if item["type"] == "PERPETUO":
+                key = (
+                    item["type"],
+                    item["partNumber"],
+                    item["normalizedTerm"],
+                    item["normalizedBilling"],
+                    item["segment"],
+                )
+                if key not in seen_keys:
+                    seen_keys.add(key)
+                    catalog.append(item)
 
     return catalog

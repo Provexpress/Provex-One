@@ -50,7 +50,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Provex One">
   <link rel="apple-touch-icon" sizes="180x180" href="icons/provex_icon_180.png">
-  <link rel="stylesheet" href="css/styles.css?v=20260827i">
+  <link rel="stylesheet" href="css/styles.css?v=20260828a">
 </head>
 <body class="app-body auth-pending bg-bg text-primary min-h-screen font-sans antialiased" style="letter-spacing:-0.022em">
   <!-- Mantenimiento para futuras actualizaciones
@@ -143,46 +143,69 @@
     <section id="cloudView" class="workspace-view" role="tabpanel" aria-labelledby="cloudWorkspaceTab">
     <!-- SEARCH CARD -->
     <section class="panel-shell bg-card rounded-card shadow-card p-5 mb-3" aria-label="Busqueda de licencias cloud">
-      <p class="text-[11px] font-semibold text-muted uppercase tracking-[0.06em] mb-3">
-        Cloud
+      <p class="text-[11px] font-semibold text-muted uppercase tracking-[0.06em] mb-2">
+        Licenciamiento Microsoft
       </p>
-      <p class="text-[13px] text-muted mb-4">Busqueda rapida y comparacion de licencias Microsoft por mayorista.</p>
+      <p class="text-[13px] text-muted mb-3">Busqueda rapida y comparacion de licencias Microsoft clasificadas por seccion y periodo.</p>
+
+      <!-- 3 SECCIONES: NCE, SOFTWARE SUSCRIPCIÓN, PERPETUO -->
+      <div class="cloud-section-toolbar mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div class="cloud-section-tabs" id="cloudSectionTabs" role="tablist" aria-label="Secciones de licenciamiento Microsoft">
+          <button type="button" class="cloud-section-tab active" data-section="" role="tab" aria-selected="true">
+            Todas las secciones
+          </button>
+          <button type="button" class="cloud-section-tab" data-section="NCE" role="tab" aria-selected="false">
+            <span class="section-dot dot-nce"></span>
+            NCE
+          </button>
+          <button type="button" class="cloud-section-tab" data-section="SUSCRIPCION" role="tab" aria-selected="false">
+            <span class="section-dot dot-subs"></span>
+            Software Suscripción
+          </button>
+          <button type="button" class="cloud-section-tab" data-section="PERPETUO" role="tab" aria-selected="false">
+            <span class="section-dot dot-perp"></span>
+            Perpetuo (Pago único)
+          </button>
+        </div>
+        <div id="cloudSectionHelper" class="text-[12px] text-muted flex items-center gap-1.5 font-medium"></div>
+      </div>
+
       <div class="flex flex-wrap gap-2 items-end">
         <div id="searchComposer" class="flex flex-col gap-1 flex-[2] min-w-[200px] relative">
           <label for="searchInput" class="text-[11px] font-medium text-muted">Nombre del producto</label>
           <input type="text" id="searchInput" class="search-input"
-                 placeholder="Ej: Microsoft 365 Business Standard"
+                 placeholder="Ej: Microsoft 365, Windows Server, SQL Server..."
                  autocomplete="off">
           <div id="searchSuggestions" class="search-suggestions" hidden></div>
         </div>
-        <div class="flex flex-col gap-1 flex-1 min-w-[130px]">
-          <label for="typeFilter" class="text-[11px] font-medium text-muted">Tipo</label>
+        <div class="flex flex-col gap-1 flex-1 min-w-[140px]">
+          <label for="typeFilter" class="text-[11px] font-medium text-muted">Sección / Tipo</label>
           <select id="typeFilter" class="search-input">
-            <option value="">Todos los tipos</option>
-            <option value="SUSCRIPCION">Suscripción</option>
-            <option value="PERPETUO">Perpetuo</option>
+            <option value="">Todas las secciones</option>
+            <option value="NCE">NCE</option>
+            <option value="SUSCRIPCION">Software Suscripción</option>
+            <option value="PERPETUO">Perpetuo (Pago único)</option>
           </select>
         </div>
         <div class="flex flex-col gap-1 flex-1 min-w-[130px]">
           <label for="segFilter" class="text-[11px] font-medium text-muted">Segmento</label>
           <select id="segFilter" class="search-input">
-            <option value="">Todos</option>
+            <option value="">Todos los segmentos</option>
             <option value="Commercial">Commercial</option>
             <option value="Education">Education</option>
-            <option value="Charity">Charity / NonProfit</option>
           </select>
         </div>
-        <div class="flex flex-col gap-1 flex-1 min-w-[130px]">
-          <label for="termFilter" class="text-[11px] font-medium text-muted">Periodo</label>
+        <div class="flex flex-col gap-1 flex-1 min-w-[140px]">
+          <label for="termFilter" class="text-[11px] font-medium text-muted">Periodo de pago</label>
           <select id="termFilter" class="search-input">
-            <option value="">Todos</option>
+            <option value="">Todos los periodos</option>
             <option value="mensual_mensual">Mensual / Mensual</option>
             <option value="anual_anual">Anual / Anual</option>
             <option value="anual_mensual">Anual / Mensual</option>
             <option value="trianual_anual">Trianual / Anual</option>
             <option value="trianual_trianual">Trianual / Trianual</option>
             <option value="trianual_mensual">Trianual / Mensual</option>
-            <option value="onetime_onetime">One Time / OneTime</option>
+            <option value="onetime_onetime">Pago único (One-Time)</option>
           </select>
         </div>
         <button type="button" id="searchButton"

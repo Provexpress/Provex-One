@@ -975,19 +975,92 @@ tr:hover td      { background: rgba(21, 101, 192, 0.035); }
 .profit-positive { color: var(--success); }
 .profit-negative { color: var(--danger); }
 
+/* ── CLOUD SECTION TABS (NCE, SOFTWARE SUSCRIPCIÓN, PERPETUO) ── */
+.cloud-section-tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--sep);
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+
+.cloud-section-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  min-height: 34px;
+  padding: 6px 13px;
+  transition: color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  user-select: none;
+}
+
+.cloud-section-tab:hover {
+  color: var(--corp-navy);
+}
+
+.cloud-section-tab.active {
+  background: #fff;
+  color: var(--corp-navy);
+  box-shadow: 0 4px 14px rgba(26, 43, 107, 0.09);
+}
+
+.cloud-section-tab[data-section="NCE"].active {
+  color: var(--corp-blue);
+}
+
+.cloud-section-tab[data-section="SUSCRIPCION"].active {
+  color: #0F84A0;
+}
+
+.cloud-section-tab[data-section="PERPETUO"].active {
+  color: var(--corp-purple);
+}
+
+.section-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.dot-nce {
+  background: var(--corp-blue);
+  box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.15);
+}
+
+.dot-subs {
+  background: var(--corp-cyan);
+  box-shadow: 0 0 0 3px rgba(42, 191, 223, 0.22);
+}
+
+.dot-perp {
+  background: var(--corp-purple);
+  box-shadow: 0 0 0 3px rgba(106, 63, 160, 0.20);
+}
+
 /* ── TAGS ─────────────────────────────────────────── */
 .tag-pill  {
   display: inline-block;
-  padding: 1px 7px;
+  padding: 2px 8px;
   border-radius: 5px;
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.03em;
   white-space: nowrap;
 }
 .tag-nce  { background: rgba(21, 101, 192, 0.12); color: var(--corp-blue); }
-.tag-subs { background: rgba(42, 191, 223, 0.14); color: #0F84A0; }
-.tag-perp { background: rgba(106, 63, 160, 0.14); color: var(--corp-purple); }
+.tag-subs { background: rgba(42, 191, 223, 0.15); color: #0F84A0; }
+.tag-perp { background: rgba(106, 63, 160, 0.15); color: var(--corp-purple); }
 
 /* ── BEST PRICE ───────────────────────────────────── */
 .best-price td { background: rgba(42, 191, 223, 0.08) !important; }

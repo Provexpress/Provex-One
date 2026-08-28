@@ -11,13 +11,13 @@ const SUGGESTION_LIMIT = 8;
 const MIN_PROFIT_PCT = 6;
 const CLOUD_CATALOG_PATHS = ["catalogs/cloud_products.json", "products.json"];
 const TYPE_OPTION_DEFS = [
-  { value: "SUSCRIPCION", label: "Suscripción" },
-  { value: "PERPETUO", label: "Perpetuo" },
+  { value: "NCE", label: "NCE" },
+  { value: "SUSCRIPCION", label: "Software Suscripción" },
+  { value: "PERPETUO", label: "Perpetuo (Pago único)" },
 ];
 const SEGMENT_OPTION_DEFS = [
   { value: "Commercial", label: "Commercial" },
   { value: "Education", label: "Education" },
-  { value: "Charity", label: "Charity / NonProfit" },
 ];
 const PERIOD_OPTION_DEFS = [
   { value: "mensual_mensual", label: "Mensual / Mensual" },
@@ -26,7 +26,7 @@ const PERIOD_OPTION_DEFS = [
   { value: "trianual_anual", label: "Trianual / Anual" },
   { value: "trianual_trianual", label: "Trianual / Trianual" },
   { value: "trianual_mensual", label: "Trianual / Mensual" },
-  { value: "onetime_onetime", label: "One Time / OneTime" },
+  { value: "onetime_onetime", label: "Pago único (One-Time)" },
 ];
 
 // Abreviaturas y aliases de busqueda. Cada palabra del query se expande
@@ -73,6 +73,8 @@ const state = {
 
 const elements = {
   totalCount: document.getElementById("totalCount"),
+  cloudSectionTabs: document.getElementById("cloudSectionTabs"),
+  cloudSectionHelper: document.getElementById("cloudSectionHelper"),
   searchComposer: document.getElementById("searchComposer"),
   searchInput: document.getElementById("searchInput"),
   searchButton: document.getElementById("searchButton"),
@@ -137,6 +139,10 @@ function bindEvents() {
   elements.clearSelectedProducts.addEventListener("click", clearSelectedProducts);
   elements.resultsArea.addEventListener("click", handleResultsAreaClick);
 
+  if (elements.cloudSectionTabs) {
+    elements.cloudSectionTabs.addEventListener("click", handleCloudSectionTabClick);
+  }
+
   document.addEventListener("click", (event) => {
     if (
       elements.searchComposer.contains(event.target) ||
@@ -148,8 +154,27 @@ function bindEvents() {
     hideSearchSuggestions();
   });
 
+  elements.typeFilter.addEventListener("change", () => {
+    const currentSection = elements.typeFilter.value;
+    syncCloudSectionTabs(currentSection);
+    if (currentSection === "PERPETUO") {
+      elements.termFilter.value = "onetime_onetime";
+      state.autoSelectedFilters.period = true;
+    } else if (elements.termFilter.value === "onetime_onetime" && currentSection !== "") {
+      elements.termFilter.value = "";
+      state.autoSelectedFilters.period = false;
+    }
+    updateCloudSectionHelper(currentSection);
+    state.autoSelectedFilters.type = false;
+    syncCloudFilterOptions();
+    updateSearchSuggestions();
+    renderSearchWarning();
+    if (state.hasSearched) {
+      runSearch();
+    }
+  });
+
   [
-    { element: elements.typeFilter, key: "type" },
     { element: elements.segFilter, key: "segment" },
     { element: elements.termFilter, key: "period" },
   ].forEach(({ element, key }) => {
@@ -192,6 +217,73 @@ function bindEvents() {
     }
   });
 
+}
+
+function handleCloudSectionTabClick(event) {
+  const button = event.target.closest(".cloud-section-tab");
+  if (!button) return;
+
+  const section = button.dataset.section || "";
+  setCloudSection(section);
+}
+
+function setCloudSection(section) {
+  syncCloudSectionTabs(section);
+  elements.typeFilter.value = section;
+  state.autoSelectedFilters.type = false;
+
+  if (section === "PERPETUO") {
+    elements.termFilter.value = "onetime_onetime";
+    state.autoSelectedFilters.period = true;
+  } else if (elements.termFilter.value === "onetime_onetime" && section !== "") {
+    elements.termFilter.value = "";
+    state.autoSelectedFilters.period = false;
+  }
+
+  updateCloudSectionHelper(section);
+  syncCloudFilterOptions();
+  updateSearchSuggestions();
+  renderSearchWarning();
+
+  if (state.hasSearched) {
+    runSearch();
+  }
+}
+
+function syncCloudSectionTabs(section) {
+  if (!elements.cloudSectionTabs) return;
+
+  elements.cloudSectionTabs.querySelectorAll(".cloud-section-tab").forEach((tab) => {
+    const isMatch = (tab.dataset.section || "") === (section || "");
+    tab.classList.toggle("active", isMatch);
+    tab.setAttribute("aria-selected", isMatch ? "true" : "false");
+  });
+}
+
+function updateCloudSectionHelper(section) {
+  if (!elements.cloudSectionHelper) return;
+
+  if (section === "PERPETUO") {
+    elements.cloudSectionHelper.innerHTML = `
+      <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+        ✓ Licenciamiento Perpetuo: Pago único (One-Time)
+      </span>
+    `;
+  } else if (section === "SUSCRIPCION") {
+    elements.cloudSectionHelper.innerHTML = `
+      <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-cyan-50 text-cyan-800 border border-cyan-200">
+        Suscripciones de Servidores y Software (1Y / 3Y)
+      </span>
+    `;
+  } else if (section === "NCE") {
+    elements.cloudSectionHelper.innerHTML = `
+      <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+        Suscripciones Cloud Modernas (M365, O365, Copilot, Defender)
+      </span>
+    `;
+  } else {
+    elements.cloudSectionHelper.innerHTML = "";
+  }
 }
 
 async function loadProducts() {
@@ -292,15 +384,15 @@ function syncCloudFilterOptions() {
   );
 
   setDynamicSelectOptions("type", elements.typeFilter, availableTypes, {
-    allLabel: "Todos los tipos",
+    allLabel: "Todas las secciones",
     autoSelectSingle,
   });
   setDynamicSelectOptions("segment", elements.segFilter, availableSegments, {
-    allLabel: "Todos",
+    allLabel: "Todos los segmentos",
     autoSelectSingle,
   });
   setDynamicSelectOptions("period", elements.termFilter, availablePeriods, {
-    allLabel: "Todos",
+    allLabel: "Todos los periodos",
     autoSelectSingle,
   });
 }
@@ -455,9 +547,7 @@ function matchesSecondaryFilters(product, criteria, ignoredKeys = new Set()) {
   const segment = normalizeText(product.segment);
 
   if (!ignoredKeys.has("type") && criteria.type) {
-    const isSub = criteria.type === "SUSCRIPCION" || criteria.type === "NCE";
-    const prodIsSub = product.type === "SUSCRIPCION" || product.type === "NCE";
-    if (isSub ? !prodIsSub : product.type !== criteria.type) {
+    if (product.type !== criteria.type) {
       return false;
     }
   }
@@ -1155,8 +1245,13 @@ function enrichProduct(product) {
     product.type || "",
     normalizeText(product.segment),
   ].join("__");
-  const rawType = String(product.type || "").trim();
-  const type = rawType.toUpperCase() === "NCE" ? "SUSCRIPCION" : rawType;
+  const rawType = String(product.type || "").trim().toUpperCase();
+  const type =
+    rawType === "NCE"
+      ? "NCE"
+      : rawType === "PERPETUO" || rawType === "PERPETUAL"
+      ? "PERPETUO"
+      : "SUSCRIPCION";
   const searchText = normalizeText(`${canonicalName} ${product.name || ""} ${product.partNumber || ""} ${product.productId || ""}`);
   return {
     ...product,
