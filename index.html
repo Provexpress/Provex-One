@@ -50,7 +50,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Provex One">
   <link rel="apple-touch-icon" sizes="180x180" href="icons/provex_icon_180.png">
-  <link rel="stylesheet" href="css/styles.css?v=20260828a">
+  <link rel="stylesheet" href="css/styles.css?v=20260831a">
 </head>
 <body class="app-body auth-pending bg-bg text-primary min-h-screen font-sans antialiased" style="letter-spacing:-0.022em">
   <!-- Mantenimiento para futuras actualizaciones
@@ -172,14 +172,14 @@
 
       <div class="flex flex-wrap gap-2 items-end">
         <div id="searchComposer" class="flex flex-col gap-1 flex-[2] min-w-[200px] relative">
-          <label for="searchInput" class="text-[11px] font-medium text-muted">Nombre del producto</label>
+          <label for="searchInput" class="text-[11px] font-medium text-muted">Buscar producto o SKU</label>
           <input type="text" id="searchInput" class="search-input"
-                 placeholder="Ej: Microsoft 365, Windows Server, SQL Server..."
+                 placeholder="Ej: Microsoft 365, Windows Server, SQL, Copilot..."
                  autocomplete="off">
           <div id="searchSuggestions" class="search-suggestions" hidden></div>
         </div>
-        <div class="flex flex-col gap-1 flex-1 min-w-[140px]">
-          <label for="typeFilter" class="text-[11px] font-medium text-muted">Sección / Tipo</label>
+        <div class="flex flex-col gap-1 flex-1 min-w-[130px]">
+          <label for="typeFilter" class="text-[11px] font-medium text-muted">Sección</label>
           <select id="typeFilter" class="search-input">
             <option value="">Todas las secciones</option>
             <option value="NCE">NCE</option>
@@ -187,7 +187,7 @@
             <option value="PERPETUO">Perpetuo (Pago único)</option>
           </select>
         </div>
-        <div class="flex flex-col gap-1 flex-1 min-w-[130px]">
+        <div class="flex flex-col gap-1 flex-1 min-w-[120px]">
           <label for="segFilter" class="text-[11px] font-medium text-muted">Segmento</label>
           <select id="segFilter" class="search-input">
             <option value="">Todos los segmentos</option>
@@ -195,17 +195,24 @@
             <option value="Education">Education</option>
           </select>
         </div>
-        <div class="flex flex-col gap-1 flex-1 min-w-[140px]">
-          <label for="termFilter" class="text-[11px] font-medium text-muted">Periodo de pago</label>
+        <div class="flex flex-col gap-1 flex-1 min-w-[130px]">
+          <label for="termFilter" class="text-[11px] font-medium text-muted">Periodo (Compromiso)</label>
           <select id="termFilter" class="search-input">
             <option value="">Todos los periodos</option>
-            <option value="mensual_mensual">Mensual / Mensual</option>
-            <option value="anual_anual">Anual / Anual</option>
-            <option value="anual_mensual">Anual / Mensual</option>
-            <option value="trianual_anual">Trianual / Anual</option>
-            <option value="trianual_trianual">Trianual / Trianual</option>
-            <option value="trianual_mensual">Trianual / Mensual</option>
-            <option value="onetime_onetime">Pago único (One-Time)</option>
+            <option value="mensual">1 Mes (P1M)</option>
+            <option value="anual">1 Año (P1Y)</option>
+            <option value="trianual">3 Años (P3Y)</option>
+            <option value="onetime">Pago único (Perpetuo)</option>
+          </select>
+        </div>
+        <div class="flex flex-col gap-1 flex-1 min-w-[130px]">
+          <label for="billingFilter" class="text-[11px] font-medium text-muted">Plan de Pago</label>
+          <select id="billingFilter" class="search-input">
+            <option value="">Todos los planes</option>
+            <option value="mensual">Pago Mensual</option>
+            <option value="anual">Pago Anual</option>
+            <option value="trianual">Pago Trianual</option>
+            <option value="onetime">Pago único (One-Time)</option>
           </select>
         </div>
         <button type="button" id="searchButton"

@@ -6,32 +6,32 @@ export const DIST_CLASS_SUFFIX = {
 };
 
 const TERM_LABELS = {
-  p1m: "Mensual",
-  p1y: "Anual",
-  p3y: "Trianual",
+  p1m: "1 Mes",
+  p1y: "1 Año",
+  p3y: "3 Años",
   onetime: "Pago único",
   "one time": "Pago único",
-  anual: "Anual",
-  mensual: "Mensual",
-  trianual: "Trianual",
+  anual: "1 Año",
+  mensual: "1 Mes",
+  trianual: "3 Años",
   nan: "-",
   "": "-",
 };
 
 const BILLING_LABELS = {
-  monthly: "Mensual",
-  annual: "Anual",
-  triennial: "Trianual",
+  monthly: "Fact. Mensual",
+  annual: "Fact. Anual",
+  triennial: "Fact. Trianual",
   onetime: "Pago único",
   "one time": "Pago único",
-  anual: "Anual",
-  mensual: "Mensual",
-  trianual: "Trianual",
+  anual: "Fact. Anual",
+  mensual: "Fact. Mensual",
+  trianual: "Fact. Trianual",
   nan: "-",
   "": "-",
 };
 
-const MAX_ROWS_PER_DIST = 50;
+const MAX_ROWS_PER_DIST = 100;
 const MIN_PROFIT_PCT = 6;
 const usdFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -201,7 +201,7 @@ function buildDistributorCard({ dist, products, bestByName, profitPct, qty }) {
         <thead>
           <tr>
             <th>Producto</th>
-            <th>Periodo</th>
+            <th>Periodo / Facturación</th>
             <th class="right">P. Unit.</th>
             <th class="right">Venta x${qty}</th>
             <th class="right">Ganancia</th>
@@ -221,6 +221,7 @@ function buildDistributorCard({ dist, products, bestByName, profitPct, qty }) {
       const comparisonKey = getComparisonKey(product);
       const isBestPrice = unitPrice === bestByName[comparisonKey];
       const { tagClass, label } = getTypeMeta(product.type);
+      const isPerp = product.type === "PERPETUO" || product.strictPeriodKey === "onetime_onetime";
 
       html += `
         <tr class="${isBestPrice ? "best-price" : ""}">
@@ -239,7 +240,16 @@ function buildDistributorCard({ dist, products, bestByName, profitPct, qty }) {
                 : ""
             }
           </td>
-          <td data-label="Periodo"><span class="term-text">${escHtml(product.type === "PERPETUO" || product.strictPeriodKey === "onetime_onetime" ? "Pago único" : `${formatTerm(product.normalizedTerm || product.term)} / ${formatBilling(product.normalizedBilling || product.billing)}`)}</span></td>
+          <td data-label="Periodo / Facturación">
+            ${
+              isPerp
+                ? '<span class="term-text font-semibold text-purple-700">Pago único</span>'
+                : `<div class="flex flex-col gap-0.5">
+                    <span class="term-text font-medium text-slate-800">${escHtml(formatTerm(product.normalizedTerm || product.term))}</span>
+                    <span class="text-[11px] text-muted">${escHtml(formatBilling(product.normalizedBilling || product.billing))}</span>
+                  </div>`
+            }
+          </td>
           <td class="td-right price-cell" data-label="P. Unit.">${getPriceDisplay(unitPrice)}</td>
           <td class="td-right price-cell sale-cell" data-label="Venta">${getPriceDisplay(saleTotal)}</td>
           <td class="td-right profit-cell ${profit >= 0 ? "profit-positive" : "profit-negative"}" data-label="Ganancia">${getPriceDisplay(profit)}</td>

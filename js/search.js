@@ -19,14 +19,17 @@ const SEGMENT_OPTION_DEFS = [
   { value: "Commercial", label: "Commercial" },
   { value: "Education", label: "Education" },
 ];
-const PERIOD_OPTION_DEFS = [
-  { value: "mensual_mensual", label: "Mensual / Mensual" },
-  { value: "anual_anual", label: "Anual / Anual" },
-  { value: "anual_mensual", label: "Anual / Mensual" },
-  { value: "trianual_anual", label: "Trianual / Anual" },
-  { value: "trianual_trianual", label: "Trianual / Trianual" },
-  { value: "trianual_mensual", label: "Trianual / Mensual" },
-  { value: "onetime_onetime", label: "Pago único (One-Time)" },
+const TERM_OPTION_DEFS = [
+  { value: "mensual", label: "1 Mes (P1M)" },
+  { value: "anual", label: "1 Año (P1Y)" },
+  { value: "trianual", label: "3 Años (P3Y)" },
+  { value: "onetime", label: "Pago único (Perpetuo)" },
+];
+const BILLING_OPTION_DEFS = [
+  { value: "mensual", label: "Pago Mensual" },
+  { value: "anual", label: "Pago Anual" },
+  { value: "trianual", label: "Pago Trianual" },
+  { value: "onetime", label: "Pago único (One-Time)" },
 ];
 
 // Abreviaturas y aliases de busqueda. Cada palabra del query se expande
@@ -67,7 +70,8 @@ const state = {
   autoSelectedFilters: {
     type: false,
     segment: false,
-    period: false,
+    term: false,
+    billing: false,
   },
 };
 
@@ -86,6 +90,7 @@ const elements = {
   typeFilter: document.getElementById("typeFilter"),
   segFilter: document.getElementById("segFilter"),
   termFilter: document.getElementById("termFilter"),
+  billingFilter: document.getElementById("billingFilter"),
   filterChips: Array.from(document.querySelectorAll(".filter-chip")),
   profitPct: document.getElementById("profitPct"),
   qtyInput: document.getElementById("qtyInput"),
@@ -158,34 +163,40 @@ function bindEvents() {
     const currentSection = elements.typeFilter.value;
     syncCloudSectionTabs(currentSection);
     if (currentSection === "PERPETUO") {
-      elements.termFilter.value = "onetime_onetime";
-      state.autoSelectedFilters.period = true;
-    } else if (elements.termFilter.value === "onetime_onetime" && currentSection !== "") {
-      elements.termFilter.value = "";
-      state.autoSelectedFilters.period = false;
+      if (elements.termFilter) elements.termFilter.value = "onetime";
+      if (elements.billingFilter) elements.billingFilter.value = "onetime";
+      state.autoSelectedFilters.term = true;
+      state.autoSelectedFilters.billing = true;
+    } else {
+      if (elements.termFilter && elements.termFilter.value === "onetime") {
+        elements.termFilter.value = "";
+        state.autoSelectedFilters.term = false;
+      }
+      if (elements.billingFilter && elements.billingFilter.value === "onetime") {
+        elements.billingFilter.value = "";
+        state.autoSelectedFilters.billing = false;
+      }
     }
     updateCloudSectionHelper(currentSection);
     state.autoSelectedFilters.type = false;
     syncCloudFilterOptions();
     updateSearchSuggestions();
     renderSearchWarning();
-    if (state.hasSearched) {
-      runSearch();
-    }
+    runSearch();
   });
 
   [
     { element: elements.segFilter, key: "segment" },
-    { element: elements.termFilter, key: "period" },
+    { element: elements.termFilter, key: "term" },
+    { element: elements.billingFilter, key: "billing" },
   ].forEach(({ element, key }) => {
+    if (!element) return;
     element.addEventListener("change", () => {
       state.autoSelectedFilters[key] = false;
       syncCloudFilterOptions();
       updateSearchSuggestions();
       renderSearchWarning();
-      if (state.hasSearched) {
-        runSearch();
-      }
+      runSearch();
     });
   });
 
@@ -233,11 +244,19 @@ function setCloudSection(section) {
   state.autoSelectedFilters.type = false;
 
   if (section === "PERPETUO") {
-    elements.termFilter.value = "onetime_onetime";
-    state.autoSelectedFilters.period = true;
-  } else if (elements.termFilter.value === "onetime_onetime" && section !== "") {
-    elements.termFilter.value = "";
-    state.autoSelectedFilters.period = false;
+    if (elements.termFilter) elements.termFilter.value = "onetime";
+    if (elements.billingFilter) elements.billingFilter.value = "onetime";
+    state.autoSelectedFilters.term = true;
+    state.autoSelectedFilters.billing = true;
+  } else {
+    if (elements.termFilter && elements.termFilter.value === "onetime") {
+      elements.termFilter.value = "";
+      state.autoSelectedFilters.term = false;
+    }
+    if (elements.billingFilter && elements.billingFilter.value === "onetime") {
+      elements.billingFilter.value = "";
+      state.autoSelectedFilters.billing = false;
+    }
   }
 
   updateCloudSectionHelper(section);
@@ -245,9 +264,7 @@ function setCloudSection(section) {
   updateSearchSuggestions();
   renderSearchWarning();
 
-  if (state.hasSearched) {
-    runSearch();
-  }
+  runSearch();
 }
 
 function syncCloudSectionTabs(section) {
@@ -310,6 +327,7 @@ async function loadProducts() {
     syncCloudFilterOptions();
     updateSearchSuggestions();
     renderSearchWarning();
+    runSearch();
   }
 }
 
@@ -348,6 +366,7 @@ function handleSearchInputInput() {
   syncCloudFilterOptions();
   updateSearchSuggestions();
   renderSearchWarning();
+  runSearch();
 }
 
 function handleSearchInputFocus() {
@@ -377,10 +396,15 @@ function syncCloudFilterOptions() {
     "segment",
     SEGMENT_OPTION_DEFS,
   );
-  const availablePeriods = getOrderedFilterValues(
-    productsForOptions.filter((product) => matchesSecondaryFilters(product, activeFilters, new Set(["period"]))),
-    "strictPeriodKey",
-    PERIOD_OPTION_DEFS,
+  const availableTerms = getOrderedFilterValues(
+    productsForOptions.filter((product) => matchesSecondaryFilters(product, activeFilters, new Set(["term"]))),
+    "normalizedTerm",
+    TERM_OPTION_DEFS,
+  );
+  const availableBillings = getOrderedFilterValues(
+    productsForOptions.filter((product) => matchesSecondaryFilters(product, activeFilters, new Set(["billing"]))),
+    "normalizedBilling",
+    BILLING_OPTION_DEFS,
   );
 
   setDynamicSelectOptions("type", elements.typeFilter, availableTypes, {
@@ -391,8 +415,12 @@ function syncCloudFilterOptions() {
     allLabel: "Todos los segmentos",
     autoSelectSingle,
   });
-  setDynamicSelectOptions("period", elements.termFilter, availablePeriods, {
+  setDynamicSelectOptions("term", elements.termFilter, availableTerms, {
     allLabel: "Todos los periodos",
+    autoSelectSingle,
+  });
+  setDynamicSelectOptions("billing", elements.billingFilter, availableBillings, {
+    allLabel: "Todos los planes",
     autoSelectSingle,
   });
 }
@@ -409,9 +437,10 @@ function getSelectionContext() {
 
 function getActiveSecondaryFilters() {
   return {
-    type: elements.typeFilter.value,
-    segment: normalizeText(elements.segFilter.value),
-    period: elements.termFilter.value,
+    type: elements.typeFilter ? elements.typeFilter.value : "",
+    segment: elements.segFilter ? normalizeText(elements.segFilter.value) : "",
+    term: elements.termFilter ? elements.termFilter.value : "",
+    billing: elements.billingFilter ? elements.billingFilter.value : "",
   };
 }
 
@@ -469,17 +498,6 @@ async function handleResultsAreaClick(event) {
 
 function runSearch() {
   const query = normalizeText(elements.searchInput.value);
-  const hasSelectedProducts = state.selectedProducts.length > 0;
-
-  if (!hasSelectedProducts && !query) {
-    state.hasSearched = false;
-    state.currentResults = createEmptyResults();
-    showEmptyState(elements.resultsArea, {
-      title: "Selecciona o escribe algo para buscar",
-      message: "Puedes comparar varios productos al mismo tiempo.",
-    });
-    return;
-  }
 
   if (state.isLoadingProducts) {
     showLoadingState(elements.resultsArea, "Cargando catalogo...");
@@ -509,9 +527,10 @@ function getSearchCriteria(query) {
   return {
     currentInput: {
       words: expandedQuery.split(/\s+/).filter(Boolean),
-      type: elements.typeFilter.value,
-      segment: normalizeText(elements.segFilter.value),
-      period: elements.termFilter.value,
+      type: elements.typeFilter ? elements.typeFilter.value : "",
+      segment: elements.segFilter ? normalizeText(elements.segFilter.value) : "",
+      term: elements.termFilter ? elements.termFilter.value : "",
+      billing: elements.billingFilter ? elements.billingFilter.value : "",
     },
     selectedProducts: [...state.selectedProducts],
   };
@@ -534,7 +553,7 @@ function matchesProduct(product, criteria) {
 
 function matchesSelectionOrQuery(product, criteria) {
   if (!criteria.words.length) {
-    return false;
+    return true;
   }
 
   const productWords =
@@ -556,7 +575,11 @@ function matchesSecondaryFilters(product, criteria, ignoredKeys = new Set()) {
     return false;
   }
 
-  if (!ignoredKeys.has("period") && criteria.period && product.strictPeriodKey !== criteria.period) {
+  if (!ignoredKeys.has("term") && criteria.term && product.normalizedTerm !== criteria.term) {
+    return false;
+  }
+
+  if (!ignoredKeys.has("billing") && criteria.billing && product.normalizedBilling !== criteria.billing) {
     return false;
   }
 
@@ -587,7 +610,8 @@ function updateSearchSuggestions() {
     const candidateSelectionId = getSelectedProductId(productName, activeFilters, {
       type: Boolean(activeFilters.type),
       segment: Boolean(activeFilters.segment),
-      period: Boolean(activeFilters.period),
+      term: Boolean(activeFilters.term),
+      billing: Boolean(activeFilters.billing),
     });
 
     if (!productName || selectedIds.has(candidateSelectionId) || seenNames.has(productName)) {
@@ -666,9 +690,7 @@ function addSelectedProduct(name) {
   renderSearchSuggestions();
   renderSearchWarning();
 
-  if (state.hasSearched) {
-    runSearch();
-  }
+  runSearch();
 }
 
 function removeSelectedProduct(selectionId) {
@@ -678,21 +700,7 @@ function removeSelectedProduct(selectionId) {
   updateSearchSuggestions();
   renderSearchWarning();
 
-  if (!state.hasSearched) {
-    return;
-  }
-
-  if (state.selectedProducts.length || normalizeText(elements.searchInput.value)) {
-    runSearch();
-    return;
-  }
-
-  state.hasSearched = false;
-  state.currentResults = createEmptyResults();
-  showEmptyState(elements.resultsArea, {
-    title: "Selecciona o escribe algo para buscar",
-    message: "Puedes comparar varios productos al mismo tiempo.",
-  });
+  runSearch();
 }
 
 function clearSelectedProducts() {
@@ -706,21 +714,7 @@ function clearSelectedProducts() {
   updateSearchSuggestions();
   renderSearchWarning();
 
-  if (!state.hasSearched) {
-    return;
-  }
-
-  if (normalizeText(elements.searchInput.value)) {
-    runSearch();
-    return;
-  }
-
-  state.hasSearched = false;
-  state.currentResults = createEmptyResults();
-  showEmptyState(elements.resultsArea, {
-    title: "Selecciona o escribe algo para buscar",
-    message: "Puedes comparar varios productos al mismo tiempo.",
-  });
+  runSearch();
 }
 
 function renderSelectedProducts() {
@@ -954,7 +948,8 @@ function createSelectedProductSelection(name) {
   const locks = {
     type: Boolean(filters.type) && !state.autoSelectedFilters.type,
     segment: Boolean(filters.segment) && !state.autoSelectedFilters.segment,
-    period: Boolean(filters.period) && !state.autoSelectedFilters.period,
+    term: Boolean(filters.term) && !state.autoSelectedFilters.term,
+    billing: Boolean(filters.billing) && !state.autoSelectedFilters.billing,
   };
   const metaParts = [];
 
@@ -966,8 +961,12 @@ function createSelectedProductSelection(name) {
     metaParts.push(getOptionLabel(filters.segment, SEGMENT_OPTION_DEFS));
   }
 
-  if (locks.period) {
-    metaParts.push(getOptionLabel(filters.period, PERIOD_OPTION_DEFS));
+  if (locks.term) {
+    metaParts.push(getOptionLabel(filters.term, TERM_OPTION_DEFS));
+  }
+
+  if (locks.billing) {
+    metaParts.push(getOptionLabel(filters.billing, BILLING_OPTION_DEFS));
   }
 
   const metaLabel = metaParts.join(" · ");
@@ -977,10 +976,12 @@ function createSelectedProductSelection(name) {
     name,
     type: locks.type ? filters.type : "",
     segment: locks.segment ? filters.segment : "",
-    period: locks.period ? filters.period : "",
+    term: locks.term ? filters.term : "",
+    billing: locks.billing ? filters.billing : "",
     typeLocked: locks.type,
     segmentLocked: locks.segment,
-    periodLocked: locks.period,
+    termLocked: locks.term,
+    billingLocked: locks.billing,
     metaLabel,
     displayLabel: metaLabel ? `${name} · ${metaLabel}` : name,
   };
@@ -991,7 +992,8 @@ function getSelectedProductId(name, filters, locks = {}) {
     name,
     locks.type ? filters.type || "" : "",
     locks.segment ? filters.segment || "" : "",
-    locks.period ? filters.period || "" : "",
+    locks.term ? filters.term || "" : "",
+    locks.billing ? filters.billing || "" : "",
   ].join("__");
 }
 
@@ -999,9 +1001,11 @@ function resetCurrentInputFilters() {
   elements.typeFilter.value = "";
   elements.segFilter.value = "";
   elements.termFilter.value = "";
+  if (elements.billingFilter) elements.billingFilter.value = "";
   state.autoSelectedFilters.type = false;
   state.autoSelectedFilters.segment = false;
-  state.autoSelectedFilters.period = false;
+  state.autoSelectedFilters.term = false;
+  state.autoSelectedFilters.billing = false;
 }
 
 function matchesSelectedProductProfile(product, selection, currentInput = {}) {
@@ -1012,7 +1016,8 @@ function matchesSelectedProductProfile(product, selection, currentInput = {}) {
   return matchesSecondaryFilters(product, {
     type: selection.typeLocked ? selection.type : currentInput.type || "",
     segment: selection.segmentLocked ? selection.segment : currentInput.segment || "",
-    period: selection.periodLocked ? selection.period : currentInput.period || "",
+    term: selection.termLocked ? selection.term : currentInput.term || "",
+    billing: selection.billingLocked ? selection.billing : currentInput.billing || "",
   });
 }
 
@@ -1037,9 +1042,10 @@ function getSearchWarningMessage() {
   }
 
   const currentInput = {
-    type: elements.typeFilter.value,
-    segment: normalizeText(elements.segFilter.value),
-    period: elements.termFilter.value,
+    type: elements.typeFilter ? elements.typeFilter.value : "",
+    segment: elements.segFilter ? normalizeText(elements.segFilter.value) : "",
+    term: elements.termFilter ? elements.termFilter.value : "",
+    billing: elements.billingFilter ? elements.billingFilter.value : "",
   };
 
   if (currentInput.type) {
@@ -1090,7 +1096,8 @@ function getMatchingTypesForSelection(selection, currentInput) {
           matchesSecondaryFilters(product, {
             type: "",
             segment: selection.segmentLocked ? selection.segment : currentInput.segment || "",
-            period: selection.periodLocked ? selection.period : currentInput.period || "",
+            term: selection.termLocked ? selection.term : currentInput.term || "",
+            billing: selection.billingLocked ? selection.billing : currentInput.billing || "",
           }),
         )
         .map((product) => product.type)
