@@ -89,6 +89,8 @@ const elements = {
   clearSelectedProducts: document.getElementById("clearSelectedProducts"),
   typeFilter: document.getElementById("typeFilter"),
   segFilter: document.getElementById("segFilter"),
+  termFilterGroup: document.getElementById("termFilterGroup"),
+  billingFilterGroup: document.getElementById("billingFilterGroup"),
   termFilter: document.getElementById("termFilter"),
   billingFilter: document.getElementById("billingFilter"),
   filterChips: Array.from(document.querySelectorAll(".filter-chip")),
@@ -280,28 +282,42 @@ function syncCloudSectionTabs(section) {
 }
 
 function updateCloudSectionHelper(section) {
-  if (!elements.cloudSectionHelper) return;
-
   if (section === "PERPETUO") {
-    elements.cloudSectionHelper.innerHTML = `
-      <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
-        ✓ Licenciamiento Perpetuo: Pago único (One-Time)
-      </span>
-    `;
+    if (elements.termFilterGroup) elements.termFilterGroup.hidden = true;
+    if (elements.billingFilterGroup) elements.billingFilterGroup.hidden = true;
+    if (elements.cloudSectionHelper) {
+      elements.cloudSectionHelper.innerHTML = `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-semibold bg-purple-50 text-purple-800 border border-purple-200">
+          💎 Licenciamiento Perpetuo: Licencia permanente de por vida (Pago único, sin cuotas ni vencimiento)
+        </span>
+      `;
+    }
   } else if (section === "SUSCRIPCION") {
-    elements.cloudSectionHelper.innerHTML = `
-      <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-cyan-50 text-cyan-800 border border-cyan-200">
-        Suscripciones de Servidores y Software (1Y / 3Y)
-      </span>
-    `;
+    if (elements.termFilterGroup) elements.termFilterGroup.hidden = false;
+    if (elements.billingFilterGroup) elements.billingFilterGroup.hidden = false;
+    if (elements.cloudSectionHelper) {
+      elements.cloudSectionHelper.innerHTML = `
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-cyan-50 text-cyan-800 border border-cyan-200">
+          Suscripciones de Servidores y Software (1Y / 3Y)
+        </span>
+      `;
+    }
   } else if (section === "NCE") {
-    elements.cloudSectionHelper.innerHTML = `
-      <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-        Suscripciones Cloud Modernas (M365, O365, Copilot, Defender)
-      </span>
-    `;
+    if (elements.termFilterGroup) elements.termFilterGroup.hidden = false;
+    if (elements.billingFilterGroup) elements.billingFilterGroup.hidden = false;
+    if (elements.cloudSectionHelper) {
+      elements.cloudSectionHelper.innerHTML = `
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+          Suscripciones Cloud Modernas (M365, O365, Copilot, Defender)
+        </span>
+      `;
+    }
   } else {
-    elements.cloudSectionHelper.innerHTML = "";
+    if (elements.termFilterGroup) elements.termFilterGroup.hidden = false;
+    if (elements.billingFilterGroup) elements.billingFilterGroup.hidden = false;
+    if (elements.cloudSectionHelper) {
+      elements.cloudSectionHelper.innerHTML = "";
+    }
   }
 }
 

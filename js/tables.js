@@ -19,14 +19,14 @@ const TERM_LABELS = {
 };
 
 const BILLING_LABELS = {
-  monthly: "Fact. Mensual",
-  annual: "Fact. Anual",
-  triennial: "Fact. Trianual",
+  monthly: "Facturación Mensual",
+  annual: "Facturación Anual",
+  triennial: "Facturación Trianual",
   onetime: "Pago único",
   "one time": "Pago único",
-  anual: "Fact. Anual",
-  mensual: "Fact. Mensual",
-  trianual: "Fact. Trianual",
+  anual: "Facturación Anual",
+  mensual: "Facturación Mensual",
+  trianual: "Facturación Trianual",
   nan: "-",
   "": "-",
 };
@@ -201,7 +201,7 @@ function buildDistributorCard({ dist, products, bestByName, profitPct, qty }) {
         <thead>
           <tr>
             <th>Producto</th>
-            <th>Periodo / Facturación</th>
+            <th>Modalidad / Plazo</th>
             <th class="right">P. Unit.</th>
             <th class="right">Venta x${qty}</th>
             <th class="right">Ganancia</th>
@@ -240,12 +240,15 @@ function buildDistributorCard({ dist, products, bestByName, profitPct, qty }) {
                 : ""
             }
           </td>
-          <td data-label="Periodo / Facturación">
+          <td data-label="Modalidad / Plazo">
             ${
               isPerp
-                ? '<span class="term-text font-semibold text-purple-700">Pago único</span>'
+                ? `<div class="flex flex-col gap-0.5">
+                    <span class="term-text font-semibold text-purple-700">De por vida (Permanente)</span>
+                    <span class="text-[11px] text-muted font-medium">Pago único · Sin vencimiento</span>
+                  </div>`
                 : `<div class="flex flex-col gap-0.5">
-                    <span class="term-text font-medium text-slate-800">${escHtml(formatTerm(product.normalizedTerm || product.term))}</span>
+                    <span class="term-text font-medium text-slate-800">${product.type === "NCE" ? "Compromiso " : "Suscripción "}${escHtml(formatTerm(product.normalizedTerm || product.term))}</span>
                     <span class="text-[11px] text-muted">${escHtml(formatBilling(product.normalizedBilling || product.billing))}</span>
                   </div>`
             }
