@@ -124,6 +124,8 @@ initialize();
 function initialize() {
   bindEvents();
   enforceMinProfitPct({ force: true });
+  syncCloudSectionTabs(elements.typeFilter ? elements.typeFilter.value : "NCE");
+  updateCloudSectionHelper(elements.typeFilter ? elements.typeFilter.value : "NCE");
   renderSelectedProducts();
   renderSearchWarning();
   loadProducts();

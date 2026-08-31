@@ -151,10 +151,7 @@
       <!-- 3 SECCIONES: NCE, SOFTWARE SUSCRIPCIÓN, PERPETUO -->
       <div class="cloud-section-toolbar mb-4 flex flex-wrap items-center justify-between gap-3">
         <div class="cloud-section-tabs" id="cloudSectionTabs" role="tablist" aria-label="Secciones de licenciamiento Microsoft">
-          <button type="button" class="cloud-section-tab active" data-section="" role="tab" aria-selected="true">
-            Todas las secciones
-          </button>
-          <button type="button" class="cloud-section-tab" data-section="NCE" role="tab" aria-selected="false">
+          <button type="button" class="cloud-section-tab active" data-section="NCE" role="tab" aria-selected="true">
             <span class="section-dot dot-nce"></span>
             NCE
           </button>
@@ -165,6 +162,9 @@
           <button type="button" class="cloud-section-tab" data-section="PERPETUO" role="tab" aria-selected="false">
             <span class="section-dot dot-perp"></span>
             Perpetuo (Pago único)
+          </button>
+          <button type="button" class="cloud-section-tab" data-section="" role="tab" aria-selected="false">
+            Todas las secciones
           </button>
         </div>
         <div id="cloudSectionHelper" class="text-[12px] text-muted flex items-center gap-1.5 font-medium"></div>
@@ -181,10 +181,10 @@
         <div class="flex flex-col gap-1 flex-1 min-w-[130px]">
           <label for="typeFilter" class="text-[11px] font-medium text-muted">Sección</label>
           <select id="typeFilter" class="search-input">
-            <option value="">Todas las secciones</option>
-            <option value="NCE">NCE</option>
+            <option value="NCE" selected>NCE</option>
             <option value="SUSCRIPCION">Software Suscripción</option>
             <option value="PERPETUO">Perpetuo (Pago único)</option>
+            <option value="">Todas las secciones</option>
           </select>
         </div>
         <div class="flex flex-col gap-1 flex-1 min-w-[120px]">
@@ -202,7 +202,6 @@
             <option value="mensual">1 Mes (P1M)</option>
             <option value="anual">1 Año (P1Y)</option>
             <option value="trianual">3 Años (P3Y)</option>
-            <option value="onetime">Pago único (Perpetuo)</option>
           </select>
         </div>
         <div class="flex flex-col gap-1 flex-1 min-w-[130px]">
@@ -212,7 +211,6 @@
             <option value="mensual">Pago Mensual</option>
             <option value="anual">Pago Anual</option>
             <option value="trianual">Pago Trianual</option>
-            <option value="onetime">Pago único (One-Time)</option>
           </select>
         </div>
         <button type="button" id="searchButton"
