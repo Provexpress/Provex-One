@@ -187,7 +187,7 @@ function initialize() {
 }
 
 function bindEvents() {
-  elements.searchButton.addEventListener("click", runSearch);
+  elements.searchButton.addEventListener("click", handleSearchButtonClick);
   elements.searchInput.addEventListener("keydown", handleSearchInputKeydown);
   elements.searchInput.addEventListener("input", handleSearchInputInput);
   elements.searchInput.addEventListener("focus", handleSearchInputFocus);
@@ -643,6 +643,11 @@ async function handleResultsAreaClick(event) {
   }
 }
 
+function handleSearchButtonClick() {
+  hideSearchSuggestions();
+  runSearch();
+}
+
 function runSearch() {
   const query = normalizeText(elements.searchInput.value);
 
@@ -662,7 +667,6 @@ function runSearch() {
 
   const criteria = getSearchCriteria(query);
   state.hasSearched = true;
-  hideSearchSuggestions();
 
   const filteredProducts = state.products.filter((product) => matchesProduct(product, criteria));
   state.currentResults = groupResultsByDistributor(filteredProducts, criteria);
@@ -745,14 +749,18 @@ function updateSearchSuggestions() {
 
   const activeFilters = getActiveSecondaryFilters();
   const selectedIds = new Set(state.selectedProducts.map((selection) => selection.id));
-  const suggestions = [];
   const seenNames = new Set();
   const expandedQuery = expandAliases(query);
   const criteria = {
+    currentInput: {
+      words: expandedQuery.split(/\s+/).filter(Boolean),
+      ...activeFilters,
+    },
     words: expandedQuery.split(/\s+/).filter(Boolean),
     ...activeFilters,
   };
 
+  const candidates = [];
   for (const product of state.products) {
     const productName = product.canonicalName || String(product.name || "").trim();
     const candidateSelectionId = getSelectedProductId(productName, activeFilters, {
@@ -777,15 +785,13 @@ function updateSearchSuggestions() {
       continue;
     }
 
-    suggestions.push({ name: productName, type: product.type });
+    const score = getProductRelevanceScore(product, criteria);
+    candidates.push({ name: productName, type: product.type, score });
     seenNames.add(productName);
-
-    if (suggestions.length >= SUGGESTION_LIMIT) {
-      break;
-    }
   }
 
-  state.searchSuggestions = suggestions;
+  candidates.sort((a, b) => b.score - a.score);
+  state.searchSuggestions = candidates.slice(0, SUGGESTION_LIMIT);
   state.activeSuggestionIndex = -1;
   renderSearchSuggestions();
 }
