@@ -40,12 +40,48 @@ const usdFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 2,
 });
 
-export function showEmptyState(resultsArea, { icon = "&#128269;", title, message }) {
+export function showEmptyState(
+  resultsArea,
+  {
+    icon = "&#128269;",
+    title = "Sin resultados para esta búsqueda",
+    message = "Prueba con otra palabra clave, código SKU o ajusta los filtros seleccionados.",
+    showReset = true,
+  } = {},
+) {
+  const quickSearches = [
+    "Business Standard",
+    "Business Premium",
+    "Business Basic",
+    "Copilot",
+    "Windows Server 2025",
+    "Office LTSC 2024",
+    "Exchange Online",
+  ];
+
   resultsArea.innerHTML = `
     <div class="empty-state">
       <div class="icon">${icon}</div>
-      <h3>${escHtml(title)}</h3>
-      <p>${escHtml(message)}</p>
+      <h3 class="text-base font-bold text-slate-800 mb-1">${escHtml(title)}</h3>
+      <p class="text-sm text-muted max-w-md mx-auto">${escHtml(message)}</p>
+      
+      ${
+        showReset
+          ? `<button type="button" class="empty-reset-btn" id="emptyResetFilters">
+              <span>↻</span> Restablecer filtros y ver todo
+            </button>`
+          : ""
+      }
+
+      <div class="empty-quick-searches">
+        <span class="text-xs text-muted w-full block mb-1">Búsquedas rápidas:</span>
+        ${quickSearches
+          .map(
+            (term) =>
+              `<button type="button" class="empty-quick-chip" data-quick-search="${escHtml(term)}">${escHtml(term)}</button>`,
+          )
+          .join("")}
+      </div>
     </div>
   `;
 }
@@ -74,8 +110,9 @@ export function renderTables({
   if (visibleTotal === 0) {
     showEmptyState(resultsArea, {
       icon: "&#128533;",
-      title: "Sin resultados",
-      message: "Activa otro mayorista o ajusta la busqueda.",
+      title: "No encontramos productos con estos filtros",
+      message: "Puedes limpiar los filtros o probar con una de las búsquedas sugeridas.",
+      showReset: true,
     });
     return;
   }

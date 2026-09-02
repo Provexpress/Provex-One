@@ -35,26 +35,71 @@ const BILLING_OPTION_DEFS = [
 // Abreviaturas y aliases de busqueda. Cada palabra del query se expande
 // antes de tokenizar, permitiendo busquedas mas naturales y flexibles.
 const SEARCH_ALIASES = {
-  "m365":   "microsoft 365",
-  "o365":   "office 365",
-  "biz":    "business",
-  "std":    "standard",
-  "prem":   "premium",
-  "ent":    "enterprise",
-  "ess":    "essentials",
-  "exch":   "exchange",
-  "spo":    "sharepoint",
-  "def":    "defender",
-  "proj":   "project",
-  "vis":    "visio",
-  "aad":    "entra",
-  "win":    "windows",
-  "subs":   "subscription",
-  "bp":     "business premium",
-  "bs":     "business standard",
-  "bb":     "business basic",
-  "teams":  "teams",
-  "intune": "intune",
+  // Abreviaturas comunes
+  m365: "microsoft 365",
+  o365: "office 365",
+  biz: "business",
+  std: "standard",
+  prem: "premium",
+  ent: "enterprise",
+  ess: "essentials",
+  exch: "exchange",
+  spo: "sharepoint",
+  def: "defender",
+  proj: "project",
+  vis: "visio",
+  aad: "entra",
+  entra: "entra",
+  win: "windows",
+  subs: "subscription",
+  bp: "business premium",
+  bs: "business standard",
+  bb: "business basic",
+  teams: "teams",
+  intune: "intune",
+  copilot: "copilot",
+  copiloto: "copilot",
+  fabric: "fabric",
+  pbi: "power bi",
+  rds: "remote desktop",
+  cal: "cal",
+  ltsc: "ltsc",
+  d365: "dynamics 365",
+  bc: "business central",
+  ws: "windows server",
+  sql: "sql server",
+
+  // Términos en español y sinónimos naturales
+  estandar: "standard",
+  basico: "basic",
+  basica: "basic",
+  empresa: "business",
+  empresas: "business",
+  negocio: "business",
+  servidor: "server",
+  servidores: "server",
+  correo: "exchange",
+  buzon: "exchange",
+  buzones: "exchange",
+  antivirus: "defender",
+  seguridad: "defender",
+  proteccion: "defender",
+  educacion: "education",
+  colegio: "education",
+  universidad: "education",
+  ofimatica: "apps",
+  oficina: "office",
+  remoto: "remote desktop",
+  escritorio: "remote desktop",
+  almacenamiento: "storage",
+  auditoria: "audit",
+  respaldo: "backup",
+  mensual: "p1m",
+  anual: "p1y",
+  trianual: "p3y",
+  perpetuo: "ltsc",
+  permanente: "ltsc",
+  vitalicio: "ltsc",
 };
 
 const state = {
@@ -67,6 +112,7 @@ const state = {
   loadError: false,
   selectedProducts: [],
   searchSuggestions: [],
+  activeSuggestionIndex: -1,
   autoSelectedFilters: {
     type: false,
     segment: false,
@@ -80,7 +126,9 @@ const elements = {
   cloudSectionTabs: document.getElementById("cloudSectionTabs"),
   cloudSectionHelper: document.getElementById("cloudSectionHelper"),
   searchComposer: document.getElementById("searchComposer"),
+  searchResultsCount: document.getElementById("searchResultsCount"),
   searchInput: document.getElementById("searchInput"),
+  searchClearBtn: document.getElementById("searchClearBtn"),
   searchButton: document.getElementById("searchButton"),
   searchSuggestions: document.getElementById("searchSuggestions"),
   selectedProductsSection: document.getElementById("selectedProductsSection"),
@@ -105,19 +153,19 @@ const elements = {
 // Expande cada palabra del query usando el mapa de aliases, palabra por palabra.
 // "m365 biz std" → "microsoft 365 business standard"
 function expandAliases(query) {
-  return query
+  return normalizeText(query)
     .split(/\s+/)
     .filter(Boolean)
     .map((word) => SEARCH_ALIASES[word] || word)
     .join(" ");
 }
 
-// Devuelve true si TODAS las palabras del query coinciden como prefijo
-// de AL MENOS UNA palabra del texto del producto.
-// "busi" → "business" ✓    "stand" → "standard" ✓
-function queryWordsMatchProduct(queryWords, productWords) {
+// Devuelve true si TODAS las palabras del query coinciden como prefijo o subtexto
+// de AL MENOS UNA palabra o el texto del producto/SKU.
+function queryWordsMatchProduct(queryWords, productWords, fullSearchText = "") {
   return queryWords.every((qw) =>
-    productWords.some((pw) => pw.startsWith(qw)),
+    productWords.some((pw) => pw.startsWith(qw) || pw.includes(qw)) ||
+    (fullSearchText && fullSearchText.includes(qw)),
   );
 }
 
@@ -143,6 +191,9 @@ function bindEvents() {
   elements.searchInput.addEventListener("keydown", handleSearchInputKeydown);
   elements.searchInput.addEventListener("input", handleSearchInputInput);
   elements.searchInput.addEventListener("focus", handleSearchInputFocus);
+  if (elements.searchClearBtn) {
+    elements.searchClearBtn.addEventListener("click", handleSearchClearClick);
+  }
   elements.searchSuggestions.addEventListener("click", handleSuggestionClick);
   elements.selectedProductsList.addEventListener("click", handleSelectedProductRemove);
   elements.clearSelectedProducts.addEventListener("click", clearSelectedProducts);
@@ -374,13 +425,71 @@ function handleSearchInputKeydown(event) {
     return;
   }
 
+  const suggestionButtons = Array.from(
+    elements.searchSuggestions ? elements.searchSuggestions.querySelectorAll(".search-suggestion") : [],
+  );
+
+  if (suggestionButtons.length > 0 && !elements.searchSuggestions.hidden) {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      state.activeSuggestionIndex = (state.activeSuggestionIndex + 1) % suggestionButtons.length;
+      updateActiveSuggestion(suggestionButtons);
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      state.activeSuggestionIndex =
+        (state.activeSuggestionIndex - 1 + suggestionButtons.length) % suggestionButtons.length;
+      updateActiveSuggestion(suggestionButtons);
+      return;
+    }
+
+    if (event.key === "Enter" && state.activeSuggestionIndex >= 0) {
+      event.preventDefault();
+      const selectedBtn = suggestionButtons[state.activeSuggestionIndex];
+      if (selectedBtn && selectedBtn.dataset.productName) {
+        addSelectedProduct(selectedBtn.dataset.productName);
+        return;
+      }
+    }
+  }
+
   if (event.key === "Enter") {
     event.preventDefault();
+    hideSearchSuggestions();
     runSearch();
   }
 }
 
+function updateActiveSuggestion(buttons) {
+  buttons.forEach((btn, idx) => {
+    btn.classList.toggle("active", idx === state.activeSuggestionIndex);
+    if (idx === state.activeSuggestionIndex) {
+      btn.scrollIntoView({ block: "nearest" });
+    }
+  });
+}
+
 function handleSearchInputInput() {
+  const hasText = Boolean(elements.searchInput.value.trim());
+  if (elements.searchClearBtn) {
+    elements.searchClearBtn.hidden = !hasText;
+  }
+  state.activeSuggestionIndex = -1;
+  syncCloudFilterOptions();
+  updateSearchSuggestions();
+  renderSearchWarning();
+  runSearch();
+}
+
+function handleSearchClearClick() {
+  elements.searchInput.value = "";
+  if (elements.searchClearBtn) {
+    elements.searchClearBtn.hidden = true;
+  }
+  state.activeSuggestionIndex = -1;
+  elements.searchInput.focus();
   syncCloudFilterOptions();
   updateSearchSuggestions();
   renderSearchWarning();
@@ -388,6 +497,10 @@ function handleSearchInputInput() {
 }
 
 function handleSearchInputFocus() {
+  const hasText = Boolean(elements.searchInput.value.trim());
+  if (elements.searchClearBtn) {
+    elements.searchClearBtn.hidden = !hasText;
+  }
   syncCloudFilterOptions();
   updateSearchSuggestions();
   renderSearchWarning();
@@ -470,7 +583,7 @@ function matchesSelectionContext(product, context) {
   const productWords =
     product.searchWords ||
     (product.searchText || normalizeText(product.name || "")).split(/\s+/).filter(Boolean);
-  return queryWordsMatchProduct(context.words, productWords);
+  return queryWordsMatchProduct(context.words, productWords, product.searchText || "");
 }
 
 function handleSuggestionClick(event) {
@@ -492,26 +605,42 @@ function handleSelectedProductRemove(event) {
 }
 
 async function handleResultsAreaClick(event) {
-  const button = event.target.closest("[data-copy-dist]");
-  if (!button) {
+  const quickChip = event.target.closest(".empty-quick-chip");
+  if (quickChip && quickChip.dataset.quickSearch) {
+    elements.searchInput.value = quickChip.dataset.quickSearch;
+    if (elements.searchClearBtn) elements.searchClearBtn.hidden = false;
+    runSearch();
     return;
   }
 
-  const dist = button.dataset.copyDist;
-  const products = state.currentResults?.[dist] || [];
-  if (!dist || !products.length) {
+  const resetBtn = event.target.closest("#emptyResetFilters");
+  if (resetBtn) {
+    elements.searchInput.value = "";
+    if (elements.searchClearBtn) elements.searchClearBtn.hidden = true;
+    setCloudSection("");
+    resetCurrentInputFilters();
+    runSearch();
     return;
   }
 
-  const text = buildDistributorCopyText({
-    dist,
-    products,
-    profitPct: getProfitPct(),
-    qty: Math.max(1, parseInt(elements.qtyInput.value, 10) || 1),
-  });
+  const copyButton = event.target.closest("[data-copy-dist]");
+  if (copyButton) {
+    const dist = copyButton.dataset.copyDist;
+    const products = state.currentResults?.[dist] || [];
+    if (!dist || !products.length) {
+      return;
+    }
 
-  const copied = await copyTextToClipboard(text);
-  flashCopyButtonState(button, copied ? "Copiado" : "No se pudo copiar");
+    const text = buildDistributorCopyText({
+      dist,
+      products,
+      profitPct: getProfitPct(),
+      qty: Math.max(1, parseInt(elements.qtyInput.value, 10) || 1),
+    });
+
+    const copied = await copyTextToClipboard(text);
+    flashCopyButtonState(copyButton, copied ? "Copiado" : "No se pudo copiar");
+  }
 }
 
 function runSearch() {
@@ -536,7 +665,7 @@ function runSearch() {
   hideSearchSuggestions();
 
   const filteredProducts = state.products.filter((product) => matchesProduct(product, criteria));
-  state.currentResults = groupResultsByDistributor(filteredProducts);
+  state.currentResults = groupResultsByDistributor(filteredProducts, criteria);
   renderCurrentResults();
 }
 
@@ -577,7 +706,7 @@ function matchesSelectionOrQuery(product, criteria) {
   const productWords =
     product.searchWords ||
     (product.searchText || normalizeText(String(product.name || "").trim())).split(/\s+/).filter(Boolean);
-  return queryWordsMatchProduct(criteria.words, productWords);
+  return queryWordsMatchProduct(criteria.words, productWords, product.searchText || "");
 }
 
 function matchesSecondaryFilters(product, criteria, ignoredKeys = new Set()) {
@@ -609,6 +738,7 @@ function updateSearchSuggestions() {
 
   if (!query || state.isLoadingProducts || state.loadError) {
     state.searchSuggestions = [];
+    state.activeSuggestionIndex = -1;
     renderSearchSuggestions();
     return;
   }
@@ -643,11 +773,11 @@ function updateSearchSuggestions() {
     const productWords =
       product.searchWords ||
       (product.searchText || normalizeText(productName)).split(/\s+/).filter(Boolean);
-    if (!queryWordsMatchProduct(criteria.words, productWords)) {
+    if (!queryWordsMatchProduct(criteria.words, productWords, product.searchText || "")) {
       continue;
     }
 
-    suggestions.push(productName);
+    suggestions.push({ name: productName, type: product.type });
     seenNames.add(productName);
 
     if (suggestions.length >= SUGGESTION_LIMIT) {
@@ -656,6 +786,7 @@ function updateSearchSuggestions() {
   }
 
   state.searchSuggestions = suggestions;
+  state.activeSuggestionIndex = -1;
   renderSearchSuggestions();
 }
 
@@ -670,22 +801,45 @@ function renderSearchSuggestions() {
 
   if (!state.searchSuggestions.length) {
     elements.searchSuggestions.innerHTML =
-      '<div class="search-suggestion-empty">Sin coincidencias para agregar</div>';
+      '<div class="search-suggestion-empty">Presiona Enter para buscar todas las coincidencias</div>';
     elements.searchSuggestions.hidden = false;
     return;
   }
 
   elements.searchSuggestions.innerHTML = state.searchSuggestions
-    .map(
-      (name) => `
-        <button type="button" class="search-suggestion" data-product-name="${escapeAttribute(name)}">
-          ${escapeHtml(name)}
+    .map((item, index) => {
+      const name = typeof item === "string" ? item : item.name;
+      const type = typeof item === "object" ? item.type : "";
+      const typeTag =
+        type === "NCE"
+          ? '<span class="tag-pill tag-nce text-[10px] uppercase font-bold">NCE</span>'
+          : type === "PERPETUO"
+          ? '<span class="tag-pill tag-perp text-[10px] uppercase font-bold">PERPETUO</span>'
+          : '<span class="tag-pill tag-subs text-[10px] uppercase font-bold">SUBS</span>';
+
+      return `
+        <button type="button" class="search-suggestion ${index === state.activeSuggestionIndex ? "active" : ""}" data-product-name="${escapeAttribute(name)}">
+          <span class="truncate pr-2">${highlightSearchText(name, query)}</span>
+          ${typeTag}
         </button>
-      `,
-    )
+      `;
+    })
     .join("");
 
   elements.searchSuggestions.hidden = false;
+}
+
+function highlightSearchText(text, query) {
+  if (!query) return escapeHtml(text);
+  const words = query.split(/\s+/).filter(Boolean);
+  let result = escapeHtml(text);
+  words.forEach((w) => {
+    if (w.length >= 2) {
+      const regex = new RegExp(`(${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
+      result = result.replace(regex, '<span class="search-suggestion-match">$1</span>');
+    }
+  });
+  return result;
 }
 
 function hideSearchSuggestions() {
@@ -769,7 +923,7 @@ function renderSelectedProducts() {
     .join("");
 }
 
-function groupResultsByDistributor(products) {
+function groupResultsByDistributor(products, criteria = null) {
   const grouped = createEmptyResults();
   const dedupedProducts = dedupeLogicalProducts(products);
 
@@ -780,7 +934,9 @@ function groupResultsByDistributor(products) {
   });
 
   Object.values(grouped).forEach((distProducts) => {
-    distProducts.sort((left, right) => compareProducts(left, right, state.selectedProducts));
+    distProducts.sort((left, right) =>
+      compareProducts(left, right, state.selectedProducts, criteria),
+    );
   });
 
   return grouped;
@@ -856,9 +1012,47 @@ function getProductQualityScore(product) {
   return score;
 }
 
-function compareProducts(left, right, selectedProducts) {
-  const leftName = left.canonicalName || left.name;
-  const rightName = right.canonicalName || right.name;
+function getProductRelevanceScore(product, criteria) {
+  if (
+    !criteria ||
+    !criteria.currentInput ||
+    !criteria.currentInput.words ||
+    !criteria.currentInput.words.length
+  ) {
+    return 0;
+  }
+
+  const queryWords = criteria.currentInput.words;
+  const fullQuery = queryWords.join(" ");
+  const cleanQuery = normalizeText(fullQuery);
+  const canonical = normalizeText(product.canonicalName || product.name || "");
+  const partNumber = normalizeText(product.partNumber || "");
+  const productId = normalizeText(product.productId || "");
+  let score = 0;
+
+  if (canonical === cleanQuery) {
+    score += 1000;
+  } else if (canonical.startsWith(cleanQuery)) {
+    score += 600;
+  } else if (canonical.includes(cleanQuery)) {
+    score += 350;
+  } else if (queryWords.every((w) => canonical.includes(w))) {
+    score += 200;
+  } else {
+    score += 100;
+  }
+
+  if (partNumber === cleanQuery || productId === cleanQuery) {
+    score += 800;
+  } else if (partNumber.includes(cleanQuery) || productId.includes(cleanQuery)) {
+    score += 400;
+  }
+
+  score += Math.max(0, 80 - Math.min(80, canonical.length));
+  return score;
+}
+
+function compareProducts(left, right, selectedProducts, criteria = null) {
   const leftOrder = getSelectedProductOrder(left, selectedProducts);
   const rightOrder = getSelectedProductOrder(right, selectedProducts);
 
@@ -866,6 +1060,21 @@ function compareProducts(left, right, selectedProducts) {
     return leftOrder - rightOrder;
   }
 
+  if (
+    criteria &&
+    criteria.currentInput &&
+    criteria.currentInput.words &&
+    criteria.currentInput.words.length > 0
+  ) {
+    const leftScore = getProductRelevanceScore(left, criteria);
+    const rightScore = getProductRelevanceScore(right, criteria);
+    if (leftScore !== rightScore) {
+      return rightScore - leftScore;
+    }
+  }
+
+  const leftName = left.canonicalName || left.name;
+  const rightName = right.canonicalName || right.name;
   const nameCompare = String(leftName || "").localeCompare(String(rightName || ""), "es", {
     sensitivity: "base",
   });
@@ -877,8 +1086,22 @@ function compareProducts(left, right, selectedProducts) {
   return (Number(left.price) || 0) - (Number(right.price) || 0);
 }
 
-
 function renderCurrentResults() {
+  const totalMatches = Object.values(state.currentResults).reduce(
+    (acc, list) => acc + (list ? list.length : 0),
+    0,
+  );
+
+  if (elements.searchResultsCount) {
+    if (normalizeText(elements.searchInput.value) || state.selectedProducts.length) {
+      elements.searchResultsCount.textContent = `${totalMatches.toLocaleString("es-CO")} ${
+        totalMatches === 1 ? "resultado" : "resultados"
+      }`;
+    } else {
+      elements.searchResultsCount.textContent = "";
+    }
+  }
+
   renderTables({
     resultsArea: elements.resultsArea,
     currentResults: state.currentResults,
@@ -1249,7 +1472,11 @@ function createEmptyResults() {
 }
 
 function normalizeText(value) {
-  return String(value || "").trim().toLowerCase();
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 }
 
 function enrichProduct(product) {

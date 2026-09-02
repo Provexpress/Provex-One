@@ -50,7 +50,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Provex One">
   <link rel="apple-touch-icon" sizes="180x180" href="icons/provex_icon_180.png">
-  <link rel="stylesheet" href="css/styles.css?v=20260902a">
+  <link rel="stylesheet" href="css/styles.css?v=20260902b">
 </head>
 <body class="app-body auth-pending bg-bg text-primary min-h-screen font-sans antialiased" style="letter-spacing:-0.022em">
   <!-- Mantenimiento para futuras actualizaciones
@@ -172,10 +172,16 @@
 
       <div class="flex flex-wrap gap-2 items-end">
         <div id="searchComposer" class="flex flex-col gap-1 flex-[2] min-w-[200px] relative">
-          <label for="searchInput" class="text-[11px] font-medium text-muted">Buscar producto o SKU</label>
-          <input type="text" id="searchInput" class="search-input"
-                 placeholder="Ej: Microsoft 365, Windows Server, SQL, Copilot..."
-                 autocomplete="off">
+          <div class="flex items-center justify-between">
+            <label for="searchInput" class="text-[11px] font-medium text-muted">Buscar producto o SKU</label>
+            <span id="searchResultsCount" class="text-[11px] font-semibold text-action"></span>
+          </div>
+          <div class="relative flex items-center">
+            <input type="text" id="searchInput" class="search-input w-full pr-8"
+                   placeholder="Ej: Business Standard, Windows Server, SQL, Copilot..."
+                   autocomplete="off">
+            <button type="button" id="searchClearBtn" class="search-clear-btn" aria-label="Limpiar búsqueda" title="Limpiar búsqueda" hidden>&times;</button>
+          </div>
           <div id="searchSuggestions" class="search-suggestions" hidden></div>
         </div>
         <div class="flex flex-col gap-1 flex-1 min-w-[130px]">

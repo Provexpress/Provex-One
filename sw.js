@@ -1,4 +1,4 @@
-const CACHE_NAME = 'provex-one-v42';
+const CACHE_NAME = 'provex-one-v43';
 
 const STATIC_ASSETS = [
   './',
