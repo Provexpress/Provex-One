@@ -197,12 +197,15 @@ def build_cloud_catalog(base_dir=None):
     data_dir = root_dir / "data"
     all_excel = [f for f in data_dir.glob("*.xlsx") if not f.name.startswith("~$")]
 
-    # Prefer newest / current month files (SEP26 -> AGO26 -> etc.)
+    # Prefer newest / current month files (SEP26 Nueva -> SEP26 -> AGO26 -> etc.)
     sep_files = [f for f in all_excel if "SEP26" in f.name.upper() or "SEPTIEMBRE" in f.name.upper()]
+    nueva_sep = [f for f in sep_files if "NUEVA" in f.name.upper()]
     ago_files = [f for f in all_excel if "AGO26" in f.name.upper() or "AGOSTO" in f.name.upper()]
 
-    if sep_files:
-        target_files = sep_files
+    if nueva_sep:
+        target_files = nueva_sep
+    elif sep_files:
+        target_files = sorted(sep_files, key=lambda f: f.stat().st_mtime, reverse=True)[:1]
     elif ago_files:
         target_files = ago_files
     else:
