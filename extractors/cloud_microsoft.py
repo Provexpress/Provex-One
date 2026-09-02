@@ -128,7 +128,7 @@ def extract_lol(path):
             default_type = "NCE"
             if "perpetu" in s_lower:
                 default_type = "PERPETUO"
-            elif "suscrip" in s_lower or "subscript" in s_lower:
+            elif "suscrip" in s_lower or "subscript" in s_lower or "software" in s_lower:
                 default_type = "SUSCRIPCION"
             elif "nce" in s_lower:
                 default_type = "NCE"
@@ -162,6 +162,8 @@ def extract_lol(path):
                         row_type = "PERPETUO"
                     else:
                         row_type = "SUSCRIPCION"
+                elif "software" in s_lower:
+                    row_type = "SUSCRIPCION"
                 elif (
                     "server" in name.lower()
                     and ("1 year" in name.lower() or "3 year" in name.lower())
@@ -193,17 +195,18 @@ def build_cloud_catalog(base_dir=None):
     catalog = []
 
     data_dir = root_dir / "data"
-    lol_files = list(data_dir.glob("*LOL.xlsx"))
+    all_excel = [f for f in data_dir.glob("*.xlsx") if not f.name.startswith("~$")]
 
-    # Prefer current month files (AGO26)
-    ago_files = [f for f in lol_files if "AGO26" in f.name.upper()]
-    if ago_files:
+    # Prefer newest / current month files (SEP26 -> AGO26 -> etc.)
+    sep_files = [f for f in all_excel if "SEP26" in f.name.upper() or "SEPTIEMBRE" in f.name.upper()]
+    ago_files = [f for f in all_excel if "AGO26" in f.name.upper() or "AGOSTO" in f.name.upper()]
+
+    if sep_files:
+        target_files = sep_files
+    elif ago_files:
         target_files = ago_files
     else:
-        if lol_files:
-            target_files = sorted(lol_files, key=lambda f: f.stat().st_mtime)[-2:]
-        else:
-            target_files = []
+        target_files = sorted(all_excel, key=lambda f: f.stat().st_mtime)[-2:] if all_excel else []
 
     seen_keys = set()
     for f in target_files:
@@ -218,21 +221,5 @@ def build_cloud_catalog(base_dir=None):
             if key not in seen_keys:
                 seen_keys.add(key)
                 catalog.append(item)
-
-    # Include perpetual licenses from earlier lists (e.g. Abril/Marzo) if available
-    abril_files = [f for f in lol_files if "ABRIL" in f.name.upper() or "MARZO" in f.name.upper()]
-    for f in abril_files:
-        for item in extract_lol(f):
-            if item["type"] == "PERPETUO":
-                key = (
-                    item["type"],
-                    item["partNumber"],
-                    item["normalizedTerm"],
-                    item["normalizedBilling"],
-                    item["segment"],
-                )
-                if key not in seen_keys:
-                    seen_keys.add(key)
-                    catalog.append(item)
 
     return catalog
