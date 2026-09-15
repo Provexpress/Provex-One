@@ -688,12 +688,23 @@ function getSearchCriteria(query) {
 }
 
 function matchesProduct(product, criteria) {
-  if (
-    criteria.selectedProducts.some((selection) =>
+  const hasSelectedProducts = criteria.selectedProducts.length > 0;
+  const hasSearchWords = criteria.currentInput.words.length > 0;
+
+  if (hasSelectedProducts) {
+    const matchesSelected = criteria.selectedProducts.some((selection) =>
       matchesSelectedProductProfile(product, selection, criteria.currentInput),
-    )
-  ) {
-    return true;
+    );
+
+    if (!hasSearchWords) {
+      return matchesSelected;
+    }
+
+    return (
+      matchesSelected ||
+      (matchesSelectionOrQuery(product, criteria.currentInput) &&
+        matchesSecondaryFilters(product, criteria.currentInput))
+    );
   }
 
   return (
@@ -1256,7 +1267,9 @@ function resetCurrentInputFilters() {
 }
 
 function matchesSelectedProductProfile(product, selection, currentInput = {}) {
-  if ((product.canonicalName || product.name) !== selection.name) {
+  const canonical = product.canonicalName || product.name || "";
+  const rawName = product.name || "";
+  if (canonical !== selection.name && rawName !== selection.name) {
     return false;
   }
 
