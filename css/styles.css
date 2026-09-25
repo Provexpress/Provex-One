@@ -1152,6 +1152,7 @@ tr:hover td      { background: rgba(21, 101, 192, 0.035); }
   font-weight: 700;
   letter-spacing: 0.03em;
   white-space: nowrap;
+}
 .tag-nce  { background: rgba(21, 101, 192, 0.12); color: var(--corp-blue); }
 .tag-subs { background: rgba(42, 191, 223, 0.15); color: #0F84A0; }
 .tag-perp { background: rgba(106, 63, 160, 0.15); color: var(--corp-purple); }
