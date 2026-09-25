@@ -1210,10 +1210,10 @@ tr:hover td      { background: rgba(21, 101, 192, 0.035); }
 
 /* ── RESPONSIVE ───────────────────────────────────── */
 @media (max-width: 640px) {
-  .summary-strip { grid-template-columns: repeat(2, 1fr); }
-  .dist-tabs     { display: flex; }
-  .dist-card     { display: none; }
-  .dist-card.mobile-visible { display: block; }
+  .summary-strip { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .summary-card  { padding: 12px 14px; }
+  .summary-val   { font-size: 16px; overflow-wrap: anywhere; }
+  .dist-card     { display: block; }
   .maintenance-gate { padding: 18px; }
   .maintenance-card { width: min(720px, calc(100vw - 36px)); padding: 24px 20px; border-radius: 14px; }
   .maintenance-logo { width: min(190px, 76%); margin-bottom: 18px; }
@@ -1299,8 +1299,20 @@ tr:hover td      { background: rgba(21, 101, 192, 0.035); }
 }
 
 .workspace-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 38px;
   padding: 8px 14px;
+}
+
+.workspace-tab-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  margin-right: 7px;
+  flex-shrink: 0;
 }
 
 .workspace-tab:hover,
@@ -1426,17 +1438,40 @@ tr:hover td      { background: rgba(21, 101, 192, 0.035); }
   padding: 17px;
 }
 
-.acronis-field {
+.acronis-field,
+.acronis-control-field {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: 6px;
 }
 
-.acronis-field label {
+.acronis-field label,
+.acronis-control-field label {
   color: var(--muted);
   font-size: 11px;
   font-weight: 700;
+}
+
+.acronis-select,
+.acronis-input {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--sep);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--corp-navy);
+  font-size: 13px;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.acronis-select:focus,
+.acronis-input:focus {
+  border-color: var(--corp-blue);
+  box-shadow: 0 0 0 3px var(--action-ring);
 }
 
 .acronis-input-suffix {
@@ -1973,27 +2008,179 @@ tr:hover td      { background: rgba(21, 101, 192, 0.035); }
   }
 }
 
-@media (max-width: 720px) {
-  .workspace-switcher,
-  .acronis-hero,
+/* ── RESPONSIVE CONSOLIDATED ────────────────────────── */
+
+/* Tablet (max-width: 960px) */
+@media (max-width: 960px) {
+  .acronis-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .acronis-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .acronis-summary {
+    position: static;
+  }
+}
+
+/* Mobile & Small Tablets (max-width: 768px) */
+@media (max-width: 768px) {
+  /* Workspace Navigation */
+  .workspace-switcher {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+
+  .workspace-switcher-tabs {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 6px;
+  }
+
+  .workspace-tab {
+    width: 100%;
+    min-height: 42px;
+    justify-content: flex-start;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  /* Tables to Mobile Cards */
+  .dist-header {
+    display: none;
+  }
+
+  .dist-table-wrap,
+  .table-card {
+    overflow: visible;
+  }
+
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+
+  thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  tr {
+    margin-bottom: 14px;
+    border: 1px solid var(--sep);
+    border-radius: var(--btn-radius, 12px);
+    background: #fff;
+    padding: 12px 14px;
+    box-shadow: 0 4px 14px rgba(26, 43, 107, 0.06);
+  }
+
+  td {
+    border: none;
+    position: relative;
+    padding: 8px 0 !important;
+    text-align: right !important;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--sep) !important;
+  }
+
+  td:last-child {
+    border-bottom: 0 !important;
+  }
+
+  td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    text-align: left;
+    margin-right: 12px;
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+  }
+
+  .td-name {
+    flex-direction: column;
+    align-items: flex-start !important;
+    text-align: left !important;
+    padding-bottom: 10px !important;
+  }
+
+  .td-name::before {
+    display: none !important;
+  }
+
+  .prod-name {
+    margin-bottom: 4px;
+  }
+
+  .td-action {
+    display: block !important;
+    padding-top: 10px !important;
+    border-bottom: 0 !important;
+  }
+
+  .td-action::before {
+    display: none !important;
+  }
+
+  .td-action .dist-copy-button {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 8px;
+  }
+
+  /* Acronis Layout & Rows */
+  .acronis-hero {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px 16px;
+  }
+
+  .acronis-hero-badge {
+    width: 100%;
+    text-align: left;
+  }
+
   .acronis-toolbar {
     align-items: stretch;
     flex-direction: column;
+    gap: 10px;
   }
 
-  .workspace-switcher-tabs,
   .acronis-tabs,
   .acronis-search {
     width: 100%;
   }
 
-  .workspace-tab,
-  .acronis-tab {
-    flex: 1;
+  .acronis-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
 
-  .acronis-release {
-    flex-basis: auto;
+  .acronis-tab {
+    width: 100%;
+    min-height: 40px;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .acronis-search {
+    min-height: 42px;
   }
 
   .acronis-column-heads {
@@ -2002,12 +2189,17 @@ tr:hover td      { background: rgba(21, 101, 192, 0.035); }
 
   .acronis-product-row {
     grid-template-columns: 86px minmax(0, 1fr) minmax(0, 1fr);
-    gap: 8px 12px;
-    padding-block: 12px;
+    gap: 10px 12px;
+    padding: 12px 14px;
   }
 
   .acronis-product-name {
     grid-column: 1 / -1;
+  }
+
+  .acronis-quantity {
+    min-height: 40px;
+    font-size: 14px;
   }
 
   .acronis-unit-price::before,
@@ -2015,8 +2207,8 @@ tr:hover td      { background: rgba(21, 101, 192, 0.035); }
     display: block;
     margin-bottom: 2px;
     color: var(--muted);
-    font-size: 8px;
-    font-weight: 800;
+    font-size: 10px;
+    font-weight: 700;
     letter-spacing: 0.05em;
     text-transform: uppercase;
   }
@@ -2030,91 +2222,135 @@ tr:hover td      { background: rgba(21, 101, 192, 0.035); }
   }
 }
 
-@media (max-width: 520px) {
-  .workspace-switcher-tabs,
-  .acronis-tabs {
+/* Smartphone (max-width: 640px) */
+@media (max-width: 640px) {
+  /* Category Pills: Horizontal Swipe */
+  .cloud-section-toolbar {
     flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
   }
 
+  .cloud-section-tabs {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 4px;
+    gap: 6px;
+  }
+
+  .cloud-section-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cloud-section-tab {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  /* Microsoft Cloud Search Panel */
+  #cloudView .flex.flex-wrap.gap-2.items-end {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  #cloudView .flex.flex-wrap.gap-2.items-end > div {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: none !important;
+  }
+
+  #searchButton {
+    width: 100%;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Acronis Controls Grid */
   .acronis-controls {
     grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 14px;
   }
 
-  .acronis-hero {
-    padding: 22px 20px;
+  /* Kaspersky Search & Filters */
+  .kaspersky-secondary-filters {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
   }
 
-  .acronis-product-name {
-    grid-column: 1 / -1;
+  .kaspersky-filter-item {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+
+  .kaspersky-filter-item select,
+  .kaspersky-filter-item input {
+    width: 100% !important;
+    min-height: 38px;
   }
 }
 
-/* ── RESPONSIVE TABLE CARDS (MOBILE) ──────────────── */
-@media (max-width: 768px) {
-  /* Ocultar el encabezado de mayorista porque ahora solo es LOL */
-  .dist-header {
-    display: none;
-  }
-  
-  .dist-table-wrap {
-    overflow: visible;
-  }
-  
-  table, thead, tbody, th, td, tr {
-    display: block;
-  }
-  
-  thead tr {
-    position: absolute;
-    top: -9999px;
-    left: -9999px;
-  }
-  
-  tr {
-    margin-bottom: 16px;
-    border: 1px solid var(--sep);
-    border-radius: var(--btn-radius, 12px);
-    background: #fff;
-    padding: 12px;
-    box-shadow: 0 4px 12px rgba(26, 43, 107, 0.05);
-  }
-  
-  td {
-    border: none;
-    position: relative;
-    padding: 8px 0 !important;
-    text-align: right !important;
+/* Acronis Mobile Floating Summary Bar */
+.acronis-mobile-bar {
+  display: none;
+}
+
+@media (max-width: 960px) {
+  .acronis-mobile-bar {
+    position: fixed;
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    z-index: 40;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid var(--sep) !important;
+    justify-content: space-between;
+    padding: 12px 18px;
+    background: #1A2B6B;
+    color: #fff;
+    border-radius: 14px;
+    box-shadow: 0 12px 32px rgba(26, 43, 107, 0.40);
   }
-  
-  td:last-child {
-    border-bottom: 0 !important;
+
+  .acronis-mobile-bar[hidden] {
+    display: none !important;
   }
-  
-  td::before {
-    content: attr(data-label);
-    font-weight: 600;
-    color: var(--muted);
+
+  .acronis-mobile-bar-info span {
+    display: block;
     font-size: 11px;
-    text-transform: uppercase;
-    text-align: left;
-    margin-right: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 600;
   }
-  
-  .td-name {
-    flex-direction: column;
-    align-items: flex-start !important;
-    text-align: left !important;
+
+  .acronis-mobile-bar-info strong {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
   }
-  
-  .td-name::before {
-    display: none;
-  }
-  
-  .prod-name {
-    margin-bottom: 6px;
+
+  .acronis-mobile-bar-btn {
+    padding: 8px 14px;
+    background: #1565C0;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
 }

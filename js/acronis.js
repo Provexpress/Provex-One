@@ -61,6 +61,10 @@ const elements = {
   annualUsd: document.getElementById("acronisAnnualUsd"),
   reset: document.getElementById("acronisReset"),
   copy: document.getElementById("acronisCopy"),
+  mobileBar: document.getElementById("acronisMobileBar"),
+  mobileCount: document.getElementById("acronisMobileCount"),
+  mobileTotal: document.getElementById("acronisMobileTotal"),
+  mobileJumpBtn: document.getElementById("acronisMobileJumpBtn"),
 };
 
 initialize();
@@ -177,6 +181,9 @@ function bindEvents() {
 
   elements.reset.addEventListener("click", resetQuantities);
   elements.copy.addEventListener("click", copyQuote);
+  elements.mobileJumpBtn?.addEventListener("click", () => {
+    document.querySelector(".acronis-summary")?.scrollIntoView({ behavior: "smooth" });
+  });
 }
 
 function activateWorkspace(workspace, updateHash = true) {
@@ -385,6 +392,16 @@ function updateSummary() {
   elements.saleCop.textContent = trm ? copFormatter.format(sale * trm) : "TRM no disponible";
   elements.annualUsd.textContent = formatUsdTotal(sale * 12);
   elements.copy.disabled = availableEntries.length === 0;
+
+  if (elements.mobileBar) {
+    elements.mobileBar.hidden = entries.length === 0;
+    if (elements.mobileCount) {
+      elements.mobileCount.textContent = `${entries.length.toLocaleString("es-CO")} ${entries.length === 1 ? "seleccionado" : "seleccionados"}`;
+    }
+    if (elements.mobileTotal) {
+      elements.mobileTotal.textContent = `${formatUsdTotal(sale)} / mes`;
+    }
+  }
 
   elements.commitmentNotice.classList.toggle("is-covered", usage >= commitment);
   if (usage < commitment) {

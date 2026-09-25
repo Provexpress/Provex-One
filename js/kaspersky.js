@@ -535,41 +535,41 @@ function renderResults() {
 
       return `
         <tr class="dist-row hover:bg-slate-50/80 transition-colors">
-          <td class="font-mono text-xs font-semibold text-action whitespace-nowrap">
+          <td class="font-mono text-xs font-semibold text-action whitespace-nowrap" data-label="Part Number">
             ${escapeHtml(product.partNumber)}
           </td>
-          <td>
-            <div class="font-semibold text-slate-800 text-[13px] leading-snug">
+          <td class="td-name" data-label="Producto">
+            <div class="prod-name font-semibold text-slate-900 text-[13px] leading-snug">
               ${escapeHtml(product.nameShort || product.name)}
             </div>
             <div class="text-[11px] text-muted mt-0.5 flex flex-wrap items-center gap-1.5">
               ${typeBadge}
-              <span>${escapeHtml(product.family)}</span>
-              ${product.nodesInfo ? `<span>· ${escapeHtml(product.nodesInfo)}</span>` : ""}
+              <span class="font-medium text-slate-700">${escapeHtml(product.family)}</span>
+              ${product.nodesInfo ? `<span class="text-slate-500 font-medium">· ${escapeHtml(product.nodesInfo)}</span>` : ""}
             </div>
           </td>
-          <td class="text-xs whitespace-nowrap font-medium text-slate-700">
+          <td class="whitespace-nowrap font-medium text-slate-700" data-label="Duración">
             <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-semibold">
               ${escapeHtml(product.duration)}
             </span>
           </td>
-          <td class="text-right text-xs text-muted font-medium whitespace-nowrap">
+          <td class="text-right text-xs text-muted font-medium whitespace-nowrap" data-label="MSRP">
             ${usdFormatter.format(msrp)}
           </td>
-          <td class="text-right text-xs font-semibold text-slate-700 whitespace-nowrap">
+          <td class="text-right text-xs font-semibold text-slate-700 whitespace-nowrap" data-label="Costo FOB">
             ${usdFormatter.format(costFob)}
           </td>
-          <td class="text-right whitespace-nowrap">
+          <td class="text-right whitespace-nowrap" data-label="Venta Unit.">
             <div class="font-bold text-slate-900 text-xs">${usdFormatter.format(saleUnitUsd)}</div>
             <div class="text-[11px] text-muted">${copFormatter.format(saleUnitCop)}</div>
           </td>
-          <td class="text-right whitespace-nowrap bg-blue-50/40">
+          <td class="text-right whitespace-nowrap bg-blue-50/40" data-label="Subtotal (${qty} uds)">
             <div class="font-bold text-action text-xs">${usdFormatter.format(subtotalUsd)}</div>
             <div class="text-[11px] text-action/80 font-medium">${copFormatter.format(subtotalCop)}</div>
           </td>
-          <td class="text-center whitespace-nowrap">
+          <td class="text-center whitespace-nowrap td-action" data-label="Acción">
             <button type="button" class="dist-copy-button" data-copy-part="${escapeAttribute(product.partNumber)}" title="Copiar cotización">
-              Copiar
+              Copiar cotización
             </button>
           </td>
         </tr>

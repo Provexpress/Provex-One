@@ -50,7 +50,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Provex One">
   <link rel="apple-touch-icon" sizes="180x180" href="icons/provex_icon_180.png">
-  <link rel="stylesheet" href="css/styles.css?v=20260925b">
+  <link rel="stylesheet" href="css/styles.css?v=20260925c">
 </head>
 <body class="app-body auth-pending bg-bg text-primary min-h-screen font-sans antialiased" style="letter-spacing:-0.022em">
   <!-- Mantenimiento para futuras actualizaciones
@@ -131,14 +131,17 @@
       <div class="workspace-switcher-tabs" role="tablist" aria-label="Cambiar herramienta">
         <button type="button" id="cloudWorkspaceTab" class="workspace-tab active" role="tab"
                 aria-selected="true" aria-controls="cloudView" data-workspace="cloud">
+          <span class="workspace-tab-dot dot-nce"></span>
           Licencias Microsoft
         </button>
         <button type="button" id="acronisWorkspaceTab" class="workspace-tab" role="tab"
                 aria-selected="false" aria-controls="acronisView" data-workspace="acronis">
+          <span class="workspace-tab-dot dot-subs"></span>
           Calculadora Acronis
         </button>
         <button type="button" id="kasperskyWorkspaceTab" class="workspace-tab" role="tab"
                 aria-selected="false" aria-controls="kasperskyView" data-workspace="kaspersky">
+          <span class="workspace-tab-dot dot-kaspersky"></span>
           Licencias Kaspersky
         </button>
       </div>
@@ -389,6 +392,17 @@
           <button type="button" id="acronisCopy" class="acronis-copy-button">Copiar cotización</button>
           <p class="acronis-fair-use">* Los servicios con almacenamiento ilimitado están sujetos a la política de uso justo de Acronis.</p>
         </aside>
+      </div>
+
+      <!-- BARRA FLOTANTE MÓVIL RESUMEN ACRONIS -->
+      <div id="acronisMobileBar" class="acronis-mobile-bar" hidden>
+        <div class="acronis-mobile-bar-info">
+          <span id="acronisMobileCount">0 seleccionados</span>
+          <strong id="acronisMobileTotal">US$0,00</strong>
+        </div>
+        <button type="button" id="acronisMobileJumpBtn" class="acronis-mobile-bar-btn">
+          Ver resumen &darr;
+        </button>
       </div>
     </section>
 
