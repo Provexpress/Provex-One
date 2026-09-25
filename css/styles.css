@@ -32,7 +32,14 @@
   --shadow-soft:    0 1px 2px rgba(26, 43, 107, 0.04), 0 3px 10px rgba(26, 43, 107, 0.05);
 }
 
+html {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
 body.app-body {
+  overflow-x: hidden;
+  max-width: 100vw;
   background-color: var(--bg);
   background-image: linear-gradient(180deg, var(--surface-soft) 0%, var(--surface-alt) 100%);
   color: var(--text);
@@ -2052,7 +2059,18 @@ tr:hover td      { background: rgba(21, 101, 192, 0.035); }
 
   /* Tables to Mobile Cards */
   .dist-header {
-    display: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 14px;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .dist-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   .dist-table-wrap,
@@ -2301,6 +2319,41 @@ tr:hover td      { background: rgba(21, 101, 192, 0.035); }
     width: 100% !important;
     min-height: 38px;
   }
+
+  /* Kaspersky Search & Controls */
+  .kaspersky-search-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .kaspersky-search-row > div {
+    width: 100%;
+  }
+
+  #kasperskySearchButton {
+    width: 100%;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #kasperskyCopyQuoteBtn {
+    width: 100%;
+    justify-content: center;
+    padding: 10px;
+  }
+}
+
+/* Very small screens (max-width: 480px) */
+@media (max-width: 480px) {
+  .brand-logo { max-width: 135px; height: 38px; }
+  .brand-title { display: none; }
+  .auth-user { max-width: 110px; font-size: 11px; }
+  .auth-logout-button { padding: 6px 8px; font-size: 10px; }
+  .summary-strip { grid-template-columns: 1fr; }
+  .kaspersky-secondary-filters { grid-template-columns: 1fr; }
 }
 
 /* Acronis Mobile Floating Summary Bar */
