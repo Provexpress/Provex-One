@@ -50,7 +50,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Provex One">
   <link rel="apple-touch-icon" sizes="180x180" href="icons/provex_icon_180.png">
-  <link rel="stylesheet" href="css/styles.css?v=20260925d">
+  <link rel="stylesheet" href="css/styles.css?v=20260925e">
 </head>
 <body class="app-body auth-pending bg-bg text-primary min-h-screen font-sans antialiased" style="letter-spacing:-0.022em">
   <!-- Mantenimiento para futuras actualizaciones
@@ -454,32 +454,34 @@
 
         <!-- SEARCH COMPOSER -->
         <div class="search-composer relative mb-4" id="kasperskySearchComposer">
-          <div class="flex items-center justify-between mb-1.5">
-            <label for="kasperskySearchInput" class="text-[11px] font-medium text-muted">Buscar producto o SKU</label>
-            <span id="kasperskyResultsCount" class="text-[11px] font-semibold text-action"></span>
-          </div>
-          <div class="kaspersky-search-row flex items-center gap-2">
-            <div class="relative flex-1 min-w-0">
-              <input
-                type="search"
-                id="kasperskySearchInput"
-                class="search-input w-full pr-8 pl-3.5 py-2.5 rounded-lg border border-sep bg-white text-sm"
-                placeholder="Ej: KL1041, KSOS, Standard, Plus, Premium, 5-Device..."
-                autocomplete="off"
-              >
-              <button
-                type="button"
-                id="kasperskySearchClearBtn"
-                class="search-clear-btn"
-                title="Borrar búsqueda"
-                aria-label="Borrar búsqueda"
-                hidden
-              >&times;</button>
+          <div class="kaspersky-search-row flex items-end gap-2.5">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="kasperskySearchInput" class="text-[11px] font-medium text-muted">Buscar producto o SKU</label>
+                <span id="kasperskyResultsCount" class="text-[11px] font-semibold text-action"></span>
+              </div>
+              <div class="relative flex items-center">
+                <input
+                  type="search"
+                  id="kasperskySearchInput"
+                  class="search-input w-full pr-8 pl-3.5 py-2.5 rounded-lg border border-sep bg-white text-sm"
+                  placeholder="Ej: KL1041, KSOS, Standard, Plus, Premium, 5-Device..."
+                  autocomplete="off"
+                >
+                <button
+                  type="button"
+                  id="kasperskySearchClearBtn"
+                  class="search-clear-btn"
+                  title="Borrar búsqueda"
+                  aria-label="Borrar búsqueda"
+                  hidden
+                >&times;</button>
+              </div>
             </div>
             <button
               type="button"
               id="kasperskySearchButton"
-              class="search-button px-5 py-2.5 rounded-lg font-semibold text-xs text-white whitespace-nowrap shadow-btn"
+              class="search-button bg-action text-white font-semibold text-sm rounded-btn px-6 py-[10px] min-h-[42px] whitespace-nowrap shadow-btn hover:opacity-90 active:opacity-100 transition-all duration-150 self-end"
             >
               Buscar
             </button>

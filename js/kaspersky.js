@@ -507,7 +507,18 @@ function renderResults() {
   const count = state.filteredProducts.length;
 
   if (elements.searchResultsCount) {
-    elements.searchResultsCount.textContent = `${count.toLocaleString("es-CO")} ${count === 1 ? "producto" : "productos"}`;
+    const hasSearch = Boolean(elements.searchInput?.value.trim());
+    const hasFilters = Boolean(
+      elements.typeFilter?.value ||
+      elements.durationFilter?.value ||
+      elements.nodesFilter?.value ||
+      state.activeFamily
+    );
+    if (hasSearch || hasFilters) {
+      elements.searchResultsCount.textContent = `${count.toLocaleString("es-CO")} ${count === 1 ? "resultado" : "resultados"}`;
+    } else {
+      elements.searchResultsCount.textContent = "";
+    }
   }
 
   if (count === 0) {
