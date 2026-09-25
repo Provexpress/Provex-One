@@ -50,7 +50,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Provex One">
   <link rel="apple-touch-icon" sizes="180x180" href="icons/provex_icon_180.png">
-  <link rel="stylesheet" href="css/styles.css?v=20260915">
+  <link rel="stylesheet" href="css/styles.css?v=20260925">
 </head>
 <body class="app-body auth-pending bg-bg text-primary min-h-screen font-sans antialiased" style="letter-spacing:-0.022em">
   <!-- Mantenimiento para futuras actualizaciones
@@ -136,6 +136,10 @@
         <button type="button" id="acronisWorkspaceTab" class="workspace-tab" role="tab"
                 aria-selected="false" aria-controls="acronisView" data-workspace="acronis">
           Calculadora Acronis
+        </button>
+        <button type="button" id="kasperskyWorkspaceTab" class="workspace-tab" role="tab"
+                aria-selected="false" aria-controls="kasperskyView" data-workspace="kaspersky">
+          Licencias Kaspersky
         </button>
       </div>
     </section>
@@ -386,6 +390,150 @@
           <p class="acronis-fair-use">* Los servicios con almacenamiento ilimitado están sujetos a la política de uso justo de Acronis.</p>
         </aside>
       </div>
+    </section>
+
+    <!-- KASPERSKY WORKSPACE -->
+    <section id="kasperskyView" class="workspace-view" role="tabpanel" aria-labelledby="kasperskyWorkspaceTab" hidden>
+      <!-- HEADER / SEARCH CARD -->
+      <section class="panel-shell bg-card rounded-card shadow-card p-5 mb-3" aria-label="Búsqueda de licencias Kaspersky">
+        <div class="flex items-center justify-between gap-3 mb-2 flex-wrap">
+          <div>
+            <p class="text-[11px] font-semibold text-muted uppercase tracking-[0.06em]">
+              Licenciamiento Kaspersky
+            </p>
+            <h2 class="text-lg font-bold text-slate-900 tracking-tight">Catálogo y Cotizador de Seguridad Kaspersky</h2>
+          </div>
+          <div class="text-right">
+            <span class="text-[11px] font-medium text-muted block">Total catálogo</span>
+            <strong id="kasperskyTotalCount" class="text-xs font-bold text-slate-800">Cargando...</strong>
+          </div>
+        </div>
+        <p class="text-[13px] text-muted mb-4">
+          Búsqueda rápida, cotización de licencias Base y Renovación para Small Office Security, Standard, Plus y Premium.
+        </p>
+
+        <!-- CATEGORÍAS / FAMILIAS DE KASPERSKY -->
+        <div class="cloud-section-toolbar mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div class="cloud-section-tabs" id="kasperskyFamilyTabs" role="tablist" aria-label="Categorías Kaspersky">
+            <button type="button" class="cloud-section-tab active" data-family="" role="tab" aria-selected="true">
+              Todas las categorías
+            </button>
+            <button type="button" class="cloud-section-tab" data-family="ksos" role="tab" aria-selected="false">
+              <span class="section-dot dot-kaspersky"></span>
+              Small Office Security (KSOS)
+            </button>
+            <button type="button" class="cloud-section-tab" data-family="standard" role="tab" aria-selected="false">
+              Standard
+            </button>
+            <button type="button" class="cloud-section-tab" data-family="plus" role="tab" aria-selected="false">
+              Plus
+            </button>
+            <button type="button" class="cloud-section-tab" data-family="premium" role="tab" aria-selected="false">
+              Premium
+            </button>
+            <button type="button" class="cloud-section-tab" data-family="otros" role="tab" aria-selected="false">
+              Otros Productos
+            </button>
+          </div>
+          <div id="kasperskyFamilyHelper" class="text-[12px] text-muted flex items-center gap-1.5 font-medium"></div>
+        </div>
+
+        <!-- SEARCH COMPOSER -->
+        <div class="search-composer relative mb-4" id="kasperskySearchComposer">
+          <div class="relative flex items-center">
+            <input
+              type="search"
+              id="kasperskySearchInput"
+              class="search-input w-full pr-24 pl-4 py-2.5 rounded-lg border border-sep bg-white text-sm"
+              placeholder="Buscar por nombre, SKU (ej. KL1041), dispositivos (ej. 5-Device), etc."
+              autocomplete="off"
+            >
+            <button
+              type="button"
+              id="kasperskySearchClearBtn"
+              class="search-clear-btn"
+              title="Borrar búsqueda"
+              aria-label="Borrar búsqueda"
+              hidden
+            >&times;</button>
+            <span
+              id="kasperskyResultsCount"
+              class="absolute right-14 text-[11px] font-semibold text-muted pointer-events-none"
+            ></span>
+            <button
+              type="button"
+              id="kasperskySearchButton"
+              class="search-button ml-2 px-4 py-2.5 rounded-lg font-semibold text-xs text-white"
+            >
+              Buscar
+            </button>
+          </div>
+          <div id="kasperskySearchSuggestions" class="search-suggestions" hidden></div>
+        </div>
+
+        <!-- FILTROS SECUNDARIOS -->
+        <div class="flex flex-wrap items-center gap-3 pt-2 border-t border-sep/40 text-xs">
+          <div class="flex items-center gap-1.5">
+            <label for="kasperskyTypeFilter" class="font-semibold text-muted">Tipo:</label>
+            <select id="kasperskyTypeFilter" class="search-input py-1 px-2.5 rounded text-xs">
+              <option value="">Todos los tipos</option>
+              <option value="base">Base (Nueva)</option>
+              <option value="renewal">Renovación</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <label for="kasperskyDurationFilter" class="font-semibold text-muted">Duración:</label>
+            <select id="kasperskyDurationFilter" class="search-input py-1 px-2.5 rounded text-xs">
+              <option value="">Todas las duraciones</option>
+              <option value="1">1 Año</option>
+              <option value="2">2 Años</option>
+              <option value="3">3 Años</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <label for="kasperskyNodesFilter" class="font-semibold text-muted">Dispositivos:</label>
+            <select id="kasperskyNodesFilter" class="search-input py-1 px-2.5 rounded text-xs">
+              <option value="">Todos los dispositivos</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONFIGURACIÓN DE COTIZACIÓN -->
+      <section class="panel-shell bg-card rounded-card shadow-card px-5 py-3.5 mb-5 flex flex-wrap items-center justify-between gap-4" aria-label="Configuración de cotización Kaspersky">
+        <div class="flex flex-wrap items-center gap-4">
+          <p class="text-[11px] font-semibold text-muted uppercase tracking-[0.06em] whitespace-nowrap">
+            Parámetros de cotización
+          </p>
+          <div class="flex items-center gap-1.5">
+            <label for="kasperskyProfitPct" class="text-[11px] font-medium text-muted whitespace-nowrap">Rentabilidad</label>
+            <input type="number" id="kasperskyProfitPct" value="15" min="0" max="999" step="any" class="profit-input">
+            <span class="text-[11px] text-muted">%</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <label for="kasperskyQtyInput" class="text-[11px] font-medium text-muted whitespace-nowrap">Cantidad</label>
+            <input type="number" id="kasperskyQtyInput" value="1" min="1" max="9999" step="1" class="qty-input">
+            <span class="text-[11px] text-muted">uds</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <label for="kasperskyTrmInput" class="text-[11px] font-medium text-muted whitespace-nowrap">TRM (COP/USD)</label>
+            <input type="text" id="kasperskyTrmInput" value="4200" class="trm-input">
+            <span id="kasperskyTrmStatus" class="status-text is-muted">cargando...</span>
+          </div>
+        </div>
+        <div>
+          <button type="button" id="kasperskyCopyQuoteBtn" class="dist-copy-button">
+            Copiar toda la lista
+          </button>
+        </div>
+      </section>
+
+      <!-- TABLA DE RESULTADOS -->
+      <section id="kasperskyResultsArea" aria-live="polite">
+        <!-- Rendered dynamically by kaspersky.js -->
+      </section>
     </section>
   </main>
   </div>

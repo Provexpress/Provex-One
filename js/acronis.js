@@ -67,7 +67,9 @@ initialize();
 
 async function initialize() {
   bindEvents();
-  activateWorkspace(window.location.hash === "#acronis" ? "acronis" : "cloud", false);
+  const initialHash = window.location.hash.replace("#", "");
+  const defaultWs = ["acronis", "kaspersky"].includes(initialHash) ? initialHash : "cloud";
+  activateWorkspace(defaultWs, false);
   enforceProfit({ force: true });
 
   fetchTRM({
@@ -178,18 +180,24 @@ function bindEvents() {
 }
 
 function activateWorkspace(workspace, updateHash = true) {
-  const acronisActive = workspace === "acronis";
-  elements.cloudView.hidden = acronisActive;
-  elements.acronisView.hidden = !acronisActive;
-  elements.workspaceTabs.forEach((tab) => {
+  const cloudView = document.getElementById("cloudView");
+  const acronisView = document.getElementById("acronisView");
+  const kasperskyView = document.getElementById("kasperskyView");
+
+  if (cloudView) cloudView.hidden = workspace !== "cloud";
+  if (acronisView) acronisView.hidden = workspace !== "acronis";
+  if (kasperskyView) kasperskyView.hidden = workspace !== "kaspersky";
+
+  const allTabs = Array.from(document.querySelectorAll("[data-workspace]"));
+  allTabs.forEach((tab) => {
     const active = tab.dataset.workspace === workspace;
     tab.classList.toggle("active", active);
     tab.setAttribute("aria-selected", String(active));
   });
 
   if (updateHash) {
-    const nextUrl = acronisActive
-      ? `${window.location.pathname}${window.location.search}#acronis`
+    const nextUrl = workspace !== "cloud"
+      ? `${window.location.pathname}${window.location.search}#${workspace}`
       : `${window.location.pathname}${window.location.search}`;
     window.history.replaceState(null, "", nextUrl);
   }

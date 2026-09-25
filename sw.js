@@ -1,4 +1,4 @@
-const CACHE_NAME = 'provex-one-v46';
+const CACHE_NAME = 'provex-one-v47';
 
 const STATIC_ASSETS = [
   './',
@@ -9,6 +9,7 @@ const STATIC_ASSETS = [
   './js/auth-config.js',
   './js/search.js',
   './js/acronis.js',
+  './js/kaspersky.js',
   './js/tables.js',
   './js/trm.js',
   './manifest.json',
@@ -16,6 +17,7 @@ const STATIC_ASSETS = [
   './icons/logo.webp',
   './catalogs/catalog_manifest.json',
   './catalogs/acronis_products.json',
+  './catalogs/kaspersky_products.json',
   './icons/provex_icon_16.png',
   './icons/provex_icon_32.png',
   './icons/provex_icon_64.png',

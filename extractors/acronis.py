@@ -13,10 +13,12 @@ import re
 import xml.etree.ElementTree as ET
 import zipfile
 
-from extractors.common import dump_json
-
-
+import sys
 ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from extractors.common import dump_json
 CATALOG_PATH = ROOT_DIR / "catalogs" / "acronis_products.json"
 MAIN_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 REL_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
@@ -108,14 +110,23 @@ class XlsxReader:
 
 
 def _find_source(root_dir: Path) -> Path:
-    candidates = sorted(
-        root_dir.glob("Calculadora Acronis*.xlsx"),
+    candidates = []
+    data_dir = root_dir / "data"
+    if data_dir.exists():
+        candidates.extend(data_dir.glob("*Acronis*Calculator*.xlsx"))
+        candidates.extend(data_dir.glob("Calculadora Acronis*.xlsx"))
+    candidates.extend(root_dir.glob("Calculadora Acronis*.xlsx"))
+    candidates.extend(root_dir.glob("*Acronis*Calculator*.xlsx"))
+
+    # Remove duplicates preserving newest modification time
+    unique_candidates = sorted(
+        list(dict.fromkeys(candidates)),
         key=lambda item: item.stat().st_mtime,
         reverse=True,
     )
-    if not candidates:
+    if not unique_candidates:
         raise FileNotFoundError("No se encontro un archivo 'Calculadora Acronis*.xlsx'.")
-    return candidates[0]
+    return unique_candidates[0]
 
 
 def _price_index(rows):

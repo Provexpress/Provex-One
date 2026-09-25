@@ -141,7 +141,11 @@ async function unlockApp() {
   setAuthenticatedUi();
 
   if (!state.appBooted) {
-    const modules = await Promise.allSettled([import("./search.js"), import("./acronis.js")]);
+    const modules = await Promise.allSettled([
+      import("./search.js"),
+      import("./acronis.js"),
+      import("./kaspersky.js"),
+    ]);
     modules.forEach((moduleResult) => {
       if (moduleResult.status === "rejected") {
         console.error("Provex One module init error", moduleResult.reason);
